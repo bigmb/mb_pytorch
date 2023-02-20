@@ -1,10 +1,12 @@
 # mb_pytorch
 malav pytorch files 
 
-#Applications
+
+# Applications
 Segmentation
 Classification 
 
-#Visualization
+
+# Visualization
 Gradio
 Tensorboard 

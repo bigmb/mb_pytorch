@@ -1,0 +1,47 @@
+params:
+  data:
+    train:
+      path: /home/username/data/train
+      batch_size: 32
+      shuffle: True
+      num_workers: 4
+      pin_memory: True
+    val:
+      path: /home/username/data/val
+      batch_size: 32
+      shuffle: False
+      num_workers: 4
+      pin_memory: True
+    test:
+      path: /home/username/data/test
+      batch_size: 32
+      shuffle: False
+      num_workers: 4
+      pin_memory: True
+  transformation:
+    resize:
+      val : True
+      size: [256, 256]
+    random_crop:
+      val : True
+      size: [224, 224]
+    random_horizontal_flip:
+      val : True
+      p: 0.5
+    random_vertical_flip:
+      val : False
+      p: 0.5
+    random_rotation:
+      val : True
+      degrees: 90
+    random_color_jitter:
+      val : True
+      brightness: 0.4
+      contrast: 0.4
+      saturation: 0.4
+      hue: 0.1
+    normalize:
+      val : False
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+    

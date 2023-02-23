@@ -4,6 +4,8 @@ import yaml
 import os
 from mb_utils.src.logging import logger
 
+__all__ = ['YamlReader']
+
 class YamlReader:
     """
     Yaml file reader class

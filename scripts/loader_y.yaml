@@ -19,7 +19,7 @@ data:
     pin_memory: True
 transformation:
   resize:
-    val : True
+    val : False
     args:
       size: [256, 256]
   random_crop:

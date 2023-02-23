@@ -20,6 +20,7 @@ class data_fetcher:
         self.data_dict = {}
         self.transforms_final=[]
 
+    @property
     def load_data_params(self):
         """
         get dataloader data from yaml file
@@ -32,11 +33,13 @@ class data_fetcher:
             self.data_dict['transforms_list'] = data['transformation']
         return self.data_dict
     
+    @property
     def get_transforms(self):
         """
         get transforms from yaml file
         """
         transforms_list = self.load_data_params()['transforms_list']
+        
         for i in transforms_list:
             if transforms_list['to_tensor']['val']:
                 self.transforms_final.append(transforms.ToTensor())
@@ -53,7 +56,7 @@ class data_fetcher:
             if transforms_list['random_rotation']['val']:
                 self.transforms_final.append(transforms.RandomRotation(transforms_list['random_rotation']['args']['degrees']))
             if transforms_list['random_color_jitter']['val']:
-                self.transforms_final.append(transforms.ColorJitter(transforms_list['random_jitter']['args']['brightness'],transforms_list['random_jitter']['args']['contrast'],transforms_list['random_jitter']['args']['saturation'],transforms_list['random_jitter']['args']['hue']))
+                self.transforms_final.append(transforms.ColorJitter(transforms_list['random_color_jitter']['args']['brightness'],transforms_list['random_color_jitter']['args']['contrast'],transforms_list['random_color_jitter']['args']['saturation'],transforms_list['random_color_jitter']['args']['hue']))
             if transforms_list['random_grayscale']['val']:
                 self.transforms_final.append(transforms.RandomGrayscale(transforms_list['random_grayscale']['args']['p']))
         if self.logger:

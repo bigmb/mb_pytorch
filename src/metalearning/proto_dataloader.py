@@ -3,6 +3,7 @@
 
 from src.dataloader.loader import data_fetcher
 from src.utils.yaml_reader import YamlReader
+from mb_pandas.src.dfload import load_any_df
 
 __all__ = ['ProtoDataLoader']
 
@@ -15,14 +16,19 @@ class ProtoDataLoader(data_fetcher):
         self.yaml = yaml
         self.logger = logger
         self._data = None
-        self.data_dict = {}
-        self.transforms_final = []
+        self.embeddings = None
         self.data_dict = self.load_data_params()
         self.transforms_final = self.get_transforms()
 
-    
     def load_embeddings(self):
         """
         load embeddings from yaml file
+        Input:
+            yaml: yaml file path (CSV or parquet)
+        Output:
+            embeddings: embeddings from yaml file as (CSV or parquet)
         """
-        pass
+        file = load_any_df(self.data_dict['data_train']['path'])
+        self.embeddings = file['embeddings']
+        return self.embeddings
+

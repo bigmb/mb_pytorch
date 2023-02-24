@@ -25,6 +25,7 @@ class YamlReader:
         """
         read data from yaml file and return a list
         """
+        assert self.yaml.endswith('.yaml') or self.yaml.endswith('.yml'), "Yaml file format wrong"
         if not self._data:
             with open(self.yaml,'r',encoding='utf-8') as f:
                 self._data = list(yaml.safe_load_all(f))

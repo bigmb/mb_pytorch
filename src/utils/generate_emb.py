@@ -39,11 +39,14 @@ class EmbeddingGenerator(data_fetcher):
         self._data = self.load_data_params()
         self.transforms_final = self.get_transforms()
         self._emb = None
+        self.logger = logger
 
 
     def model_set(self):
         k=eval("torchvision.models."+self._data['emb']['model'])
         self.model = k(pretrained=True)
+        if self.logger:
+            self.logger.info("Model set to {}".format(self._data['emb']['model']))
         return self.model
     
     def generate_emb(self, data,transform=None):
@@ -65,14 +68,18 @@ class EmbeddingGenerator(data_fetcher):
 
         extractor = FeatureExtractor(model)
         extractor.to(self.device)
-        
+
+        if self.logger:
+            self.logger.info("Embedding generation started")
         features = {}
         for i in tqdm(range(len(imgs))):
             img = imgs[i].to(self.device)
             with torch.no_grad():
                 feature = extractor(img)              
             features[i]=feature.cpu().detach().numpy().reshape(-1)
-
+        
+        if self.logger:
+            self.logger.info("Embedding generation completed")
         self.emb = np.array(list(features.values()))
         return self.emb
 

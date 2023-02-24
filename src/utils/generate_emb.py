@@ -43,6 +43,10 @@ class EmbeddingGenerator(data_fetcher):
 
 
     def model_set(self):
+        """
+        Set the model for embedding generation
+        model already set in the yaml file
+        """
         k=eval("torchvision.models."+self._data['emb']['model'])
         self.model = k(pretrained=True)
         if self.logger:

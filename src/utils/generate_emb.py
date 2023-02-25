@@ -90,4 +90,12 @@ class EmbeddingGenerator(data_fetcher):
         self.emb = np.array(list(features.values()))
         return self.emb
 
+    def data_emb_loader(self,data_file,transform=None,batch_size=8,shuffle=False,num_workers=4,logger=None):
+        """
+        get embedding data from yaml file
+        """
+        loader = torch.utils.data.DataLoader(data_file, batch_size=batch_size, transform=transform,shuffle=shuffle, num_workers=num_workers)
+        return loader
+
+
         

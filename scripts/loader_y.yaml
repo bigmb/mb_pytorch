@@ -1,4 +1,7 @@
 data:
+  from_datasets: 'CIFAR10'
+  from_file: True  ##if False, then from_datasets is used
+  folder: /home/username/work_dir
   train:
     path: /home/username/data/train
     batch_size: 32

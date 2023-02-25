@@ -104,7 +104,7 @@ class DataLoader(data_fetcher):
         """
         get train data from yaml file
         """
-        pass
+        #datasets.CIFAR10(data_path, train=True, download=False,transform=transform)
 
     def data_test(self,data_file,transform,logger=None):
         """
@@ -117,8 +117,6 @@ class DataLoader(data_fetcher):
         get val data from yaml file
         """
         pass
-
-
 
 
 

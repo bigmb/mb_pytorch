@@ -39,26 +39,31 @@ class data_fetcher:
         get transforms from yaml file
         """
         transforms_list = self.load_data_params()['transforms_list']
-        
-        for i in transforms_list:
-            if transforms_list['to_tensor']['val']:
-                self.transforms_final.append(transforms.ToTensor())
-            if transforms_list['normalize']['val']:
-                self.transforms_final.append(transforms.Normalize(transforms_list['normalize']['args']['mean'],transforms_list['normalize']['args']['std']))
-            if transforms_list['resize']['val']:
-                self.transforms_final.append(transforms.Resize(transforms_list['resize']['args']['size']))
-            if transforms_list['random_crop']['val']:
-                self.transforms_final.append(transforms.RandomCrop(transforms_list['random_crop']['args']['size']))
-            if transforms_list['random_horizontal_flip']['val']:
-                self.transforms_final.append(transforms.RandomHorizontalFlip(transforms_list['random_horizontal_flip']['args']['p']))
-            if transforms_list['random_vertical_flip']['val']:
-                self.transforms_final.append(transforms.RandomVerticalFlip(transforms_list['random_vertical_flip']['args']['p']))
-            if transforms_list['random_rotation']['val']:
-                self.transforms_final.append(transforms.RandomRotation(transforms_list['random_rotation']['args']['degrees']))
-            if transforms_list['random_color_jitter']['val']:
-                self.transforms_final.append(transforms.ColorJitter(transforms_list['random_color_jitter']['args']['brightness'],transforms_list['random_color_jitter']['args']['contrast'],transforms_list['random_color_jitter']['args']['saturation'],transforms_list['random_color_jitter']['args']['hue']))
-            if transforms_list['random_grayscale']['val']:
-                self.transforms_final.append(transforms.RandomGrayscale(transforms_list['random_grayscale']['args']['p']))
+
+        # for t_list in transforms_list:
+        #     if t_list in dir(transforms):
+        #         self.transforms_final.append(transforms.t_list)
+
+
+        #for t_list in transforms_list:
+        if transforms_list['to_tensor']['val']:
+            self.transforms_final.append(transforms.ToTensor())
+        if transforms_list['normalize']['val']:
+            self.transforms_final.append(transforms.Normalize(transforms_list['normalize']['args']['mean'],transforms_list['normalize']['args']['std']))
+        if transforms_list['resize']['val']:
+            self.transforms_final.append(transforms.Resize(transforms_list['resize']['args']['size']))
+        if transforms_list['random_crop']['val']:
+            self.transforms_final.append(transforms.RandomCrop(transforms_list['random_crop']['args']['size']))
+        if transforms_list['random_horizontal_flip']['val']:
+            self.transforms_final.append(transforms.RandomHorizontalFlip(transforms_list['random_horizontal_flip']['args']['p']))
+        if transforms_list['random_vertical_flip']['val']:
+            self.transforms_final.append(transforms.RandomVerticalFlip(transforms_list['random_vertical_flip']['args']['p']))
+        if transforms_list['random_rotation']['val']:
+            self.transforms_final.append(transforms.RandomRotation(transforms_list['random_rotation']['args']['degrees']))
+        if transforms_list['random_color_jitter']['val']:
+            self.transforms_final.append(transforms.ColorJitter(transforms_list['random_color_jitter']['args']['brightness'],transforms_list['random_color_jitter']['args']['contrast'],transforms_list['random_color_jitter']['args']['saturation'],transforms_list['random_color_jitter']['args']['hue']))
+        if transforms_list['random_grayscale']['val']:
+            self.transforms_final.append(transforms.RandomGrayscale(transforms_list['random_grayscale']['args']['p']))
         if self.logger:
             self.logger.info("transforms: {}".format(self.transforms_final))
         return self.transforms_final

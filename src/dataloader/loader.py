@@ -96,11 +96,11 @@ class DataLoader(data_fetcher):
         if not self.valset:
             self.valset = self.data_val(data_file,transform=self.get_transforms(),logger=self.logger)
         if not self.trainloader:
-            self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.load_data()['data_train']['batch_size'], shuffle=self.load_data()['data_train']['shuffle'], num_workers=self.load_data()['data_train']['num_workers'])
+            self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.load_data()['data_train']['batch_size'], shuffle=self.load_data()['data_train']['shuffle'], num_workers=self.load_data()['data_train']['num_workers'], collate_fn=None)
         if not self.testloader:
-            self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.load_data()['data_test']['batch_size'], shuffle=self.load_data()['data_test']['shuffle'], num_workers=self.load_data()['data_test']['num_workers'])
+            self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.load_data()['data_test']['batch_size'], shuffle=self.load_data()['data_test']['shuffle'], num_workers=self.load_data()['data_test']['num_workers'],collate_fn=None)
         if not self.valloader:
-            self.valloader = torch.utils.data.DataLoader(self.valset, batch_size=self.load_data()['data_val']['batch_size'], shuffle=self.load_data()['data_val']['shuffle'], num_workers=self.load_data()['data_val']['num_workers'])
+            self.valloader = torch.utils.data.DataLoader(self.valset, batch_size=self.load_data()['data_val']['batch_size'], shuffle=self.load_data()['data_val']['shuffle'], num_workers=self.load_data()['data_val']['num_workers'],collate_fn=None)
 
         return self.trainloader,self.testloader,self.valloader
 

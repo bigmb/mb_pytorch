@@ -7,6 +7,7 @@ from ..utils.dist import euclidean_dist
 
 __all__ = ['ProtoNet']
 
+
 class Flatten(nn.Module):
     def __init__(self):
         super(Flatten, self).__init__()
@@ -14,8 +15,25 @@ class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
 
-class ProtoNet(nn.Module):
-    def __init__(self):
+def load_protonet_conv(**kwargs):
+    x_dim=kwargs['x_dim']
+    y_dim=kwargs['y_dim']
+    z_dim=kwargs['z_dim']
+
+    def conv_block(in_ch,out_ch):
+        return nn.Sequential(
+                nn.Conv2d(in_ch,out_ch,1,stride=1),
+                nn.BatchNorm2d(out_ch),
+                nn.ReLU(),
+                nn.MaxPool2d(2))
+    encoder=nn.Sequential(
+            conv_block(x_dim,y_dim),
+            conv_block(y_dim,z_dim),
+            Flatten())
+    return PrototypicalNetworks(encoder)
+
+class PrototypicalNetworks(nn.Module):
+    def __init__(self,encoder):
         """
         Args:
             encoder : CNN encoding the images in sample
@@ -23,7 +41,8 @@ class ProtoNet(nn.Module):
             n_support (int): number of labeled examples per class in the support set
             n_query (int): number of labeled examples per class in the query set
         """
-        super(ProtoNet, self).__init__()
+        super(PrototypicalNetworks, self).__init__()
+        self.encoder = encoder
 
     def set_forward_loss(self, sample):
         """

@@ -26,7 +26,7 @@ class data_fetcher:
         get dataloader data from yaml file
         """
         if not self._yaml_data:
-            data = YamlReader(self.yaml).data(self.logger)[0]
+            data = YamlReader(self.yaml).data(self.logger)
             self.data_dict['data_train'] = data['data']['train']
             self.data_dict['data_val'] = data['data']['val']
             self.data_dict['data_test'] = data['data']['test']
@@ -38,12 +38,14 @@ class data_fetcher:
         """
         get transforms from yaml file
         """
-        transforms_list = self.load_data_params()['transforms_list']
+        transforms_list = self.load_data_params['transforms_list']
 
         # for t_list in transforms_list:
         #     if t_list in dir(transforms):
         #         self.transforms_final.append(transforms.t_list)
 
+        if len(self.transforms_final) != 0:
+            self.transforms_final = []
 
         #for t_list in transforms_list:
         if transforms_list['to_tensor']['val']:
@@ -70,8 +72,8 @@ class data_fetcher:
    
 
 class DataLoader(data_fetcher):
-    def __init__(self, yaml, logger=None) -> None:
-        super().__init__()
+    def __init__(self,yaml,logger=None) -> None:
+        super().__init__(yaml, logger=logger)
         self.yaml = yaml
         self.logger = logger
         self._yaml_data = None

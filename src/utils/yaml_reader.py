@@ -31,5 +31,5 @@ class YamlReader:
                 self._data = list(yaml.safe_load_all(f))
         if logger:
             logger.info("Read data from yaml file: {}".format(self._data))
-        return self._data
+        return self._data[0]
     

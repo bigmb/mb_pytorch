@@ -5,6 +5,7 @@ malav pytorch files
 ## Applications
 Segmentation
 Classification 
+Meta Learning
 
 ## Scripts
 

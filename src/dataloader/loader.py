@@ -21,16 +21,21 @@ class data_fetcher:
         self.transforms_final=[]
 
     @property
+    def read_yaml(self):
+        """
+        read yaml file
+        """
+        self._yaml_data = YamlReader(self.yaml).data(self.logger)
+        return self._yaml_data
+
+    @property
     def load_data_params(self):
         """
         get dataloader data from yaml file
         """
-        if not self._yaml_data:
-            data = YamlReader(self.yaml).data(self.logger)
-            self.data_dict['data_train'] = data['data']['train']
-            self.data_dict['data_val'] = data['data']['val']
-            self.data_dict['data_test'] = data['data']['test']
-            self.data_dict['transforms_list'] = data['transformation']
+        data = YamlReader(self.yaml).data(self.logger)
+        self.data_dict['data'] = data['data']
+        self.data_dict['transforms_list'] = data['transformation']
         return self.data_dict
     
     @property
@@ -80,23 +85,14 @@ class DataLoader(data_fetcher):
         self.data_dict = {}
         self.transforms_final=[]
         self.trainset = None
-        self.testset = None
-        self.valset = None
         self.trainloader = None
-        self.testloader = None
-        self.valloader = None
-        self.classes = None
     
     def data_load(self,data_file = 'CIFAR10',embeddings=False,logger=None):
         """
         return all data loaders
         """
         if not self.trainset:
-            self.trainset = self.data_train(data_file,transform=self.get_transforms(),logger=self.logger)
-        if not self.testset:
-            self.testset = self.data_test(data_file,transform=self.get_transforms(),logger=self.logger)
-        if not self.valset:
-            self.valset = self.data_val(data_file,transform=self.get_transforms(),logger=self.logger)
+            self.trainset = self.data_train(data_file,transform=self.get_transforms,logger=self.logger,collate_fn=None)
         if not self.trainloader:
             self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.load_data()['data_train']['batch_size'], shuffle=self.load_data()['data_train']['shuffle'], num_workers=self.load_data()['data_train']['num_workers'], collate_fn=None)
         if not self.testloader:
@@ -112,18 +108,3 @@ class DataLoader(data_fetcher):
         get train data from yaml file
         """
         #datasets.CIFAR10(data_path, train=True, download=False,transform=transform)
-
-    def data_test(self,data_file,transform,logger=None):
-        """
-        get test data from yaml file
-        """
-        pass
-
-    def data_val(self,data_file,transform,logger=None):
-        """
-        get val data from yaml file
-        """
-        pass
-
-
-

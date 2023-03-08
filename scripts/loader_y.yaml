@@ -1,25 +1,7 @@
 data:
   from_datasets: 'CIFAR10'
   from_file: True  ##if False, then from_datasets is used
-  folder: /home/malav/mb_pytorch/data/images1
-  training:
-    path: /home/username/data/train
-    batch_size: 32
-    shuffle: True
-    num_workers: 4
-    pin_memory: True
-  validation:
-    path: /home/username/data/val
-    batch_size: 32
-    shuffle: False
-    num_workers: 4
-    pin_memory: True
-  evaluation:
-    path: /home/username/data/test
-    batch_size: 32
-    shuffle: False
-    num_workers: 4
-    pin_memory: True
+  folder: /home/malav/mb_pytorch/data/csv/file_data.csv
 transformation:
   resize:
     val : False

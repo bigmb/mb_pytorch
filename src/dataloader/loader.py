@@ -7,10 +7,13 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from src.utils.yaml_reader import YamlReader
 import os
+import sys
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb_pandas.src.transform import *
 from datetime import datetime
+from PIL import Image
+import cv2
 
 today = datetime.now()
 
@@ -42,6 +45,8 @@ class data_fetcher:
         """
         data = YamlReader(self.yaml).data(self.logger)
         self.data_dict['data'] = data['data']
+        self.data_dict['train_params'] = data['train_params']
+        self.data_dict['test_params'] = data['test_params']
         self.data_dict['transforms_list'] = data['transformation']
         return self.data_dict
     
@@ -52,9 +57,15 @@ class data_fetcher:
         """
         transforms_list = self.load_data_params['transforms_list']
 
+        if transforms_list['transform']==False:
+            return None
+
         # for t_list in transforms_list:
         #     if t_list in dir(transforms):
         #         self.transforms_final.append(transforms.t_list)
+
+        if 'transforms' in dir(self.transforms_final):
+            self.transforms_final = []
 
         if len(self.transforms_final) != 0:
             self.transforms_final = []
@@ -80,46 +91,103 @@ class data_fetcher:
             self.transforms_final.append(transforms.RandomGrayscale(transforms_list['random_grayscale']['args']['p']))
         if self.logger:
             self.logger.info("transforms: {}".format(self.transforms_final))
+        
+        self.transforms_final = transforms.Compose(self.transforms_final)
         return self.transforms_final
    
 class customdl(torch.utils.data.Dataset):
-    def __init__(self,data,folder_name=None,transform=None,logger=None):
-        self.data=load_any_df(data)
+    def __init__(self,data,transform=None,train_file=True,logger=None):
         self.transform=transform
         self.logger=logger
+        self.folder_name=data['work_dir']
+        self.data = load_any_df(data['file'],logger=self.logger)
 
         if self.logger:
             self.logger.info("Data file: {} loaded with mb_pandas.".format(data))
             self.logger.info("Data columns: {}".format(self.data.columns))
+            self.logger.info("Data will be split into train and validation according to train_file input : {}".format(train_file))
             self.logger.info("If unnamed columns are present, they will be removed.")
             self.logger.info("If duplicate rows are present, they will be removed.")
         assert 'image_path' in self.data.columns, "image_path column not found in data"
-        assert 'label' in self.data.columns, "label column not found in data"
         assert 'image_type' in self.data.columns, "image_type column not found in data"
 
-        self.data = remove_unnamed(self.data,logger=self.logger)
-        self.data = check_drop_duplicates(self.data,columns=['image_path'],drop=True,logger=self.logger)
+        if train_file:
+            self.data = self.data[self.data['image_type'] == 'training']
+        else:
+            self.data = self.data[self.data['image_type'] == 'validation']
 
-        if folder_name:
-            self.folder_name=folder_name
+        if 'label' in self.data.columns:
+            self.label = self.data['label']
+        else:
+            self.label = None
+
+        self.data = check_drop_duplicates(self.data,columns=['image_path'],drop=True,logger=self.logger)
+        self.data = remove_unnamed(self.data,logger=self.logger)
+
         # else:
         #     date_now = today.strftime("%d_%m_%Y_%H_%M")
         #     self.folder_name='data_'+date_now
         # os.mkdir('./data'+str(self.folder_name))
-        img_path = [os.path.join(str(self.folder_name),self.data['image_path'].iloc[i]) for i in range(len(self.data))]
-        self.data['image_path'] = img_path
-        if self.logger:
-            self.logger.info("Verifying images")
-        self.data = verify_image(self.data,logger=self.logger)
 
-    
+        if data['use_img_dir']:
+            img_path = [os.path.join(str(data['img_dir']),self.data['image_path'].iloc[i]) for i in range(len(self.data))]
+        else:
+            img_path = [self.data['image_path'].iloc[i] for i in range(len(self.data))]
+        self.data['image_path_new'] = img_path
+        if self.logger:
+            self.logger.info("Verifying paths")
+            self.logger.info("first path : {}".format(img_path[0]))
+
+        path_check_res= [os.path.exists(img_path[i]) for i in range(len(img_path))]
+        self.data['img_path_check'] = path_check_res
+        self.data = self.data[self.data['img_path_check'] == True]
+        self.data = self.data.reset_index(drop=True)
+        if logger:
+            self.logger.info("self.data: {}".format(self.data))
+
+        if data['thresholding_pd']>0:
+            if len(self.data) <= data['thresholding_pd']:
+                self.logger.info("Length of data after removing invalid paths: {}".format(len(self.data)))
+                self.logger.info("Less than thresholding_pd data points. Please check the data file.")
+                self.logger.info("Exiting")
+                sys.exit('Less than thresholding_pd data points. Please check the data file.')
+
+        if self.logger:
+            self.logger.info("Length of data after removing invalid paths: {}".format(len(self.data)))
+            self.logger.info("Verifying images")
+        verify_image_res = [verify_image(self.data['image_path_new'].iloc[i],logger=self.logger) for i in range(len(self.data))]  
+        self.data['img_verify'] = verify_image_res
+        self.data = self.data[self.data['img_verify'] == True]
+        self.data = self.data.reset_index()
+
+        if data['thresholding_pd']>0:
+            if len(self.data) <= data['thresholding_pd']:
+                self.logger.info("Length of data after removing invalid images: {}".format(len(self.data)))
+                self.logger.info("Less than thresholding_pd data points. Please check the data file.")
+                self.logger.info("Exiting")
+                sys.exit('Less than thresholding_pd data points. Please check the data file.')
+        
+        if os.path.exists(self.folder_name):
+            self.data.to_csv(os.path.join(self.folder_name,'wrangled_file.csv'),index=False)
+
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self,idx):
         
-                                                                
-        return {self.label[idx]:self.emb[idx]}
+        img = self.data['image_path_new'].iloc[idx]
+        #img = Image.open(img)
+        img = cv2.imread(img)
+        if self.label:
+            label = self.label[idx]
+        
+        if self.transform:
+            img = self.transform(img)
+
+        out_dict = {'image':img}
+        if self.label:
+            out_dict['label'] = label                                                
+        return out_dict
 
 class DataLoader(data_fetcher):
     """
@@ -130,33 +198,46 @@ class DataLoader(data_fetcher):
         self.yaml = yaml
         self.logger = logger
         self._yaml_data = None
-        self.data_dict = {}
+        self.data_dict = self.load_data_params
         self.transforms_final=[]
         self.trainloader = None
         self.testloader = None
+        self.folder_name = self.data_dict['data']['work_dir']
+
+        if os.path.exists(self.folder_name):
+            if self.logger:
+                self.logger.info("Data folder already exists. Using existing data folder :  {}".format(self.folder_name))
+        else:
+            os.mkdir(self.folder_name)
+            if self.logger:
+                self.logger.info("Data folder created : {}".format(self.folder_name))
     
-    def data_load(self,data_file = 'CIFAR10',embeddings=False,logger=None):
+    def data_load(self, data_file = 'CIFAR10',embeddings=False,logger=None):
         """
         return all data loaders
         """
 
-        if data_file in dir(torchvision.datasets):
-            if self.logger:
-                self.logger.info("Data file: {} loading from torchvision.datasets.".format(data_file))
-            if data_file in os.listdir('../../data/'):
-                download_flag = False
-            else:
-                download_flag = True
-            self.trainset = getattr(torchvision.datasets,data_file)(root='../../data/', train=True, download=download_flag,transform=self.get_transforms)
-            self.testset = getattr(torchvision.datasets,data_file)(root='../../data/', train=False, download=download_flag,transform=self.get_transforms)
+        if self.data_dict['data']['from_file']==False:
+            if data_file in dir(torchvision.datasets):
+                if self.logger:
+                    self.logger.info("Data file: {} loading from torchvision.datasets.".format(data_file))
+                if data_file in os.listdir(self.folder_name):
+                    download_flag = False
+                else:
+                    download_flag = True
+                self.trainset = getattr(torchvision.datasets,data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
+                self.testset = getattr(torchvision.datasets,data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
         else:
-            self.trainset = self.data_train(data_file,transform=self.get_transforms,logger=self.logger)
-            
-        self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.load_data()['data_train']['batch_size'], shuffle=self.load_data()['data_train']['shuffle'], num_workers=self.load_data()['data_train']['num_workers'])
-        return self.dataloader
+            self.trainset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=True,logger=self.logger)
+            self.testset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=False,logger=self.logger)
 
+            self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.data_dict['train_params']['batch_size'], shuffle=self.data_dict['train_params']['shuffle'], num_workers=self.data_dict['train_params']['num_workers'])
+            self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.data_dict['test_params']['batch_size'], shuffle=self.data_dict['test_params']['shuffle'], num_workers=self.data_dict['test_params']['num_workers'])
+        return self.trainloader,self.testloader,self.trainset,self.testset
 
-    def data_train(self,data_file,transform,logger=None):
+    def data_train(self,data_file,transform,train_file,logger=None):
         """
         get train data from yaml file
         """
+        data_t = customdl(data_file,transform=transform,train_file=train_file,logger=logger)
+        return data_t

@@ -1,7 +1,82 @@
-2023-03-07 19:22:10,084 - mb_utils - INFO - Read data from yaml file: [{'data': {'from_datasets': 'CIFAR10', 'from_file': True, 'folder': '/home/malav/mb_pytorch/data/csv/file_data.csv'}, 'transformation': {'resize': {'val': False, 'args': {'size': [256, 256]}}, 'random_crop': {'val': False, 'args': {'size': [224, 224]}}, 'random_horizontal_flip': {'val': True, 'args': {'p': 0.5}}, 'random_vertical_flip': {'val': False, 'args': {'p': 0.5}}, 'random_rotation': {'val': True, 'args': {'degrees': 90}}, 'random_grayscale': {'val': False, 'args': {'p': 0.1}}, 'random_color_jitter': {'val': True, 'args': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}}, 'normalize': {'val': False, 'args': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}, 'to_tensor': {'val': True}}}]
-2023-03-07 19:22:10,084 - mb_utils - INFO - transforms: [ToTensor(), RandomHorizontalFlip(p=0.5), RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0), ColorJitter(brightness=(0.6, 1.4), contrast=(0.6, 1.4), saturation=(0.6, 1.4), hue=(-0.1, 0.1))]
-2023-03-07 19:22:10,087 - mb_utils - INFO - Read data from yaml file: [{'data': {'from_datasets': 'CIFAR10', 'from_file': True, 'folder': '/home/malav/mb_pytorch/data/csv/file_data.csv'}, 'transformation': {'resize': {'val': False, 'args': {'size': [256, 256]}}, 'random_crop': {'val': False, 'args': {'size': [224, 224]}}, 'random_horizontal_flip': {'val': True, 'args': {'p': 0.5}}, 'random_vertical_flip': {'val': False, 'args': {'p': 0.5}}, 'random_rotation': {'val': True, 'args': {'degrees': 90}}, 'random_grayscale': {'val': False, 'args': {'p': 0.1}}, 'random_color_jitter': {'val': True, 'args': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}}, 'normalize': {'val': False, 'args': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}, 'to_tensor': {'val': True}}}]
-2023-03-07 19:22:16,574 - mb_utils - INFO - Read data from yaml file: [{'data': {'from_datasets': 'CIFAR10', 'from_file': True, 'folder': '/home/malav/mb_pytorch/data/csv/file_data.csv'}, 'transformation': {'resize': {'val': False, 'args': {'size': [256, 256]}}, 'random_crop': {'val': False, 'args': {'size': [224, 224]}}, 'random_horizontal_flip': {'val': True, 'args': {'p': 0.5}}, 'random_vertical_flip': {'val': False, 'args': {'p': 0.5}}, 'random_rotation': {'val': True, 'args': {'degrees': 90}}, 'random_grayscale': {'val': False, 'args': {'p': 0.1}}, 'random_color_jitter': {'val': True, 'args': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}}, 'normalize': {'val': False, 'args': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}, 'to_tensor': {'val': True}}}]
-2023-03-07 19:22:40,878 - mb_utils - INFO - Read data from yaml file: [{'data': {'from_datasets': 'CIFAR10', 'from_file': True, 'folder': '/home/malav/mb_pytorch/data/csv/file_data.csv'}, 'transformation': {'resize': {'val': False, 'args': {'size': [256, 256]}}, 'random_crop': {'val': False, 'args': {'size': [224, 224]}}, 'random_horizontal_flip': {'val': True, 'args': {'p': 0.5}}, 'random_vertical_flip': {'val': False, 'args': {'p': 0.5}}, 'random_rotation': {'val': True, 'args': {'degrees': 90}}, 'random_grayscale': {'val': False, 'args': {'p': 0.1}}, 'random_color_jitter': {'val': True, 'args': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}}, 'normalize': {'val': False, 'args': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}, 'to_tensor': {'val': True}}}]
-2023-03-07 19:23:20,249 - mb_utils - INFO - transforms: [ToTensor(), RandomHorizontalFlip(p=0.5), RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0), ColorJitter(brightness=(0.6, 1.4), contrast=(0.6, 1.4), saturation=(0.6, 1.4), hue=(-0.1, 0.1))]
-2023-03-07 19:23:20,984 - mb_utils - INFO - transforms: [ToTensor(), RandomHorizontalFlip(p=0.5), RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0), ColorJitter(brightness=(0.6, 1.4), contrast=(0.6, 1.4), saturation=(0.6, 1.4), hue=(-0.1, 0.1))]
+2023-03-10 05:39:07,141 - mb_utils - INFO - Read data from yaml file: [{'data': {'from_datasets': 'CIFAR10', 'from_file': True, 'work_dir': '/home/malav/mb_pytorch/data/', 'file': '/home/malav/mb_pytorch/data/csv/file_data.csv', 'use_img_dir': True, 'img_dir': '/home/malav/mb_pytorch/data/images1/', 'thresholding_pd': 0}, 'train_params': {'batch_size': 4, 'num_workers': 4, 'pin_memory': True, 'shuffle': True}, 'test_params': {'batch_size': 4, 'num_workers': 4, 'pin_memory': True, 'shuffle': True}, 'transformation': {'transform': True, 'resize': {'val': False, 'args': {'size': [256, 256]}}, 'random_crop': {'val': False, 'args': {'size': [224, 224]}}, 'random_horizontal_flip': {'val': True, 'args': {'p': 0.5}}, 'random_vertical_flip': {'val': False, 'args': {'p': 0.5}}, 'random_rotation': {'val': True, 'args': {'degrees': 90}}, 'random_grayscale': {'val': False, 'args': {'p': 0.1}}, 'random_color_jitter': {'val': True, 'args': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}}, 'normalize': {'val': False, 'args': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}, 'to_tensor': {'val': True}}}]
+2023-03-10 05:39:07,141 - mb_utils - INFO - Data folder already exists. Using existing data folder :  /home/malav/mb_pytorch/data/
+2023-03-10 05:39:18,092 - mb_utils - INFO - Read data from yaml file: [{'data': {'from_datasets': 'CIFAR10', 'from_file': True, 'work_dir': '/home/malav/mb_pytorch/data/', 'file': '/home/malav/mb_pytorch/data/csv/file_data.csv', 'use_img_dir': True, 'img_dir': '/home/malav/mb_pytorch/data/images1/', 'thresholding_pd': 0}, 'train_params': {'batch_size': 4, 'num_workers': 4, 'pin_memory': True, 'shuffle': True}, 'test_params': {'batch_size': 4, 'num_workers': 4, 'pin_memory': True, 'shuffle': True}, 'transformation': {'transform': True, 'resize': {'val': False, 'args': {'size': [256, 256]}}, 'random_crop': {'val': False, 'args': {'size': [224, 224]}}, 'random_horizontal_flip': {'val': True, 'args': {'p': 0.5}}, 'random_vertical_flip': {'val': False, 'args': {'p': 0.5}}, 'random_rotation': {'val': True, 'args': {'degrees': 90}}, 'random_grayscale': {'val': False, 'args': {'p': 0.1}}, 'random_color_jitter': {'val': True, 'args': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}}, 'normalize': {'val': False, 'args': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}, 'to_tensor': {'val': True}}}]
+2023-03-10 05:39:18,093 - mb_utils - INFO - transforms: [ToTensor(), RandomHorizontalFlip(p=0.5), RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0), ColorJitter(brightness=(0.6, 1.4), contrast=(0.6, 1.4), saturation=(0.6, 1.4), hue=(-0.1, 0.1))]
+2023-03-10 05:39:18,097 - mb_utils - INFO - Loaded dataframe from /home/malav/mb_pytorch/data/csv/file_data.csv using asyncio
+2023-03-10 05:39:18,097 - mb_utils - INFO - Data file: {'from_datasets': 'CIFAR10', 'from_file': True, 'work_dir': '/home/malav/mb_pytorch/data/', 'file': '/home/malav/mb_pytorch/data/csv/file_data.csv', 'use_img_dir': True, 'img_dir': '/home/malav/mb_pytorch/data/images1/', 'thresholding_pd': 0} loaded with mb_pandas.
+2023-03-10 05:39:18,098 - mb_utils - INFO - Data columns: Index(['image_path', 'image_type'], dtype='object')
+2023-03-10 05:39:18,098 - mb_utils - INFO - Data will be split into train and validation according to train_file input : True
+2023-03-10 05:39:18,098 - mb_utils - INFO - If unnamed columns are present, they will be removed.
+2023-03-10 05:39:18,098 - mb_utils - INFO - If duplicate rows are present, they will be removed.
+2023-03-10 05:39:18,099 - mb_utils - INFO - Checking duplicates for the columns: ['image_path']
+2023-03-10 05:39:18,100 - mb_utils - INFO - No duplicates found
+2023-03-10 05:39:18,100 - mb_utils - INFO - Removing unnamed columns
+2023-03-10 05:39:18,100 - mb_utils - INFO - Columns : Index(['image_path', 'image_type'], dtype='object')
+2023-03-10 05:39:18,101 - mb_utils - INFO - Verifying paths
+2023-03-10 05:39:18,101 - mb_utils - INFO - first path : /home/malav/mb_pytorch/data/images1/img_0.jpg
+2023-03-10 05:39:18,111 - mb_utils - INFO - self.data:     image_path image_type                                  image_path_new  img_path_check
+0    img_1.jpg   training   /home/malav/mb_pytorch/data/images1/img_1.jpg            True
+1    img_2.jpg   training   /home/malav/mb_pytorch/data/images1/img_2.jpg            True
+2    img_3.jpg   training   /home/malav/mb_pytorch/data/images1/img_3.jpg            True
+3    img_4.jpg   training   /home/malav/mb_pytorch/data/images1/img_4.jpg            True
+4    img_5.jpg   training   /home/malav/mb_pytorch/data/images1/img_5.jpg            True
+5    img_6.jpg   training   /home/malav/mb_pytorch/data/images1/img_6.jpg            True
+6    img_7.jpg   training   /home/malav/mb_pytorch/data/images1/img_7.jpg            True
+7    img_8.jpg   training   /home/malav/mb_pytorch/data/images1/img_8.jpg            True
+8    img_9.jpg   training   /home/malav/mb_pytorch/data/images1/img_9.jpg            True
+9   img_10.jpg   training  /home/malav/mb_pytorch/data/images1/img_10.jpg            True
+10  img_11.jpg   training  /home/malav/mb_pytorch/data/images1/img_11.jpg            True
+11  img_12.jpg   training  /home/malav/mb_pytorch/data/images1/img_12.jpg            True
+12  img_13.jpg   training  /home/malav/mb_pytorch/data/images1/img_13.jpg            True
+13  img_14.jpg   training  /home/malav/mb_pytorch/data/images1/img_14.jpg            True
+14  img_15.jpg   training  /home/malav/mb_pytorch/data/images1/img_15.jpg            True
+15  img_16.jpg   training  /home/malav/mb_pytorch/data/images1/img_16.jpg            True
+16  img_17.jpg   training  /home/malav/mb_pytorch/data/images1/img_17.jpg            True
+17  img_18.jpg   training  /home/malav/mb_pytorch/data/images1/img_18.jpg            True
+18  img_19.jpg   training  /home/malav/mb_pytorch/data/images1/img_19.jpg            True
+19  img_20.jpg   training  /home/malav/mb_pytorch/data/images1/img_20.jpg            True
+20  img_21.jpg   training  /home/malav/mb_pytorch/data/images1/img_21.jpg            True
+21  img_22.jpg   training  /home/malav/mb_pytorch/data/images1/img_22.jpg            True
+22  img_23.jpg   training  /home/malav/mb_pytorch/data/images1/img_23.jpg            True
+23  img_24.jpg   training  /home/malav/mb_pytorch/data/images1/img_24.jpg            True
+24  img_25.jpg   training  /home/malav/mb_pytorch/data/images1/img_25.jpg            True
+25  img_26.jpg   training  /home/malav/mb_pytorch/data/images1/img_26.jpg            True
+26  img_27.jpg   training  /home/malav/mb_pytorch/data/images1/img_27.jpg            True
+27  img_28.jpg   training  /home/malav/mb_pytorch/data/images1/img_28.jpg            True
+28  img_29.jpg   training  /home/malav/mb_pytorch/data/images1/img_29.jpg            True
+29  img_30.jpg   training  /home/malav/mb_pytorch/data/images1/img_30.jpg            True
+30  img_31.jpg   training  /home/malav/mb_pytorch/data/images1/img_31.jpg            True
+31  img_32.jpg   training  /home/malav/mb_pytorch/data/images1/img_32.jpg            True
+32  img_33.jpg   training  /home/malav/mb_pytorch/data/images1/img_33.jpg            True
+33  img_34.jpg   training  /home/malav/mb_pytorch/data/images1/img_34.jpg            True
+2023-03-10 05:39:18,123 - mb_utils - INFO - Length of data after removing invalid paths: 34
+2023-03-10 05:39:18,124 - mb_utils - INFO - Verifying images
+2023-03-10 05:39:18,164 - mb_utils - INFO - Read data from yaml file: [{'data': {'from_datasets': 'CIFAR10', 'from_file': True, 'work_dir': '/home/malav/mb_pytorch/data/', 'file': '/home/malav/mb_pytorch/data/csv/file_data.csv', 'use_img_dir': True, 'img_dir': '/home/malav/mb_pytorch/data/images1/', 'thresholding_pd': 0}, 'train_params': {'batch_size': 4, 'num_workers': 4, 'pin_memory': True, 'shuffle': True}, 'test_params': {'batch_size': 4, 'num_workers': 4, 'pin_memory': True, 'shuffle': True}, 'transformation': {'transform': True, 'resize': {'val': False, 'args': {'size': [256, 256]}}, 'random_crop': {'val': False, 'args': {'size': [224, 224]}}, 'random_horizontal_flip': {'val': True, 'args': {'p': 0.5}}, 'random_vertical_flip': {'val': False, 'args': {'p': 0.5}}, 'random_rotation': {'val': True, 'args': {'degrees': 90}}, 'random_grayscale': {'val': False, 'args': {'p': 0.1}}, 'random_color_jitter': {'val': True, 'args': {'brightness': 0.4, 'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}}, 'normalize': {'val': False, 'args': {'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225]}}, 'to_tensor': {'val': True}}}]
+2023-03-10 05:39:18,164 - mb_utils - INFO - transforms: [ToTensor(), RandomHorizontalFlip(p=0.5), RandomRotation(degrees=[-90.0, 90.0], interpolation=nearest, expand=False, fill=0), ColorJitter(brightness=(0.6, 1.4), contrast=(0.6, 1.4), saturation=(0.6, 1.4), hue=(-0.1, 0.1))]
+2023-03-10 05:39:18,167 - mb_utils - INFO - Loaded dataframe from /home/malav/mb_pytorch/data/csv/file_data.csv using asyncio
+2023-03-10 05:39:18,168 - mb_utils - INFO - Data file: {'from_datasets': 'CIFAR10', 'from_file': True, 'work_dir': '/home/malav/mb_pytorch/data/', 'file': '/home/malav/mb_pytorch/data/csv/file_data.csv', 'use_img_dir': True, 'img_dir': '/home/malav/mb_pytorch/data/images1/', 'thresholding_pd': 0} loaded with mb_pandas.
+2023-03-10 05:39:18,168 - mb_utils - INFO - Data columns: Index(['image_path', 'image_type'], dtype='object')
+2023-03-10 05:39:18,168 - mb_utils - INFO - Data will be split into train and validation according to train_file input : False
+2023-03-10 05:39:18,168 - mb_utils - INFO - If unnamed columns are present, they will be removed.
+2023-03-10 05:39:18,168 - mb_utils - INFO - If duplicate rows are present, they will be removed.
+2023-03-10 05:39:18,169 - mb_utils - INFO - Checking duplicates for the columns: ['image_path']
+2023-03-10 05:39:18,171 - mb_utils - INFO - No duplicates found
+2023-03-10 05:39:18,171 - mb_utils - INFO - Removing unnamed columns
+2023-03-10 05:39:18,172 - mb_utils - INFO - Columns : Index(['image_path', 'image_type'], dtype='object')
+2023-03-10 05:39:18,173 - mb_utils - INFO - Verifying paths
+2023-03-10 05:39:18,173 - mb_utils - INFO - first path : /home/malav/mb_pytorch/data/images1/img_35.jpg
+2023-03-10 05:39:18,179 - mb_utils - INFO - self.data:    image_path  image_type                                  image_path_new  img_path_check
+0  img_35.jpg  validation  /home/malav/mb_pytorch/data/images1/img_35.jpg            True
+1  img_36.jpg  validation  /home/malav/mb_pytorch/data/images1/img_36.jpg            True
+2  img_37.jpg  validation  /home/malav/mb_pytorch/data/images1/img_37.jpg            True
+3  img_38.jpg  validation  /home/malav/mb_pytorch/data/images1/img_38.jpg            True
+4  img_39.jpg  validation  /home/malav/mb_pytorch/data/images1/img_39.jpg            True
+5  img_40.jpg  validation  /home/malav/mb_pytorch/data/images1/img_40.jpg            True
+6  img_41.jpg  validation  /home/malav/mb_pytorch/data/images1/img_41.jpg            True
+7  img_42.jpg  validation  /home/malav/mb_pytorch/data/images1/img_42.jpg            True
+8  img_43.jpg  validation  /home/malav/mb_pytorch/data/images1/img_43.jpg            True
+9  img_44.jpg  validation  /home/malav/mb_pytorch/data/images1/img_44.jpg            True
+2023-03-10 05:39:18,180 - mb_utils - INFO - Length of data after removing invalid paths: 10
+2023-03-10 05:39:18,180 - mb_utils - INFO - Verifying images
+2023-03-10 05:39:18,182 - mb_utils - INFO - Trainset: None
+2023-03-10 05:39:18,182 - mb_utils - INFO - Trainset dir: ['__bool__', '__class__', '__delattr__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__']

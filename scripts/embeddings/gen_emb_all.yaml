@@ -7,17 +7,21 @@ data:
   img_dir: /home/malav/mb_pytorch/data/images1/
   thresholding_pd: 0
 
+emb_data:
+  model: 'resnet18'
+  use_pretrained: True  
+  use_own_model: False
+  model_path: '/home/malav/mb_pytorch/models/...'
+  model_layer : 'avgpool'
+
 train_params:
   batch_size: 4
   num_workers: 4
   pin_memory: True
-  shuffle: True
+  shuffle: False
 
 test_params:
-  batch_size: 4
-  num_workers: 4
-  pin_memory: True
-  shuffle: True
+  null: null
 
 transformation:
   transform : True

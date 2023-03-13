@@ -29,6 +29,10 @@ class data_fetcher:
         self._yaml_data = None
         self.data_dict = {}
         self.transforms_final=[]
+        self.all = None
+
+    def __repr__(self) -> str:
+        return "data_fetcher(yaml={},logger={})".format(self.yaml,self.logger)
 
     @property
     def read_yaml(self):
@@ -51,10 +55,20 @@ class data_fetcher:
         return self.data_dict
     
     @property
+    def load_data_all(self):
+        """
+        get dataloader all data dict from yaml file
+        """
+        data = YamlReader(self.yaml).data(self.logger)
+        self.all = data
+        return self.all
+
+    @property
     def get_transforms(self):
         """
         get transforms from yaml file
         """
+
         transforms_list = self.load_data_params['transforms_list']
 
         if transforms_list['transform']==False:
@@ -173,6 +187,9 @@ class customdl(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.data)
     
+    def __repr__(self) -> str:
+        return "self.data: {},self.transform: {},self.label: {}".format(self.data,self.transform,self.label)
+
     def __getitem__(self,idx):
         
         img = self.data['image_path_new'].iloc[idx]

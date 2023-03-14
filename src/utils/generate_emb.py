@@ -153,7 +153,7 @@ class EmbeddingGenerator(DataLoader):
         work_dir = self._data['data']['work_dir']
         if os.path.exists(self.folder_name):
             df = load_any_df(os.path.join(self.folder_name,'emb_wrangled_file.csv'))
-        df['embedding'] = list(emb)
+        df['embedding'] = emb.tolist()
         df.to_csv(os.path.join(self.folder_name,'emb_wrangled_file.csv'),index=False)
         if self.logger:
             self.logger.info("Embeddings saved to {}".format(os.path.join(self.folder_name,'emb_wrangled_file.csv')))

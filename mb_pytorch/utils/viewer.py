@@ -22,8 +22,8 @@ def show_images(imgs, figsize=(10.0, 10.0)):
         imgs = [imgs]
     fig, axs = plt.subplots(ncols=len(imgs), figsize=figsize, squeeze=False)
     for i, img in enumerate(imgs):
-        img = img.detach()
-        img = TF.to_pil_image(img)
+        #img = img.detach()
+        #img = TF.to_pil_image(img)
         axs[0, i].imshow(np.asarray(img))
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     plt.show()

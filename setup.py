@@ -6,7 +6,7 @@ setup(
     version=version,
     description="Pytorch functions functions package",
     author=["Malav Bateriwala"],
-    packages=find_namespace_packages(include=["src.*"]),
+    packages=find_namespace_packages(include=["mb_pytorch.src.*"]),
     #packages=find_packages(),
     scripts=['scripts/embeddings/emb.py','scripts/extra_utils/dataload_results.py'],
     install_requires=[

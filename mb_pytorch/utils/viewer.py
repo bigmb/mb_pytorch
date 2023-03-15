@@ -8,7 +8,7 @@ import torchvision.transforms.functional as TF
 
 __all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img']
 
-def show_images(imgs, figsize=(10.0, 10.0)):
+def show_images(imgs, figsize=(5.0, 5.0)):
     """Displays a single image or list of images. 
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images
@@ -33,7 +33,7 @@ def show_images(imgs, figsize=(10.0, 10.0)):
 
     return None
 
-def show_segmentation_masks(imgs, masks, figsize=(10.0, 10.0)):
+def show_segmentation_masks(imgs, masks, figsize=(5.0, 5.0)):
     """Displays a single image or list of images with segmentation masks.
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images
@@ -67,7 +67,7 @@ def show_segmentation_masks(imgs, masks, figsize=(10.0, 10.0)):
 
     return None
 
-def show_bounding_boxes(imgs, boxes, figsize=(10.0, 10.0)):
+def show_bounding_boxes(imgs, boxes, figsize=(5.0, 5.0)):
     """Displays a single image or list of images with bounding boxes.
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images
@@ -98,7 +98,7 @@ def show_bounding_boxes(imgs, boxes, figsize=(10.0, 10.0)):
 
     return None
 
-def show_label_on_img(imgs,labels,figsize=(10.0,10.0)):
+def show_label_on_img(imgs,labels,figsize=(5.0,5.0)):
     """Displays a single image or list of images with labels.
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images

@@ -8,7 +8,7 @@ import torchvision.transforms.functional as TF
 
 __all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img']
 
-def show_images(imgs, figsize=(5.0, 5.0)):
+def show_images(imgs, figsize=(12.0, 12.0)):
     """Displays a single image or list of images. 
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images
@@ -27,13 +27,13 @@ def show_images(imgs, figsize=(5.0, 5.0)):
         img = np.asarray(img)
         if img.shape[0]==3:
             img = np.transpose(img, (1, 2, 0))
-        axs[0, i].imshow(np.asarray(img),interpolation='nearest')
+        axs[0, i].imshow(np.asarray(img))
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     plt.show()
 
     return None
 
-def show_segmentation_masks(imgs, masks, figsize=(5.0, 5.0)):
+def show_segmentation_masks(imgs, masks, figsize=(12.0, 12.0)):
     """Displays a single image or list of images with segmentation masks.
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images
@@ -60,14 +60,14 @@ def show_segmentation_masks(imgs, masks, figsize=(5.0, 5.0)):
         mask = np.asarray(mask)
         if mask.shape[0]==3:
             mask = np.transpose(mask, (1, 2, 0))
-        axs[0, i].imshow(np.asarray(img),interpolation='nearest')
+        axs[0, i].imshow(np.asarray(img))
         axs[0, i].imshow(np.asarray(mask), alpha=0.5)
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     plt.show()
 
     return None
 
-def show_bounding_boxes(imgs, boxes, figsize=(5.0, 5.0)):
+def show_bounding_boxes(imgs, boxes, figsize=(12.0, 12.0)):
     """Displays a single image or list of images with bounding boxes.
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images
@@ -98,7 +98,7 @@ def show_bounding_boxes(imgs, boxes, figsize=(5.0, 5.0)):
 
     return None
 
-def show_label_on_img(imgs,labels,figsize=(5.0,5.0)):
+def show_label_on_img(imgs,labels,figsize=(12.0,12.0)):
     """Displays a single image or list of images with labels.
     Args:
         imgs (Union[List[torch.Tensor], torch.Tensor]): A list of images
@@ -119,7 +119,9 @@ def show_label_on_img(imgs,labels,figsize=(5.0,5.0)):
         img = np.asarray(img)
         if img.shape[0]==3:
             img = np.transpose(img, (1, 2, 0))
-        cv2.putText(img, str(label), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        img = img.astype('float32')
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv2.putText(img, str(label), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 255), 1)
         axs[0, i].imshow(np.asarray(img))
     plt.show()
 

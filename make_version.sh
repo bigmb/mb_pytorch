@@ -26,7 +26,7 @@ VERSION_MINUTE=`date -u +'%M'`
 PATCH_VERSION=${VERSION_YEAR}${VERSION_MONTH}${VERSION_DAY}${VERSION_HOUR}${VERSION_MINUTE}
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
-VERSION_DIRPATH=${SCRIPT_PATH}/src
+VERSION_DIRPATH=${SCRIPT_PATH}/mb_pytorch
 VERSION_FILEPATH=${VERSION_DIRPATH}/version.py
 
 ##Run the make_version file to update the version number and then run install package file to install the package and upload it to pipy.

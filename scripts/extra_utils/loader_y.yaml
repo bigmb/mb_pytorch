@@ -1,6 +1,6 @@
 data:
   from_datasets: 'CIFAR10'
-  from_file: True  ##if False, then from_datasets is used
+  from_file: False  ##if False, then from_datasets is used
   work_dir: /home/malav/mb_pytorch/data/
   file: /home/malav/mb_pytorch/data/csv/file_data.csv
   use_img_dir: True

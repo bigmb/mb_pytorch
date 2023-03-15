@@ -50,11 +50,17 @@ def show_segmentation_masks(imgs, masks, figsize=(10.0, 10.0)):
         masks = [masks]
     fig, axs = plt.subplots(ncols=len(imgs), figsize=figsize, squeeze=False)
     for i, (img, mask) in enumerate(zip(imgs, masks)):
-        img = img.detach()
-        img = TF.to_pil_image(img)
-        mask = mask.detach()
-        mask = TF.to_pil_image(mask)
-        axs[0, i].imshow(np.asarray(img))
+        # img = img.detach()
+        # img = TF.to_pil_image(img)
+        # mask = mask.detach()
+        # mask = TF.to_pil_image(mask)
+        img = np.asarray(img)
+        if img.shape[0]==3:
+            img = np.transpose(img, (1, 2, 0))
+        mask = np.asarray(mask)
+        if mask.shape[0]==3:
+            mask = np.transpose(mask, (1, 2, 0))
+        axs[0, i].imshow(np.asarray(img),interpolation='nearest')
         axs[0, i].imshow(np.asarray(mask), alpha=0.5)
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     plt.show()
@@ -78,9 +84,13 @@ def show_bounding_boxes(imgs, boxes, figsize=(10.0, 10.0)):
         boxes = [boxes]
     fig, axs = plt.subplots(ncols=len(imgs), figsize=figsize, squeeze=False)
     for i, (img, box) in enumerate(zip(imgs, boxes)):
-        img = img.detach()
-        img = TF.to_pil_image(img)
-        box = box.detach()
+        # img = img.detach()
+        # img = TF.to_pil_image(img)
+        # box = box.detach()
+        img = np.asarray(img)
+        if img.shape[0]==3:
+            img = np.transpose(img, (1, 2, 0))
+        box = np.asarray(box)
         axs[0, i].imshow(np.asarray(img))
         axs[0, i].imshow(draw_bounding_boxes(img, box))
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
@@ -104,8 +114,11 @@ def show_label_on_img(imgs,labels,figsize=(10.0,10.0)):
         labels = [labels]
     fig, axs = plt.subplots(ncols=len(imgs), figsize=figsize, squeeze=False)
     for i, (img, label) in enumerate(zip(imgs, labels)):
-        img = img.detach()
-        img = TF.to_pil_image(img)
+        # img = img.detach()
+        # img = TF.to_pil_image(img)
+        img = np.asarray(img)
+        if img.shape[0]==3:
+            img = np.transpose(img, (1, 2, 0))
         cv2.putText(img, str(label), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         axs[0, i].imshow(np.asarray(img))
     plt.show()

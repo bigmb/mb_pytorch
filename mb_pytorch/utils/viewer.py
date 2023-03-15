@@ -24,6 +24,9 @@ def show_images(imgs, figsize=(10.0, 10.0)):
     for i, img in enumerate(imgs):
         #img = img.detach()
         #img = TF.to_pil_image(img)
+        img = np.asarray(img)
+        if img.shape[0]==3:
+            img = np.transpose(img, (1, 2, 0))
         axs[0, i].imshow(np.asarray(img),interpolation='nearest')
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     plt.show()

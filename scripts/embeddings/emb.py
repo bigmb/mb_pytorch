@@ -1,6 +1,6 @@
 ##File to create embeddings for the given dataset
 
-from src.utils.generate_emb import EmbeddingGenerator
+from mb_pytorch.utils.generate_emb import EmbeddingGenerator
 from mb_utils.src.logging import logger
 import argparse
 

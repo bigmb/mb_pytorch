@@ -4,7 +4,7 @@
 
 import os
 import sys
-from src.dataloader.loader import DataLoader
+from mb_pytorch.dataloader.loader import DataLoader
 from mb_utils.src.logging import logger
 import argparse
 

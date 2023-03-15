@@ -1,8 +1,8 @@
 # Data load for proto net
 # Path: src/metalearning/proto_dataloader.py
 
-from src.dataloader.loader import data_fetcher
-from src.utils.yaml_reader import YamlReader
+from mb_pytorch.dataloader.loader import data_fetcher
+from mb_pytorch.utils.yaml_reader import YamlReader
 from mb_pandas.src.dfload import load_any_df
 
 __all__ = ['ProtoDataLoader']

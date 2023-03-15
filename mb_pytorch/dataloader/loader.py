@@ -5,7 +5,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from src.utils.yaml_reader import YamlReader
+from mb_pytorch.utils.yaml_reader import YamlReader
 import os
 import sys
 from mb_pandas.src.dfload import load_any_df

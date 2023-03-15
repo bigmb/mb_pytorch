@@ -3,7 +3,7 @@
 import torch
 from torch import optim, nn
 from torchvision import models, transforms
-from src.dataloader.loader import data_fetcher,DataLoader
+from src.dataloader.loader import DataLoader
 import cv2
 import numpy as np
 from PIL import Image

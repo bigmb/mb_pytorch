@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from mb_pytorch.utils.yaml_reader import YamlReader
 import os
 import sys
+import numpy as np
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb_pandas.src.transform import *
@@ -248,8 +249,8 @@ class DataLoader(data_fetcher):
             self.trainset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=True,logger=self.logger)
             self.testset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=False,logger=self.logger)
 
-        self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.data_dict['train_params']['batch_size'], shuffle=self.data_dict['train_params']['shuffle'], num_workers=self.data_dict['train_params']['num_workers'])
-        self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.data_dict['test_params']['batch_size'], shuffle=self.data_dict['test_params']['shuffle'], num_workers=self.data_dict['test_params']['num_workers'])
+        self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.data_dict['train_params']['batch_size'], shuffle=self.data_dict['train_params']['shuffle'], num_workers=self.data_dict['train_params']['num_workers'],worker_init_fn = lambda id: np.array(self.data_dict['train_params']['seed']))
+        self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.data_dict['test_params']['batch_size'], shuffle=self.data_dict['test_params']['shuffle'], num_workers=self.data_dict['test_params']['num_workers'],worker_init_fn = lambda id: np.array(self.data_dict['test_params']['seed']))
         return self.trainloader,self.testloader,self.trainset,self.testset
 
     def data_train(self,data_file,transform,train_file,logger=None):

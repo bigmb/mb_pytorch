@@ -2,6 +2,9 @@ import torch
 from torch import nn
 from .conv_with_relu import ConvBlock
 
+
+__all__ = ['CNN']
+
 class CNN(nn.Module):
    """
    Applies several ConvBlocks each doubling the number of channels, and halving the feature map size, before taking a global average and classifying.
@@ -27,3 +30,66 @@ class CNN(nn.Module):
        x = x.flatten(1)
        x = self.cls(x)
        return x
+
+class CustomCNN(nn.Module):
+    def __init__(self, depth, layer_of_extraction, skip_connection):
+        super(CustomCNN, self).__init__()
+        
+        self.depth = depth
+        self.layer_of_extraction = layer_of_extraction
+        self.skip_connection = skip_connection
+        
+        self.conv_layers = nn.ModuleList()
+        self.pool_layers = nn.ModuleList()
+        self.skip_connections = nn.ModuleList()
+        
+        # Define convolutional layers
+        for i in range(depth):
+            in_channels = 3 if i == 0 else 64
+            out_channels = 64
+            kernel_size = 3
+            padding = 1
+            conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, padding)
+            self.conv_layers.append(conv_layer)
+            
+            # Define skip connections
+            if skip_connection and i > 0:
+                skip_connection = nn.Conv2d(in_channels, out_channels, 1)
+                identity = nn.Identity()
+                self.skip_connections.append(nn.ModuleList([skip_connection, identity]))
+                
+            # Define pooling layers
+            if i < depth - 1:
+                pool_layer = nn.MaxPool2d(2, 2)
+                self.pool_layers.append(pool_layer)
+        
+        # Define fully connected layer
+        self.fc_layer = nn.Linear(64 * 8 * 8, 10)
+        
+    def forward(self, x):
+        layer_outputs = []
+        
+        for i in range(self.depth):
+            x = self.conv_layers[i](x)
+            
+            if self.skip_connection and i > 0:
+                skip_connection_out, skip_connection_identity = self.skip_connections[i - 1]
+                if skip_connection_out is not None:
+                    skip_connection_out = skip_connection_out(x)
+                x = x + skip_connection_out
+            
+            x = nn.functional.relu(x)
+            
+            if i < self.depth - 1:
+                x = self.pool_layers[i](x)
+            
+            if i == self.layer_of_extraction:
+                layer_outputs.append(x)
+        
+        x = torch.flatten(x, start_dim=1)
+        x = self.fc_layer(x)
+        
+        if self.layer_of_extraction == self.depth:
+            layer_outputs.append(x)
+        
+        return x, layer_outputs[self.layer_of_extraction]

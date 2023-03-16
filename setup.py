@@ -14,5 +14,7 @@ setup(
         "mb_pandas",
         "mb_utils",
         "torch",
-        "torchvision"],
+        "torchvision",
+        "tqdm",
+        "torchsummary",],
     python_requires='>=3.8',)

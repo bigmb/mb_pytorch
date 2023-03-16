@@ -1,0 +1,7 @@
+##Function to get the summary of the model
+
+from torchsummary import summary
+
+def get_model_summary(model, input_size):
+    summary(model, input_size=input_size)
+    

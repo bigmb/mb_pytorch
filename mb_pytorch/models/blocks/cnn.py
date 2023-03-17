@@ -3,7 +3,7 @@ from torch import nn
 from .conv_with_relu import ConvBlock
 
 
-__all__ = ['CNN']
+__all__ = ['CNN','CustomCNN']
 
 class CNN(nn.Module):
    """

@@ -1,2 +1,2 @@
-from cnn import *
-from conv_with_relu import *
+from .cnn import *
+from .conv_with_relu import *

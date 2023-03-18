@@ -127,3 +127,23 @@ def show_label_on_img(imgs,labels,figsize=(12.0,12.0)):
 
     return None
 
+def model_viewer(model,input_shape = (1,3,128,128), location='model',view=False):
+    """
+    Function to visualize the model architecture
+    Uses torchviz to visualize the model
+    Input:
+        model: Model to be visualized
+        input_shape: Input shape of the model (batch,channels,height,width)
+        location: name and location to save the model image. Default is current directory
+        view: Boolean to view the model image or not
+    Output:
+        None
+    """
+    from torchviz import make_dot
+    x = torch.randn(input_shape)
+    y = model(x)
+    dot= make_dot(y.mean(), params=dict(model.named_parameters()),show_attrs=True)
+    dot.format = 'png'
+    dot.render(location,view=view)
+    return None
+    

@@ -11,6 +11,7 @@ __pycache__/
 torch_compile_debug/
 data/
 logs/
+.vscode/
 build/
 develop-eggs/
 dist/

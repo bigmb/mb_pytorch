@@ -6,7 +6,7 @@ import torchvision
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 import torchvision.transforms.functional as TF
 
-__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img']
+__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer']
 
 def show_images(imgs, figsize=(12.0, 12.0)):
     """Displays a single image or list of images. 

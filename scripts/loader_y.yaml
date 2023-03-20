@@ -63,3 +63,27 @@ transformation:
   to_tensor:
     val : True
   
+model:
+  use_torchvision_models: True
+  model_name: 'resnet' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
+  model_version: '50'  ##if model_name is in torchvision.models, then this is the version of the model
+  model_path: /home/malav/mb_pytorch/models/ #path to save the model if model_name is not in models otherise it will use the saved one
+  model_optimizer: 'adam' #adam, sgd, rmsprop,none
+  model_loss: 'cross_entropy' #cross_entropy, mse,none
+  model_pretrained: False
+  model_num_classes: 10
+  model_initialization: None
+
+  model_parameters:
+    adam: 
+      {lr: 0.001, betas: [0.9, 0.999], eps: 1e-08, weight_decay: 0, amsgrad: False}
+    sgd:
+      {lr: 0.01, momentum: 0.9, dampening: 0, weight_decay: 0, nesterov: False}
+    rmsprop:
+      {lr: 0.01, alpha: 0.99, eps: 1e-08, weight_decay: 0, momentum: 0, centered: False}
+    cross_entropy:
+      {weight: None, size_average: None, ignore_index: -100, reduce: None, reduction: 'mean'}
+    mse:
+      {size_average: None, reduce: None, reduction: 'mean'}
+
+ 

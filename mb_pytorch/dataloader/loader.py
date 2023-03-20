@@ -53,6 +53,7 @@ class data_fetcher:
         self.data_dict['train_params'] = data['train_params']
         self.data_dict['test_params'] = data['test_params']
         self.data_dict['transforms_list'] = data['transformation']
+        self.data_dict['model'] = data['model']
         return self.data_dict
     
     @property

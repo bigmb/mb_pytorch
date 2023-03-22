@@ -3,9 +3,8 @@ import torch
 from torch.nn import functional as F
 import torchvision
 import torchvision.models as models
-from batchnorm import Norm
-from attention import Attention
-from conv import Conv
+from mb_pytorch.models.blocks.attention_block import Attention
+from mb_pytorch.models.blocks.conv_block import Conv
 
 __all__ = ['ModelOut']
 

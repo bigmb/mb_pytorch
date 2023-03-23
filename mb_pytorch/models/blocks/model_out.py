@@ -8,7 +8,7 @@ from mb_pytorch.models.blocks.conv_block import Conv
 
 __all__ = ['ModelOut']
 
-class ModelOut(nn.modules):
+class ModelOut(nn.Modules):
     def __init__(self, yaml_data,logger=None):
         self._data=yaml_data
         self._use_torchvision_models=self._data['use_torchvision_models']

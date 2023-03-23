@@ -32,6 +32,14 @@ class CNN(nn.Module):
        return x
 
 class CustomCNN(nn.Module):
+    """
+    Custom CNN model.
+    Inputs:
+        depth (int): Number of convolutional layers
+        layer_of_extraction (int): Layer of feature extraction
+        skip_connection (bool): Whether to use skip connections
+    
+    """
     def __init__(self, depth, layer_of_extraction, skip_connection):
         super(CustomCNN, self).__init__()
         
@@ -49,14 +57,14 @@ class CustomCNN(nn.Module):
             out_channels = 64
             kernel_size = 3
             padding = 1
-            conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, padding)
+            conv_layer = nn.Conv2d(in_channels, out_channels, kernel_size, padding,stride=1)
             self.conv_layers.append(conv_layer)
             
             # Define skip connections
             if skip_connection and i > 0:
-                skip_connection = nn.Conv2d(in_channels, out_channels, 1)
+                skip_connection_layer = nn.Conv2d(in_channels, out_channels, 1)
                 identity = nn.Identity()
-                self.skip_connections.append(nn.ModuleList([skip_connection, identity]))
+                self.skip_connections_layer.append([skip_connection_layer, identity])
                 
             # Define pooling layers
             if i < depth - 1:
@@ -73,9 +81,9 @@ class CustomCNN(nn.Module):
             x = self.conv_layers[i](x)
             
             if self.skip_connection and i > 0:
-                skip_connection_out, skip_connection_identity = self.skip_connections[i - 1]
-                if skip_connection_out is not None:
-                    skip_connection_out = skip_connection_out(x)
+                skip_connection_layer, skip_connection_identity = self.skip_connections[i - 1]
+                if skip_connection_layer is not None:
+                    skip_connection_out = skip_connection_layer(x)
                 x = x + skip_connection_out
             
             x = nn.functional.relu(x)
@@ -89,7 +97,9 @@ class CustomCNN(nn.Module):
         x = torch.flatten(x, start_dim=1)
         x = self.fc_layer(x)
         
-        if self.layer_of_extraction == self.depth:
+        if self.layer_of_extraction == self.depth-1 and len(layer_outputs) == 0:            
+            layer_outputs.append(x)
+        elif self.layer_of_extraction < self.depth-1:
             layer_outputs.append(x)
         
-        return x, layer_outputs[self.layer_of_extraction]
+        return x, layer_outputs[-1]

@@ -84,6 +84,5 @@ class ConvBlock(nn.Module):
 
     def forward(self,x):
         for i,module in enumerate(self.add_module):
-            print(i,module)
             x = module(x)
         return x

@@ -1,2 +1,2 @@
-from .linear import LeNet
+from .lenet import LeNet
 from .blocks import *

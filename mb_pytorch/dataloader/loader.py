@@ -35,7 +35,7 @@ class data_fetcher:
     def __repr__(self) -> str:
         return "data_fetcher(yaml={},logger={})".format(self.yaml,self.logger)
 
-    @property
+    @staticmethod
     def read_yaml(self):
         """
         read yaml file
@@ -43,7 +43,7 @@ class data_fetcher:
         self._yaml_data = YamlReader(self.yaml).data(self.logger)
         return self._yaml_data
 
-    @property
+    @staticmethod
     def load_data_params(self):
         """
         get dataloader data from yaml file
@@ -56,7 +56,7 @@ class data_fetcher:
         self.data_dict['model'] = data['model']
         return self.data_dict
     
-    @property
+    @staticmethod
     def load_data_all(self):
         """
         get dataloader all data dict from yaml file
@@ -65,7 +65,7 @@ class data_fetcher:
         self.all = data
         return self.all
 
-    @property
+    @staticmethod
     def get_transforms(self):
         """
         get transforms from yaml file

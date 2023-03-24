@@ -7,7 +7,7 @@ import torch.nn.functional as F
 __all__ = ['Attention']
 class Attention(nn.Module):
     
-    def __init__(self, x,g) -> None:
+    def __init__(self, x= None,g=None) -> None:
         """
         Attention module for U-Net
         Input:
@@ -18,9 +18,9 @@ class Attention(nn.Module):
         """
 
         super(Attention,self).__init__()
-        self.x = nn.Conv2d(x.shape[1], x.shape[1], kernel_size=1, stride=2, padding=0)(x)
-        self.g = nn.Conv2d(g.shape[1], g.shape[1], kernel_size=1, stride=1, padding=0)(g)
-        self.psi = nn.Conv2d(x.shape[1], 1, kernel_size=1, stride=1, padding=0)
+        self.x = nn.Conv2d(in_channels=x,out_channels=x, kernel_size=1, stride=1, padding=1)(x)
+        self.g = nn.Conv2d(in_channels=g, out_channels=g, kernel_size=1, stride=1, padding=1)(g)
+        self.psi = nn.Conv2d(in_channels=x, out_channels=1, kernel_size=1, stride=1, padding=1)
 
     def forward(self,x,g):
         """

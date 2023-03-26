@@ -38,3 +38,4 @@ class Attention(nn.Module):
         attention = F.sigmoid(psi)
         return attention
 
+

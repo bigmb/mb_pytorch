@@ -2,8 +2,10 @@ from torchsummary import summary
 import onnx
 from onnx2pytorch import ConvertModel
 import torch
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-__all__ = ['get_model_summary','onnx2torch','overwrite_layer_weights']
+__all__ = ['get_model_summary','onnx2torch','overwrite_layer_weights','feature_extractor']
 
 
 def get_model_summary(model, input_size):
@@ -47,3 +49,38 @@ def overwrite_layer_weights(model, layer_index, new_weights,logger=None):
     else:
         raise ValueError("The specified layer is not a convolutional layer or linear layer.")
 
+
+def feature_extractor(model,layer_name):
+    """
+    Function to get the feature extractor from the model
+        model: PyTorch model
+        layer_name: Name of the layer to be used as feature extractor
+    Output:
+        feature_extractor: Feature extractor from the model
+    """
+    feature_extractor = torch.nn.Sequential(*list(model.children())[:layer_name])
+    return feature_extractor
+
+def feature_view(data,model,layer_names:list) -> None:
+    """
+    Function to view image from the feature extractor
+        data: Image data
+        model: PyTorch model
+        layer_names (list): Name of the layer to be used as feature extractor
+    Output:
+        feature_view: Feature view from the model
+    """
+    out_list = []
+    for j in data:
+        for i in range(len(layer_names)):
+            layer = layer_names[i]
+            features = feature_extractor(model,layer)
+            output = features(j)
+            output = output.squeeze(0).detach().numpy()
+            out_list.append(output)
+        fig, axs = plt.subplots(1, len(layer_names), figsize=(12, 12))
+        for i in range(len(layer_names)):
+            sns.heatmap(out_list[i], ax=axs[i])
+            axs[i].set_title(f'{layer_names[i]} : {out_list[i].shape}' )
+    return None
+        

@@ -6,4 +6,4 @@ def training_loop(yaml_file,logger=None):
     """
     Function for training_loop
     """
-    
+    pass

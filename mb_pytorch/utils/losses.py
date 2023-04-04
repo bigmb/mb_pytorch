@@ -1,5 +1,7 @@
 import torch.nn.functional as F
 
+__all__ = ['dice_loss', 'binary_cross_entropy', 'cross_entropy', 'mse_loss', 'l1_loss']
+
 def dice_loss(input, target):
     """
     Dice loss function
@@ -88,3 +90,4 @@ def l2_loss(input, target):
         l2_loss: torch tensor of shape (1)
     """
     return F.mse_loss(input, target)
+

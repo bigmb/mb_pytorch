@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import spatial
 
+__all__ = ['dice_coefficient_image','numeric_score']
+
 def dice_coefficient_image(pred, target,empty_score=1.0):
     """
     Calculate the dice coefficient between two images

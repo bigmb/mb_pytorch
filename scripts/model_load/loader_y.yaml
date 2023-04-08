@@ -80,11 +80,11 @@ model:
 
   model_train_parameters:
     Adam: 
-      {lr: 0.001, betas: [0.9, 0.999], eps: 1e-08, weight_decay: 0, amsgrad: False}
+      {lr: 0.001, betas: [0.9, 0.999], eps: 1.0e-08, weight_decay: 0, amsgrad: False}
     SGD:
       {lr: 0.01, momentum: 0.9, dampening: 0, weight_decay: 0, nesterov: False}
     RMSprop:
-      {lr: 0.01, alpha: 0.99, eps: 1e-08, weight_decay: 0, momentum: 0, centered: False}
+      {lr: 0.01, alpha: 0.99, eps: 1.0e-08, weight_decay: 0, momentum: 0, centered: False}
     cross_entropy:
       {weight: None, size_average: None, ignore_index: -100, reduce: None, reduction: 'mean'}
     mse:

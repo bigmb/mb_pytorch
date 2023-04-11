@@ -58,7 +58,8 @@ def feature_extractor(model,layer_name):
     Output:
         feature_extractor: Feature extractor from the model
     """
-    feature_extractor = torch.nn.Sequential(*list(model.children())[:layer_name])
+    layer_loc = list(model.named_modules()).index(layer_name)
+    feature_extractor = torch.nn.Sequential(*list(model.children())[:layer_loc])
     return feature_extractor
 
 def feature_view(data,model,layer_names:list) -> None:

@@ -8,7 +8,8 @@ import os
 from mb_utils.src.logging import logger
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
-
+import numpy as np
+from ..utils.viewer import new_show_cam_on_image
 
 __all__ = ['train_loop']
 
@@ -34,7 +35,7 @@ __all__ = ['train_loop']
 #logger = logger
 
 
-def train_loop( data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,device='cpu'):
+def train_loop( data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
     """
     Function to train the model
     Args:
@@ -71,7 +72,23 @@ def train_loop( data,data_model,model,train_loader,val_loader,loss_attr,optimize
             train_loss += current_loss.item()
             if logger:
                 logger.info(f'Epoch {i+1} - Batch {j+1} - Train Loss: {current_loss.item()}')
-
+                    #get grad cam images
+        
+            if i == 0 and j == 0:
+                if gradcam and writer is not None:
+                    x_grad = x.to('cpu')
+                    for cam_layers in gradcam:
+                        if logger:
+                            logger.info(f'Gradcam for layer {cam_layers} started')
+                        with GradCAM(model=model,target_layers=[cam_layers],use_cuda=False) as cm: 
+                            cr = cm(input_tensor=x_grad)[0,:]        
+                            #cr2 = np.reshape(cr,[1,cr.shape[0],cr.shape[1]])
+                            #if cr2.max() == 0 and cr2.min() == 0:
+                            #    cr2 = cr2 + 1
+                            print(cr.shape)
+                        cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)
+                        writer.add_image(f'Gradcam/{cam_layers}',cam_img,global_step=i)
+        
         avg_train_loss = train_loss / len(train_loader)
         if logger:
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
@@ -85,18 +102,6 @@ def train_loop( data,data_model,model,train_loader,val_loader,loss_attr,optimize
         if writer is not None:
             for name, param in model.named_parameters():
                 writer.add_histogram(name, param, global_step=i)
-        
-        #get grad cam images
-        if gradcam and writer is not None:
-            for cam_layers in gradcam:
-                if getattr(model,cam_layers) is None:
-                    if logger:
-                        logger.info(f'Layer {cam_layers} not found in model') 
-                else:
-                    with GradCAM(model=model,target_layers=cam_layers,use_cuda=False) as cm: 
-                        cr = cm(input_tensor=x)[0,:]
-                        writer.add_image(f'Gradcam/{cam_layers}',show_cam_on_image(x[0].cpu().numpy(),cr.cpu().numpy(),use_rgb=True),global_step=i)
-        
         
         #validation loop
         val_loss = 0
@@ -125,6 +130,8 @@ def train_loop( data,data_model,model,train_loader,val_loader,loss_attr,optimize
             writer.add_scalar('Accuracy/val', val_acc, global_step=i)
     
         # save best model
+        if i == 0:
+            best_val_loss = float('inf')
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             best_model = model.state_dict()

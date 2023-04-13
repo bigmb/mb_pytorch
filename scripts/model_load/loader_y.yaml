@@ -9,14 +9,14 @@ data:
   thresholding_pd: 0
   
 train_params:
-  batch_size: 128
+  batch_size: 4
   num_workers: 4
   pin_memory: True
   shuffle: True
   seed : 42
 
 test_params:
-  batch_size: 128
+  batch_size: 4
   num_workers: 4
   pin_memory: True
   shuffle: False
@@ -25,7 +25,7 @@ test_params:
 transformation:
   transform : True
   resize:
-    val : False
+    val : True
     args:
       size: [256, 256]
   random_crop:

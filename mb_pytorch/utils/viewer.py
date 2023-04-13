@@ -6,7 +6,7 @@ import torchvision
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 import torchvision.transforms.functional as TF
 
-__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer']
+__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer','new_show_cam_on_image']
 
 def show_images(imgs, figsize=(12.0, 12.0)):
     """Displays a single image or list of images. 
@@ -147,3 +147,23 @@ def model_viewer(model,input_shape = (1,3,128,128), location='model',view=False)
     dot.render(location,view=view)
     return None
     
+def new_show_cam_on_image(img, mask, use_rgb=True):
+    """
+    Input:
+        img: Image on which the cam is to be superimposed
+        mask: cam mask
+    Return:
+        cam: superimposed image
+    """
+    #mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY) # Convert to single channel
+    mask = np.float32(mask) / 255 # Convert to float32
+    heatmap = cv2.applyColorMap(np.uint8(255 * mask), cv2.COLORMAP_JET) # Convert to uint8
+    heatmap = np.float32(heatmap) / 255
+
+    if use_rgb:
+        cam = heatmap[..., ::-1] + np.float32(img)
+    else:
+        cam = heatmap[..., 0] * np.float32(img)
+    
+    cam = cam / np.max(cam)
+    return np.uint8(255 * cam)

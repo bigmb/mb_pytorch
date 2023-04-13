@@ -6,88 +6,133 @@ import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import os
 from mb_utils.src.logging import logger
-
-yaml_file = '/home/malav/mb_pytorch/scripts/models/loader_y.yaml'
-data = DataLoader(yaml_file,logger=None)
-data_model = data.data_dict['model']
-train_loader, val_loader,_,_ = data.data_load(logger=None)
-model = ModelLoader(data_model,logger=None)
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-loss_attr,optimizer_attr,optimizer_dict,scheduler_attr,scheduler_dict = train_helper(data_model)
-
-#optimizer_dict['lr'] = scheduler_attr.get_last_lr()[0]
-optimizer =optimizer_attr(model.parameters(),**optimizer_dict)
-scheduler = scheduler_attr(optimizer,**scheduler_dict)
-
-best_val_loss = float('inf')
-
-path_logs = os.path.join(data['data']['work_dir'], 'logs')
-writer = SummaryWriter(log_dir=path_logs)
-
-logger = logger
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
 
 
-for i in tqdm.tqdm(range(data_model['model_epochs'])):
-    ##train loop
-    model.train()
-    train_loss = 0
-    logger.info('Training Started')
-    for j,(x,y) in enumerate(train_loader):
-        x,y = x.to(device),y.to(device)
-        optimizer.zero_grad()
-        y_pred = model(x)
-        current_loss = loss_attr()(y_pred,y)
-        current_loss.backward()    
-        optimizer.step()
-        train_loss += current_loss.item()
-        logger.info(f'Epoch {i+1} - Batch {j+1} - Train Loss: {current_loss.item()}')
+__all__ = ['train_loop']
 
-    avg_train_loss = train_loss / len(train_loader)
-    logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
+#yaml_file = '/home/malav/mb_pytorch/scripts/models/loader_y.yaml'
+#data = DataLoader(yaml_file,logger=None)
+#data_model = data.data_dict['model']
+#train_loader, val_loader,_,_ = data.data_load(logger=None)
+#model = ModelLoader(data_model,logger=None)
+
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+#loss_attr,optimizer_attr,optimizer_dict,scheduler_attr,scheduler_dict = train_helper(data_model)
+
+##optimizer_dict['lr'] = scheduler_attr.get_last_lr()[0]
+#optimizer =optimizer_attr(model.parameters(),**optimizer_dict)
+#scheduler = scheduler_attr(optimizer,**scheduler_dict)
+
+#best_val_loss = float('inf')
+
+#path_logs = os.path.join(data['data']['work_dir'], 'logs')
+#writer = SummaryWriter(log_dir=path_logs)
+
+#logger = logger
+
+
+def train_loop( data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,device='cpu'):
+    """
+    Function to train the model
+    Args:
+        data: data dictionary YAML of DataLoader
+        data_model: model parameters - data.data_dict['model']
+        model: model to be trained
+        train_loader: train dataloader
+        val_loader: validation dataloader
+        loss_attr: loss function
+        optimizer: optimizer
+        scheduler: scheduler
+        writer: tensorboard writer
+        logger: logger
+        gradcam: gradcam layers to be visulized
+        device: default is cpu
+    output:
+        None
+    """
+
+    for i in tqdm.tqdm(range(data_model['model_epochs'])):
+        ##train loop
+        model.train()
+        train_loss = 0
+        if logger:
+            logger.info('Training Started')
     
-    writer.add_scalar('Loss/train', loss_attr().item(), global_step=i)
+        for j,(x,y) in enumerate(train_loader):
+            x,y = x.to(device),y.to(device)
+            optimizer.zero_grad()
+            y_pred = model(x)
+            current_loss = loss_attr()(y_pred,y)
+            current_loss.backward()    
+            optimizer.step()
+            train_loss += current_loss.item()
+            if logger:
+                logger.info(f'Epoch {i+1} - Batch {j+1} - Train Loss: {current_loss.item()}')
+
+        avg_train_loss = train_loss / len(train_loader)
+        if logger:
+            logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
     
-    if scheduler is not None:
-        scheduler.step()
+        if writer is not None:
+            writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
     
-    for name, param in model.named_parameters():
-        writer.add_histogram(name, param, global_step=i)
+        if scheduler is not None:
+            scheduler.step()
+    
+        if writer is not None:
+            for name, param in model.named_parameters():
+                writer.add_histogram(name, param, global_step=i)
         
-    #get grad cam images
+        #get grad cam images
+        if gradcam and writer is not None:
+            for cam_layers in gradcam:
+                if getattr(model,cam_layers) is None:
+                    if logger:
+                        logger.info(f'Layer {cam_layers} not found in model') 
+                else:
+                    with GradCAM(model=model,target_layers=cam_layers,use_cuda=False) as cm: 
+                        cr = cm(input_tensor=x)[0,:]
+                        writer.add_image(f'Gradcam/{cam_layers}',show_cam_on_image(x[0].cpu().numpy(),cr.cpu().numpy(),use_rgb=True),global_step=i)
         
-    #validation loop
-    val_loss = 0
-    val_acc = 0
-    num_samples = 0
+        
+        #validation loop
+        val_loss = 0
+        val_acc = 0
+        num_samples = 0
     
-    model.eval()
-    with torch.no_grad():
-        for x_val, y_val in val_loader:
-            x_val, y_val = x_val.to(device), y_val.to(device)
-            output = model(x_val)
-            val_loss += loss_attr()(output, y_val).item() * x_val.size(0)
-            _, preds = torch.max(output, 1)
-            val_acc += torch.sum(preds == y_val.data)
-            num_samples += x_val.size(0)
-            logger.info(f'Epoch {i+1} - Batch {j+1} - Val Loss: {val_loss}')
+        model.eval()
+        with torch.no_grad():
+            for x_val, y_val in val_loader:
+                x_val, y_val = x_val.to(device), y_val.to(device)
+                output = model(x_val)
+                val_loss += loss_attr()(output, y_val).item() * x_val.size(0)
+                _, preds = torch.max(output, 1)
+                val_acc += torch.sum(preds == y_val.data)
+                num_samples += x_val.size(0)
+                if logger: 
+                    logger.info(f'Epoch {i+1} - Batch {j+1} - Val Loss: {val_loss}')
             
-        val_loss /= num_samples
-        val_acc = val_acc.double() / num_samples
-        logger.info(f'Epoch {i+1} - Val Loss: {val_loss}', f'Epoch {i+1} - Val Accuracy: {val_acc}')
+            val_loss /= num_samples
+            val_acc = val_acc / num_samples
+            if logger:
+                logger.info(f'Epoch {i+1} - Val Loss: {val_loss}', f'Epoch {i+1} - Val Accuracy: {val_acc}')
     
-    writer.add_scalar('Loss/val', val_loss, global_step=i)
-    writer.add_scalar('Accuracy/val', val_acc, global_step=i)
+        if writer is not None:
+            writer.add_scalar('Loss/val', val_loss, global_step=i)
+            writer.add_scalar('Accuracy/val', val_acc, global_step=i)
     
-    # save best model
-    if val_loss < best_val_loss:
-        best_val_loss = val_loss
-        best_model = model.state_dict()
+        # save best model
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_model = model.state_dict()
 
-        path = os.path.join(data['data']['work_dir'], 'best_model.pth')
-        torch.save(best_model, path)
-        logger.info(f'Epoch {i+1} - Best Model Saved')
+            path = os.path.join(data['data']['work_dir'], 'best_model.pth')
+            torch.save(best_model, path)
+            if logger:
+                logger.info(f'Epoch {i+1} - Best Model Saved')
         
-    model.train()
+        model.train()
         

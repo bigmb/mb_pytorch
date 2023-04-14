@@ -1,6 +1,5 @@
 #dataloader for pytorch1.0
 
-import torchdata
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -246,6 +245,10 @@ class DataLoader(data_fetcher):
                     download_flag = True
                 self.trainset = getattr(torchvision.datasets,data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
                 self.testset = getattr(torchvision.datasets,data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
+                if self.data_dict['data']['thresholding_pd']>0:
+                    subset_indices = range(self.data_dict['data']['thresholding_pd'])
+                    self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)
+                    self.testset = torch.utils.data.Subset(self.testset, subset_indices)
         else:
             self.trainset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=True,logger=self.logger)
             self.testset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=False,logger=self.logger)

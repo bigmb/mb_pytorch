@@ -9,14 +9,14 @@ data:
   thresholding_pd: 0
   
 train_params:
-  batch_size: 4
+  batch_size: 8
   num_workers: 4
   pin_memory: True
   shuffle: True
   seed : 42
 
 test_params:
-  batch_size: 4
+  batch_size: 8
   num_workers: 4
   pin_memory: True
   shuffle: False
@@ -41,7 +41,7 @@ transformation:
     args:
        p: 0.5
   random_rotation:
-    val : True
+    val : False
     args:
       degrees: 90
   random_grayscale:
@@ -76,7 +76,7 @@ model:
   model_pretrained: False  ##if True, then it will use the pretrained model
   model_num_classes: 10 ##number of classes in the dataset
   model_initialization: None 
-  model_epochs: 50
+  model_epochs: 20
 
   model_train_parameters:
     Adam: 

@@ -45,8 +45,24 @@ class ModelLoader(nn.Module):
         Function to get default model resnet, vgg, densenet, googlenet, inception, mobilenet, mnasnet, shufflenet_v2, squeezenet
         """
         model_out = getattr(torchvision.models,self._model_final_name)(pretrained=self._model_pretrained)
-        num_ftrs = model_out.fc.in_features
-        model_out.fc = nn.Linear(num_ftrs, self._model_num_classes)            
+        if hasattr(model_out,'fc'):
+            num_ftrs = model_out.fc.in_features
+            model_out.fc = nn.Linear(num_ftrs, self._model_num_classes)            
+        if hasattr(model_out,'classifier'):
+            for module in list(model_out.modules()):
+                if isinstance(module, nn.Linear):
+                    first_layer = module
+                    num_ftrs = first_layer.in_features
+                    model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
+                    break
+            
+        #     for module in reversed(list(model_out.modules())):
+        #         if isinstance(module, nn.Linear):
+        #             last_layer = module
+        #             num_ftrs = last_layer.in_features
+        #             model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
+        #             break
+        
         return model_out
 
     def model_params(self):

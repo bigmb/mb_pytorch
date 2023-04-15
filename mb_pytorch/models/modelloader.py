@@ -36,15 +36,15 @@ class ModelLoader(nn.Module):
         self._model_pretrained=self._data['model_pretrained']
         self._load_model = self._data['load_model']
         self._model_num_classes = self._data['model_num_classes']
+        if self._model_version==None:
+            self._model_version=''
+        self._model_final_name = self._model_name + self._model_version
 
     def model_type(self):
         """
         Function to get default model resnet, vgg, densenet, googlenet, inception, mobilenet, mnasnet, shufflenet_v2, squeezenet
         """
-        if self._model_version==None:
-            self._model_version=''
-        model_final = self._model_name + self._model_version
-        model_out = getattr(torchvision.models,model_final)(pretrained=self._model_pretrained)
+        model_out = getattr(torchvision.models,self._model_final_name)(pretrained=self._model_pretrained)
         num_ftrs = model_out.fc.in_features
         model_out.fc = nn.Linear(num_ftrs, self._model_num_classes)            
         return model_out
@@ -71,11 +71,13 @@ class ModelLoader(nn.Module):
         if self._use_torchvision_models:
             try:
                 # Try to load the model from the specified path
-                if hasattr(models, self._model_name):
+                if hasattr(models, self._model_final_name):
                     #model_class = getattr(models, self._model_name)
-                    if self._model_name in ['resnet', 'vgg', 'densenet', 'googlenet', 'inception', 'mobilenet', 'mnasnet', 'shufflenet_v2', 'squeezenet']:
+                    #if self._model_name in ['resnet', 'vgg', 'densenet', 'googlenet', 'inception', 'mobilenet', 'mnasnet', 'shufflenet_v2', 'squeezenet']:
                         # These models have pretrained weights available
-                        self.model = self.model_type()  
+                    self.model = self.model_type() 
+                    if logger:
+                        logger.info(f"Model {self._model_name} loaded from torchvision.models.") 
             except FileNotFoundError:
                 raise ValueError(f"Model {self._model_name} not found in torchvision.models.")
 

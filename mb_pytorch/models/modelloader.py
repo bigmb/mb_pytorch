@@ -41,6 +41,8 @@ class ModelLoader(nn.Module):
         """
         Function to get default model resnet, vgg, densenet, googlenet, inception, mobilenet, mnasnet, shufflenet_v2, squeezenet
         """
+        if self._model_version==None:
+            self._model_version=''
         model_final = self._model_name + self._model_version
         model_out = getattr(torchvision.models,model_final)(pretrained=self._model_pretrained)
         num_ftrs = model_out.fc.in_features

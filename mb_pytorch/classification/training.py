@@ -104,7 +104,7 @@ def train_loop( k_data,data_model,model,train_loader,val_loader,loss_attr,optimi
         #validation loop
         val_loss = 0
         val_acc = 0
-        num_samples = 0
+        #num_samples = 0
     
         model.eval()
         with torch.no_grad():
@@ -114,14 +114,16 @@ def train_loop( k_data,data_model,model,train_loader,val_loader,loss_attr,optimi
                 val_loss += loss_attr()(output, y_val).item() * x_val.size(0)
                 _, preds = torch.max(output, 1)
                 val_acc += torch.sum(preds == y_val.data)
-                num_samples += x_val.size(0)
+                #num_samples += x_val.size(0)
                 if logger: 
                     logger.info(f'Epoch {i+1} - Batch {j+1} - Val Loss: {val_loss}')
             
-            val_loss /= num_samples
-            val_acc = val_acc / num_samples
+            avg_val_loss = val_loss / len(val_loader)
+            val_acc = val_acc/len(val_loader)
+            #val_loss /= num_samples
+            #val_acc = val_acc / num_samples
             if logger:
-                logger.info(f'Epoch {i+1} - Val Loss: {val_loss}', f'Epoch {i+1} - Val Accuracy: {val_acc}')
+                logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}', f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')
     
         if writer is not None:
             writer.add_scalar('Loss/val', val_loss, global_step=i)

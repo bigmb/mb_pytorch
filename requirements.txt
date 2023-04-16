@@ -1,0 +1,16 @@
+python>=3.8
+torch
+torchvision
+torchsummary
+numpy
+matplotlib
+mb_pandas
+mb_utils
+onnx
+onnx2pytorch
+seaborn
+tqdm
+pytorch_grad_cam
+datetime
+pillow
+cv2

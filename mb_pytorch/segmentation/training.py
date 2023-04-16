@@ -1,3 +1,5 @@
+#Training loop for segmentaion data
+
 from ..models.modelloader import ModelLoader
 from ..dataloader.loader import DataLoader
 import torch
@@ -11,31 +13,12 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 import numpy as np
 from ..utils.viewer import new_show_cam_on_image
 
-__all__ = ['classification_train_loop']
 
-#yaml_file = '/home/malav/mb_pytorch/scripts/models/loader_y.yaml'
-#data = DataLoader(yaml_file,logger=None)
-#data_model = data.data_dict['model']
-#train_loader, val_loader,_,_ = data.data_load(logger=None)
-#model = ModelLoader(data_model,logger=None)
-
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-#loss_attr,optimizer_attr,optimizer_dict,scheduler_attr,scheduler_dict = train_helper(data_model)
-
-##optimizer_dict['lr'] = scheduler_attr.get_last_lr()[0]
-#optimizer =optimizer_attr(model.parameters(),**optimizer_dict)
-#scheduler = scheduler_attr(optimizer,**scheduler_dict)
-
-#best_val_loss = float('inf')
-
-#path_logs = os.path.join(data['data']['work_dir'], 'logs')
-#writer = SummaryWriter(log_dir=path_logs)
-
-#logger = logger
+__all__ = ['segmentation_train_loop']
 
 
-def classification_train_loop( k_data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
+
+def segmentation_train_loop(k_data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
     """
     Function to train the model
     Args:

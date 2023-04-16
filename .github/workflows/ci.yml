@@ -13,16 +13,17 @@ jobs:
               uses: actions/setup-python@v2
               with:
                 python-version: '3.10' #Choose the appropriate Python version
+            - name: Testing Action
+              run: |
+                  echo "Testing package"
             - name: Install mb_pytorch
               run: |
                   python3 -m pip install mb_pytorch
-            - name: Install dependencies
-              run: |
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt 
-            - name: Testing Action
-              run: |
-                echo "Testing package"
-            - name: Install mb_pytorch
-              run: |
-                python3 -m pip install mb_pytorch
+            # - name: Install dependencies
+            #   run: |
+            #     python -m pip install --upgrade pip
+            #     pip install -r requirements.txt 
+
+            # - name: Install mb_pytorch
+            #   run: |
+            #     python3 -m pip install mb_pytorch

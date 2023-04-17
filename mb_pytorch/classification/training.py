@@ -55,6 +55,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
         None
     """
 
+    model.to(device)
     for i in tqdm.tqdm(range(data_model['model_epochs'])):
         ##train loop
         model.train()
@@ -67,6 +68,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             y_pred = model(x)
             current_loss = loss_attr()(y_pred,y)
             current_loss.backward()    
+            optimizer.to(device)
             optimizer.step()
             train_loss += current_loss.item()
             if logger:
@@ -113,7 +115,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
                 old_val_loss = new_val_loss
-                val_loss += loss_attr()(output, y_val).item() #* x_val.size(0)
+                val_loss += loss_attr()(output, y_val).item() * x_val.size(0)
                 _, preds = torch.max(output, 1)
                 val_acc += torch.sum(preds == y_val.data)
                 new_val_loss = val_loss-old_val_loss

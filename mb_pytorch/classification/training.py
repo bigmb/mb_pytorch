@@ -56,10 +56,14 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
     """
 
     model.to(device)
+
     for i in tqdm.tqdm(range(data_model['model_epochs'])):
+        
         ##train loop
+        
         model.train()
         train_loss = 0
+        
         if logger:
             logger.info('Training Started')
         for j,(x,y) in enumerate(train_loader):
@@ -67,14 +71,17 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             optimizer.zero_grad()
             y_pred = model(x)
             current_loss = loss_attr()(y_pred,y)
-            current_loss.backward()    
-            optimizer.to(device)
+            current_loss.backward()            
             optimizer.step()
+            if scheduler is not None:
+                scheduler.step()    
             train_loss += current_loss.item()
             if logger:
                 logger.info(f'Epoch {i+1} - Batch {j+1} - Train Loss: {current_loss.item()}')
-                    #get grad cam images
-        
+            
+            
+            #get grad cam images
+            
             if gradcam and writer is not None:
                 x_grad = x.to('cpu')
                 for cam_layers in gradcam:
@@ -82,10 +89,6 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                         logger.info(f'Gradcam for layer {cam_layers} started')
                     with GradCAM(model=model,target_layers=[cam_layers],use_cuda=False) as cm: 
                         cr = cm(input_tensor=x_grad)[0,:]        
-                        #cr2 = np.reshape(cr,[1,cr.shape[0],cr.shape[1]])
-                        #if cr2.max() == 0 and cr2.min() == 0:
-                        #    cr2 = cr2 + 1
-                        #print(cr.shape)
                     cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)
                     writer.add_image(f'Gradcam/{cam_layers}',cam_img,global_step=i)
         
@@ -95,15 +98,12 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
     
         if writer is not None:
             writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
-    
-        if scheduler is not None:
-            scheduler.step()
-    
-        if writer is not None:
             for name, param in model.named_parameters():
                 writer.add_histogram(name, param, global_step=i)
+
         
         #validation loop
+
         val_loss = 0
         val_acc = 0
         new_val_loss = 0
@@ -147,5 +147,4 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if logger:
                 logger.info(f'Epoch {i+1} - Best Model Saved')
         
-        model.train()
         

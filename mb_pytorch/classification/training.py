@@ -104,6 +104,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
         #validation loop
         val_loss = 0
         val_acc = 0
+        new_val_loss = 0
         #num_samples = 0
     
         model.eval()
@@ -111,19 +112,22 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             for x_val, y_val in val_loader:
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
-                val_loss += loss_attr()(output, y_val).item() * x_val.size(0)
+                old_val_loss = new_val_loss
+                val_loss += loss_attr()(output, y_val).item() #* x_val.size(0)
                 _, preds = torch.max(output, 1)
                 val_acc += torch.sum(preds == y_val.data)
+                new_val_loss = val_loss-old_val_loss
                 #num_samples += x_val.size(0)
                 if logger: 
-                    logger.info(f'Epoch {i+1} - Batch {j+1} - Val Loss: {val_loss}')
+                    logger.info(f'Epoch {i+1} - Batch {j+1} - Val Loss: {new_val_loss:.3f}')
             
             avg_val_loss = val_loss / len(val_loader)
             val_acc = val_acc/len(val_loader)
             #val_loss /= num_samples
             #val_acc = val_acc / num_samples
             if logger:
-                logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}', f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')
+                logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}')
+                logger.info(f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')
     
         if writer is not None:
             writer.add_scalar('Loss/val', val_loss, global_step=i)

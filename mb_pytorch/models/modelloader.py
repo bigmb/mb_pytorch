@@ -36,6 +36,7 @@ class ModelLoader(nn.Module):
         self._model_pretrained=self._data['model_pretrained']
         self._load_model = self._data['load_model']
         self._model_num_classes = self._data['model_num_classes']
+        self._model_type=self._data['model_type']
         if self._model_version==None:
             self._model_version=''
         self._model_final_name = self._model_name + self._model_version
@@ -45,16 +46,19 @@ class ModelLoader(nn.Module):
         Function to get default model resnet, vgg, densenet, googlenet, inception, mobilenet, mnasnet, shufflenet_v2, squeezenet
         """
         model_out = getattr(torchvision.models,self._model_final_name)(pretrained=self._model_pretrained)
-        if hasattr(model_out,'fc'):
-            num_ftrs = model_out.fc.in_features
-            model_out.fc = nn.Linear(num_ftrs, self._model_num_classes)            
-        if hasattr(model_out,'classifier'):
-            for module in list(model_out.modules()):
-                if isinstance(module, nn.Linear):
-                    first_layer = module
-                    num_ftrs = first_layer.in_features
-                    model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
-                    break
+        if self._model_type=='classification':
+            if hasattr(model_out,'fc'):
+                num_ftrs = model_out.fc.in_features
+                model_out.fc = nn.Linear(num_ftrs, self._model_num_classes)            
+            if hasattr(model_out,'classifier'):
+                for module in list(model_out.modules()):
+                    if isinstance(module, nn.Linear):
+                        first_layer = module
+                        num_ftrs = first_layer.in_features
+                        model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
+                        break
+            model_out.softmax = nn.Softmax(dim=1)
+        
             
         #     for module in reversed(list(model_out.modules())):
         #         if isinstance(module, nn.Linear):
@@ -62,7 +66,6 @@ class ModelLoader(nn.Module):
         #             num_ftrs = last_layer.in_features
         #             model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
         #             break
-        
         return model_out
 
     def model_params(self):

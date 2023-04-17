@@ -6,34 +6,10 @@ import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import os
 from mb_utils.src.logging import logger
-from pytorch_grad_cam import GradCAM
-from pytorch_grad_cam.utils.image import show_cam_on_image
 import numpy as np
-from ..utils.viewer import new_show_cam_on_image
+from ..utils.viewer import gradcam_viewer
 
 __all__ = ['classification_train_loop']
-
-#yaml_file = '/home/malav/mb_pytorch/scripts/models/loader_y.yaml'
-#data = DataLoader(yaml_file,logger=None)
-#data_model = data.data_dict['model']
-#train_loader, val_loader,_,_ = data.data_load(logger=None)
-#model = ModelLoader(data_model,logger=None)
-
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-#loss_attr,optimizer_attr,optimizer_dict,scheduler_attr,scheduler_dict = train_helper(data_model)
-
-##optimizer_dict['lr'] = scheduler_attr.get_last_lr()[0]
-#optimizer =optimizer_attr(model.parameters(),**optimizer_dict)
-#scheduler = scheduler_attr(optimizer,**scheduler_dict)
-
-#best_val_loss = float('inf')
-
-#path_logs = os.path.join(data['data']['work_dir'], 'logs')
-#writer = SummaryWriter(log_dir=path_logs)
-
-#logger = logger
-
 
 def classification_train_loop( k_data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
     """
@@ -83,15 +59,14 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             #get grad cam images
             
             if gradcam and writer is not None:
-                x_grad = x.to('cpu')
+                x_grad = x[0,:].to('cpu')
+                x_grad = x_grad.unsqueeze(0)
+                y_grad = y[0,:].to('cpu')
                 for cam_layers in gradcam:
-                    if logger:
-                        logger.info(f'Gradcam for layer {cam_layers} started')
-                    with GradCAM(model=model,target_layers=[cam_layers],use_cuda=False) as cm: 
-                        cr = cm(input_tensor=x_grad)[0,:]        
-                    cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)
-                    writer.add_image(f'Gradcam/{cam_layers}',cam_img,global_step=i)
-        
+                    grad_img = gradcam_viewer(cam_layers,model,x_grad,y_grad,logger,gradcam_rgb)
+                    if grad_img is not None:
+                        writer.add_image(f'Gradcam/{cam_layers}',grad_img,global_step=i)
+
         avg_train_loss = train_loss / len(train_loader)
         if logger:
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')

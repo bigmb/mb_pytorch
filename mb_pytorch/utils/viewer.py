@@ -5,8 +5,10 @@ import torch
 import torchvision
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 import torchvision.transforms.functional as TF
+from pytorch_grad_cam import GradCAM
 
-__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer','new_show_cam_on_image']
+
+__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer','new_show_cam_on_image','gradcam_viewer']
 
 def show_images(imgs, figsize=(12.0, 12.0)):
     """Displays a single image or list of images. 
@@ -167,3 +169,21 @@ def new_show_cam_on_image(img, mask, use_rgb=True):
     
     cam = cam / np.max(cam)
     return np.uint8(255 * cam)
+
+def gradcam_viewer(gradcam_layer, model, x_grad, y=None, logger=None, gradcam_rgb=False):
+    with GradCAM(model=model,target_layers=[gradcam_layer],use_cuda=False) as cm: 
+        split_layer = gradcam_layer.split('.')
+        try:
+            if split_layer[1] == 'classifier' or 'fc':
+                cr = cm(input_tensor=x_grad, target_category=y)[0,:]
+            else:
+                cr = cm(input_tensor=x_grad)[0,:]
+        except:
+            cr = None
+            if logger:
+                logger.info(f'Gradcam not supported for {gradcam_layer}')
+            return cr
+        if cr is not None:        
+            cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)
+    return cam_img
+    

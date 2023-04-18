@@ -74,17 +74,19 @@ def create_img_grid(data,labels, t_writer, n_images=9, g_i=3, g_j=3,global_step=
         for i, ax in enumerate(axes.flat):
             img_cur = np.array(data_read[i,0,:,:])
             ax.title.set_text(int(labels_read[i]))
-            #ax.imshow(img_cur, cmap='gray')
+            ax.imshow(img_cur, cmap='gray')
     else:
         for i, ax in enumerate(axes.flat):
             img_cur = np.array(data_read[i])
             img_cur = np.transpose(img_cur, (1, 2, 0))
             ax.title.set_text(int(labels_read[i]))
-            #ax.imshow(img_cur)
+            ax.imshow(img_cur)
     
     ### Send the figure over to TensorBoard
     t_writer.add_image('grid', plot_to_image(fig), global_step=global_step)
+    plt.close(fig)
 
+    
 
 def show_segmentation_masks(imgs, masks, figsize=(12.0, 12.0)):
     """Displays a single image or list of images with segmentation masks.

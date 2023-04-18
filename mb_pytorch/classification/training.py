@@ -61,7 +61,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if gradcam and writer is not None:
                 x_grad = x[0,:].to('cpu')
                 x_grad = x_grad.unsqueeze(0)
-                y_grad = y[0,:].to('cpu')
+                y_grad = y[0].to('cpu')
                 for cam_layers in gradcam:
                     grad_img = gradcam_viewer(cam_layers,model,x_grad,y_grad,logger,gradcam_rgb)
                     if grad_img is not None:

@@ -172,7 +172,8 @@ def new_show_cam_on_image(img, mask, use_rgb=True):
 
 def gradcam_viewer(gradcam_layer, model, x_grad, y=None, logger=None, gradcam_rgb=False):
     split_val = gradcam_layer.split('.')[1]
-    gradcam_eval = eval(gradcam_layer)
+    new_layer_name = 'model'+ split_val
+    gradcam_eval = eval(new_layer_name)
     with GradCAM(model=model,target_layers=[gradcam_eval],use_cuda=False) as cm: 
         try:
             if split_val == 'classifier' or 'fc':

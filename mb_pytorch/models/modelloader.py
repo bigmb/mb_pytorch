@@ -57,7 +57,7 @@ class ModelLoader(nn.Module):
                         num_ftrs = first_layer.in_features
                         model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
                         break
-            model_out.softmax = nn.Softmax(dim=1)
+            #model_out.softmax = nn.Softmax(dim=1)
         
             
         #     for module in reversed(list(model_out.modules())):

@@ -44,12 +44,13 @@ def plot_to_image(figure):
     buf = io.BytesIO()
     figure.savefig(buf, format='png')
     buf.seek(0)
-    image = PIL.Image.open(buf)
-    img_ar = np.array(image)
-    image = torch.Tensor(img_ar)
-    return image
+    image = PIL.Image.open(buf)  
+    img_tensor = torch.tensor(np.array(image)).permute(2, 0, 1).float() / 255.0      
+    #img_ar = np.array(image)
+    #image = torch.Tensor(img_ar)
+    return img_tensor
 
-def create_img_grid(data,labels, t_writer, n_images=9, g_i=3, g_j=3,global_step=0):
+def create_img_grid(data,labels, t_writer, n_images=9, g_i=3, g_j=3,global_step=0,gray_image=False):
     """
     Creates a grid of images and sends it to TensorBoard.
     Input:
@@ -69,14 +70,20 @@ def create_img_grid(data,labels, t_writer, n_images=9, g_i=3, g_j=3,global_step=
             subplot_kw = {'xticks':[], 'yticks':[]},
             gridspec_kw = dict(hspace=0.3, wspace=0.01))
     
-    for i, ax in enumerate(axes.flat):
-        img_cur = np.array(data_read[i])
-        ax.title.set_text(labels_read[i])
-        ax.imshow(img_cur, cmap='gray')
-        
+    if gray_image:
+        for i, ax in enumerate(axes.flat):
+            img_cur = np.array(data_read[i,0,:,:])
+            ax.title.set_text(int(labels_read[i]))
+            #ax.imshow(img_cur, cmap='gray')
+    else:
+        for i, ax in enumerate(axes.flat):
+            img_cur = np.array(data_read[i])
+            img_cur = np.transpose(img_cur, (1, 2, 0))
+            ax.title.set_text(int(labels_read[i]))
+            #ax.imshow(img_cur)
+    
     ### Send the figure over to TensorBoard
     t_writer.add_image('grid', plot_to_image(fig), global_step=global_step)
-    print('Written image grid to TensorBoard.')
 
 
 def show_segmentation_masks(imgs, masks, figsize=(12.0, 12.0)):
@@ -214,15 +221,13 @@ def new_show_cam_on_image(img, mask, use_rgb=True):
     cam = cam / np.max(cam)
     return np.uint8(255 * cam)
 
-def gradcam_viewer(gradcam_layer, model, x_grad, y=None,gradcam_rgb=False,use_cuda=False):
+def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False):
     split_val = gradcam_layer.split('.')[1]
     new_layer_name = 'model.' + split_val
     gradcam_eval = eval(new_layer_name)
     with GradCAM(model=model,target_layers=[gradcam_eval],use_cuda=use_cuda) as cm: 
         try:
             if split_val == 'classifier' or 'fc':
-                cr = cm(input_tensor=x_grad, target_category=y)[0,:]
-            else:
                 cr = cm(input_tensor=x_grad)[0,:]
         except:
             cr = None

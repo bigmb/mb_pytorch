@@ -1,22 +1,22 @@
 ##general loader yaml file to get the loader and the data.
 data:
-  from_datasets: 'CIFAR10' ##if from_file = True, then this model from torchvision will be used
+  from_datasets: 'Flowers102' ##if from_file = True, then this model from torchvision will be used
   from_file: False  ##if False, then from_datasets is used
   work_dir: /home/malav/mb_pytorch/data/
   file: /home/malav/mb_pytorch/data/csv/file_data.csv
   use_img_dir: True
   img_dir: /home/malav/mb_pytorch/data/images1/
-  thresholding_pd: 0
+  thresholding_pd: 100
   
 train_params:
-  batch_size: 8
+  batch_size: 16
   num_workers: 4
   pin_memory: True
   shuffle: True
   seed : 42
 
 test_params:
-  batch_size: 8
+  batch_size: 16
   num_workers: 4
   pin_memory: True
   shuffle: False
@@ -27,11 +27,11 @@ transformation:
   resize:
     val : True
     args:
-      size: [256, 256]
+      size: [64, 64]
   random_crop:
     val : False
     args:
-      size: [224, 224]
+      size: [62, 62]
   random_horizontal_flip:
     val : True
     args:
@@ -75,9 +75,9 @@ model:
   model_loss: cross_entropy #mse, cross_entropy, any other available in torch.nn.functional
   model_scheduler: StepLR #none, StepLR, ExponentialLR ,any other available in torch.optim.lr_scheduler
   model_pretrained: False  ##if True, then it will use the pretrained model
-  model_num_classes: 10 ##number of classes in the dataset
+  model_num_classes: 102 ##number of classes in the dataset
   model_initialization: None 
-  model_epochs: 20
+  model_epochs: 10
 
   model_train_parameters:
     Adam: 

@@ -57,31 +57,29 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             
             
             #get grad cam images
-            
             if gradcam and writer is not None:
                 x_grad = x[0,:].to('cpu')
                 x_grad = x_grad.unsqueeze(0)
                 y_grad = y[0].to('cpu')
                 use_cuda=False
-                if device != 'cpu':
+                if device.type != 'cpu':
                     use_cuda = True
                 for cam_layers in gradcam:
-                    grad_img = gradcam_viewer(cam_layers,model,x_grad,y_grad,gradcam_rgb=gradcam_rgb,use_cuda=use_cuda)
+                    grad_img = gradcam_viewer(cam_layers,model,x_grad,gradcam_rgb=gradcam_rgb,use_cuda=use_cuda)
                     if grad_img is not None:
                         writer.add_image(f'Gradcam/{cam_layers}',grad_img,global_step=i)
                     if j == 0:
                         if grad_img is None:
                             if logger:
                                 logger.info(f'Gradcam not supported for {cam_layers}')
-                            
-                        
+            if writer is not None and j==1:
+                create_img_grid(x,y,writer,global_step=i)
 
         avg_train_loss = train_loss / len(train_loader)
         if logger:
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
     
         if writer is not None:
-            create_img_grid(x,y,writer,global_step=i)
             writer.add_graph(model, x)
             writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
             for name, param in model.named_parameters():
@@ -101,7 +99,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
                 val_loss += loss_attr(output, y_val).item() * x_val.size(0)
-                _, preds = torch.max(output, 1)
+                _, preds = torch.max(output, 1) #no need of softmax. max returns the index of the max value
                 val_acc += torch.sum(preds == y_val.data)
                 new_val_loss = val_loss/len(val_loader.dataset)
                 num_samples += x_val.size(0)

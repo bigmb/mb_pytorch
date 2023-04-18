@@ -6,7 +6,8 @@ import torchvision
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 import torchvision.transforms.functional as TF
 from pytorch_grad_cam import GradCAM
-
+import io
+import PIL
 
 __all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer','new_show_cam_on_image','gradcam_viewer']
 
@@ -34,6 +35,49 @@ def show_images(imgs, figsize=(12.0, 12.0)):
     plt.show()
 
     return None
+    
+def plot_to_image(figure):
+    """Converts the matplotlib plot specified by 'figure' to a PNG image and
+    returns it. The supplied figure is closed and inaccessible after this call.
+    Source: (https://www.tensorflow.org/tensorboard/image_summaries)."""
+    # Save the plot to a PNG in memory.
+    buf = io.BytesIO()
+    figure.savefig(buf, format='png')
+    buf.seek(0)
+    image = PIL.Image.open(buf)
+    img_ar = np.array(image)
+    image = torch.Tensor(img_ar)
+    return image
+
+def create_img_grid(data,labels, t_writer, n_images=9, g_i=3, g_j=3,global_step=0):
+    """
+    Creates a grid of images and sends it to TensorBoard.
+    Input:
+        data: A list of images
+        labels: A list of labels
+        t_writer: TensorBoard writer
+        n_images: Number of images to display
+        g_i: Number of rows in the grid
+        g_j: Number of columns in the grid
+    """
+    
+    data_read = data[:n_images]
+    labels_read = labels[:n_images]
+    
+    ### Visualize a 3x3 grid
+    fig, axes = plt.subplots(g_i, g_j, figsize=(15,15),
+            subplot_kw = {'xticks':[], 'yticks':[]},
+            gridspec_kw = dict(hspace=0.3, wspace=0.01))
+    
+    for i, ax in enumerate(axes.flat):
+        img_cur = np.array(data_read[i])
+        ax.title.set_text(labels_read[i])
+        ax.imshow(img_cur, cmap='gray')
+        
+    ### Send the figure over to TensorBoard
+    t_writer.add_image('grid', plot_to_image(fig), global_step=global_step)
+    print('Written image grid to TensorBoard.')
+
 
 def show_segmentation_masks(imgs, masks, figsize=(12.0, 12.0)):
     """Displays a single image or list of images with segmentation masks.

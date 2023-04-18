@@ -7,7 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 from mb_utils.src.logging import logger
 import numpy as np
-from ..utils.viewer import gradcam_viewer
+from ..utils.viewer import gradcam_viewer,create_img_grid
 
 __all__ = ['classification_train_loop']
 
@@ -46,7 +46,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             x,y = x.to(device),y.to(device)
             optimizer.zero_grad()
             y_pred = model(x)
-            current_loss = loss_attr()(y_pred,y)
+            current_loss = loss_attr(y_pred,y)
             current_loss.backward()            
             optimizer.step()
             if scheduler is not None:
@@ -81,6 +81,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
     
         if writer is not None:
+            create_img_grid(x,y,writer,global_step=i)
             writer.add_graph(model, x)
             writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
             for name, param in model.named_parameters():

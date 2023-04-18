@@ -17,7 +17,7 @@ import cv2
 
 today = datetime.now()
 
-__all__ = ['data_fetcher','DataLoader']
+__all__ = ['data_fetcher','DataLoader_YAML']
 
 class data_fetcher:
     """
@@ -207,7 +207,7 @@ class customdl(torch.utils.data.Dataset):
             out_dict['label'] = label                                                
         return out_dict
 
-class DataLoader(data_fetcher):
+class DataLoader_YAML(data_fetcher):
     """
     Basic dataloader for pytorch1.0
     """
@@ -221,7 +221,7 @@ class DataLoader(data_fetcher):
         self.trainloader = None
         self.testloader = None
         self.folder_name = self.data_dict['data']['work_dir']
-        self.data_file= self.data_dict['data']['data_file']
+        self.data_file= self.data_dict['data']['from_datasets']
 
         if os.path.exists(self.folder_name):
             if self.logger:
@@ -231,7 +231,7 @@ class DataLoader(data_fetcher):
             if self.logger:
                 self.logger.info("Data folder created : {}".format(self.folder_name))
     
-    def data_load(self, data_file = 'CIFAR10',embeddings=False,logger=None):
+    def data_load(self, data_file = 'CIFAR10',embeddings=False):
         """
         return all data loaders
         """

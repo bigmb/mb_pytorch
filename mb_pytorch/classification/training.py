@@ -62,10 +62,19 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                 x_grad = x[0,:].to('cpu')
                 x_grad = x_grad.unsqueeze(0)
                 y_grad = y[0].to('cpu')
+                use_cuda=False
+                if device != 'cpu':
+                    use_cuda = True
                 for cam_layers in gradcam:
-                    grad_img = gradcam_viewer(cam_layers,model,x_grad,y_grad,logger,gradcam_rgb)
+                    grad_img = gradcam_viewer(cam_layers,model,x_grad,y_grad,gradcam_rgb=gradcam_rgb,use_cuda=use_cuda)
                     if grad_img is not None:
                         writer.add_image(f'Gradcam/{cam_layers}',grad_img,global_step=i)
+                    if j == 0:
+                        if grad_img is None:
+                            if logger:
+                                logger.info(f'Gradcam not supported for {cam_layers}')
+                            
+                        
 
         avg_train_loss = train_loss / len(train_loader)
         if logger:

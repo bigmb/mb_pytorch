@@ -170,11 +170,11 @@ def new_show_cam_on_image(img, mask, use_rgb=True):
     cam = cam / np.max(cam)
     return np.uint8(255 * cam)
 
-def gradcam_viewer(gradcam_layer, model, x_grad, y=None, logger=None, gradcam_rgb=False):
+def gradcam_viewer(gradcam_layer, model, x_grad, y=None,gradcam_rgb=False,use_cuda=False):
     split_val = gradcam_layer.split('.')[1]
     new_layer_name = 'model.' + split_val
     gradcam_eval = eval(new_layer_name)
-    with GradCAM(model=model,target_layers=[gradcam_eval],use_cuda=False) as cm: 
+    with GradCAM(model=model,target_layers=[gradcam_eval],use_cuda=use_cuda) as cm: 
         try:
             if split_val == 'classifier' or 'fc':
                 cr = cm(input_tensor=x_grad, target_category=y)[0,:]
@@ -182,8 +182,6 @@ def gradcam_viewer(gradcam_layer, model, x_grad, y=None, logger=None, gradcam_rg
                 cr = cm(input_tensor=x_grad)[0,:]
         except:
             cr = None
-            if logger:
-                logger.info(f'Gradcam not supported for {gradcam_layer}')
             return cr
         if cr is not None:        
             cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)

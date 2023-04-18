@@ -99,7 +99,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             for x_val, y_val in val_loader:
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
-                val_loss += loss_attr()(output, y_val).item() * x_val.size(0)
+                val_loss += loss_attr(output, y_val).item() * x_val.size(0)
                 _, preds = torch.max(output, 1)
                 val_acc += torch.sum(preds == y_val.data)
                 new_val_loss = val_loss/len(val_loader.dataset)

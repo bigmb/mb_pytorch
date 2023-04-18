@@ -35,7 +35,7 @@ def train_helper(data):
         if data['model_loss']==k:
             loss_attr = getattr(loss_fn,data['model_loss'])
     if loss==None:
-        loss_attr = getattr(torch.nn,data['model_loss']) ## if loss is not in loss_fn, it is in torch.nn
+        loss_attr = getattr(torch.nn.functional,data['model_loss']) ## if loss is not in loss_fn, it is in torch.nn
 
     return loss_attr, optimizer, optimizer_dict, scheduler, scheduler_dict
         

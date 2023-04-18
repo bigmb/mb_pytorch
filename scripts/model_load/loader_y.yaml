@@ -72,7 +72,7 @@ model:
   model_custom: mb_pytorch.models.unet_models   ##python file where the model is defined
   model_path: /home/malav/mb_pytorch/models/ #path to save the model if model_name is not in models otherise it will use the saved one
   model_optimizer: 'Adam' #Adam, SGD, RMSprop ,any other available in torch.optim
-  model_loss: CrossEntropyLoss #CrossEntropyLoss, MSELoss,NLLLoss,none
+  model_loss: cross_entropy #mse, cross_entropy, any other available in torch.nn.functional
   model_scheduler: StepLR #none, StepLR, ExponentialLR ,any other available in torch.optim.lr_scheduler
   model_pretrained: False  ##if True, then it will use the pretrained model
   model_num_classes: 10 ##number of classes in the dataset

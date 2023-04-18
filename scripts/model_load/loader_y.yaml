@@ -1,6 +1,6 @@
 ##general loader yaml file to get the loader and the data.
 data:
-  from_datasets: 'Flowers102' ##if from_file = True, then this model from torchvision will be used
+  from_datasets: 'flowers120.Flowers102' ##if from_file = True, then this model from torchvision will be used
   from_file: False  ##if False, then from_datasets is used
   work_dir: /home/malav/mb_pytorch/data/
   file: /home/malav/mb_pytorch/data/csv/file_data.csv

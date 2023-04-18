@@ -221,6 +221,7 @@ class DataLoader(data_fetcher):
         self.trainloader = None
         self.testloader = None
         self.folder_name = self.data_dict['data']['work_dir']
+        self.data_file= self.data_dict['data']['data_file']
 
         if os.path.exists(self.folder_name):
             if self.logger:
@@ -236,15 +237,15 @@ class DataLoader(data_fetcher):
         """
 
         if self.data_dict['data']['from_file']==False:
-            if data_file in dir(torchvision.datasets):
+            if self.data_file in dir(torchvision.datasets):
                 if self.logger:
                     self.logger.info("Data file: {} loading from torchvision.datasets.".format(data_file))
-                if data_file in os.listdir(self.folder_name):
+                if self.data_file in os.listdir(self.folder_name):
                     download_flag = False
                 else:
                     download_flag = True
-                self.trainset = getattr(torchvision.datasets,data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
-                self.testset = getattr(torchvision.datasets,data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
+                self.trainset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
+                self.testset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
                 if self.data_dict['data']['thresholding_pd']>0:
                     subset_indices = range(self.data_dict['data']['thresholding_pd'])
                     self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)

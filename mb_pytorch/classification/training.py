@@ -81,6 +81,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
     
         if writer is not None:
+            writer.add_graph(model, x)
             writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
             for name, param in model.named_parameters():
                 writer.add_histogram(name, param, global_step=i)
@@ -91,24 +92,23 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
         val_loss = 0
         val_acc = 0
         new_val_loss = 0
-        #num_samples = 0
+        num_samples = 0
     
         model.eval()
         with torch.no_grad():
             for x_val, y_val in val_loader:
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
-                old_val_loss = new_val_loss
                 val_loss += loss_attr()(output, y_val).item() * x_val.size(0)
                 _, preds = torch.max(output, 1)
                 val_acc += torch.sum(preds == y_val.data)
-                new_val_loss = val_loss-old_val_loss
-                #num_samples += x_val.size(0)
+                new_val_loss = val_loss/len(val_loader.dataset)
+                num_samples += x_val.size(0)
                 if logger: 
                     logger.info(f'Epoch {i+1} - Batch {j+1} - Val Loss: {new_val_loss:.3f}')
             
-            avg_val_loss = val_loss / len(val_loader)
-            val_acc = val_acc/len(val_loader)
+            avg_val_loss = val_loss / len(val_loader.dataset)
+            val_acc = val_acc/len(val_loader.dataset)
             #val_loss /= num_samples
             #val_acc = val_acc / num_samples
             if logger:

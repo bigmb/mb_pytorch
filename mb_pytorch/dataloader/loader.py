@@ -17,7 +17,7 @@ import cv2
 
 today = datetime.now()
 
-__all__ = ['data_fetcher','DataLoader_YAML']
+__all__ = ['data_fetcher','DataLoader']
 
 class data_fetcher:
     """
@@ -207,7 +207,7 @@ class customdl(torch.utils.data.Dataset):
             out_dict['label'] = label                                                
         return out_dict
 
-class DataLoader_YAML(data_fetcher):
+class DataLoader(data_fetcher):
     """
     Basic dataloader for pytorch1.0
     """
@@ -231,7 +231,7 @@ class DataLoader_YAML(data_fetcher):
             if self.logger:
                 self.logger.info("Data folder created : {}".format(self.folder_name))
     
-    def data_load(self, data_file = 'CIFAR10',embeddings=False):
+    def data_load(self,embeddings=False):
         """
         return all data loaders
         """
@@ -239,7 +239,7 @@ class DataLoader_YAML(data_fetcher):
         if self.data_dict['data']['from_file']==False:
             if self.data_file in dir(torchvision.datasets):
                 if self.logger:
-                    self.logger.info("Data file: {} loading from torchvision.datasets.".format(data_file))
+                    self.logger.info("Data file: {} loading from torchvision.datasets.".format(self.data_file))
                 if self.data_file in os.listdir(self.folder_name):
                     download_flag = False
                 else:
@@ -250,6 +250,11 @@ class DataLoader_YAML(data_fetcher):
                     subset_indices = range(self.data_dict['data']['thresholding_pd'])
                     self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)
                     self.testset = torch.utils.data.Subset(self.testset, subset_indices)
+            else:
+                if self.logger:
+                    self.logger.info("Data file: {} could not be loaded from torchvision.datasets.".format(self.data_file))
+                    self.logger.info("Exiting")
+                sys.exit("Data file: {} could not be loaded from torchvision.datasets.".format(self.data_file))
         else:
             self.trainset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=True,logger=self.logger)
             self.testset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=False,logger=self.logger)

@@ -5,7 +5,7 @@ import torch
 import torchvision
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 import torchvision.transforms.functional as TF
-from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam import GradCAM,show_cam_on_image
 import io
 import PIL
 
@@ -235,6 +235,7 @@ def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False
             cr = None
             return cr
         if cr is not None:        
-            cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)
+            #cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)
+            cam_img = show_cam_on_image(x_grad[0].numpy(), cr,use_rgb=gradcam_rgb)
     return cam_img
     

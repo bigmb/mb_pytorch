@@ -2,6 +2,9 @@
 malav pytorch files 
 
 
+
+[![Close inactive issues](https://github.com/bigmb/mb_pytorch/actions/workflows/stale.yml/badge.svg)](https://github.com/bigmb/mb_pytorch/actions/workflows/stale.yml)
+
 ## Applications
 Segmentation
 Classification 

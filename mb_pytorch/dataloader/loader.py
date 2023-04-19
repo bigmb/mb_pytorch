@@ -231,7 +231,7 @@ class DataLoader(data_fetcher):
             if self.logger:
                 self.logger.info("Data folder created : {}".format(self.folder_name))
     
-    def data_load(self,embeddings=False):
+    def data_load(self):
         """
         return all data loaders
         """
@@ -244,7 +244,7 @@ class DataLoader(data_fetcher):
                     download_flag = False
                 else:
                     download_flag = True
-                if self.data_dict['data']['from_datasets'] == 'CIFAR10' or 'CIFAR100':
+                if self.data_file == 'CIFAR10' or self.data_file == 'CIFAR100':
                     self.trainset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
                     self.testset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
                 else:

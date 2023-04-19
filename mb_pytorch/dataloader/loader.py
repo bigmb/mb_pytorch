@@ -244,8 +244,12 @@ class DataLoader(data_fetcher):
                     download_flag = False
                 else:
                     download_flag = True
-                self.trainset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
-                self.testset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
+                if self.data_dict['data']['from_datasets'] == 'CIFAR10' or 'CIFAR100':
+                    self.trainset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
+                    self.testset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
+                else:
+                    self.trainset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, split='train', download=download_flag,transform=self.get_transforms)
+                    self.testset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, split='val', download=download_flag,transform=self.get_transforms)
                 if self.data_dict['data']['thresholding_pd']>0:
                     subset_indices = range(self.data_dict['data']['thresholding_pd'])
                     self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)

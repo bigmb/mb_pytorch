@@ -10,7 +10,7 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 import io
 import PIL
 
-__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer','new_show_cam_on_image','gradcam_viewer']
+__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer','new_show_cam_on_image','gradcam_viewer','plot_classes_pred']
 
 def show_images(imgs, figsize=(12.0, 12.0)):
     """Displays a single image or list of images. 
@@ -241,3 +241,15 @@ def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False
             cam_img = show_cam_on_image(x_grad_new, cr,use_rgb=gradcam_rgb)
     return cam_img
     
+def plot_classes_pred(images,labels,predictions_prob,preds):
+    fig = plt.figure(figsize=(12, 48))
+    predictions_prob_val = predictions_prob
+    for idx in np.arange(4):
+        ax = fig.add_subplot(1, 4, idx+1, xticks=[], yticks=[])
+        plt.imshow(images[idx], one_channel=True)
+        ax.set_title("{0}, {1:.1f}%\n(label: {2})".format(
+                    classes[preds[idx]],
+                    preds[idx] * 100.0,
+                    classes[labels[idx]]),
+        color=("green" if preds[idx]==labels[idx].item() else "red"))
+    return fig

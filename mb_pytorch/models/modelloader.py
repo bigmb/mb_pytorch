@@ -7,7 +7,7 @@ import torchvision.models as models
 import os
 import importlib
 
-__all__ = ['ModelLoader']
+__all__ = ['ModelLoader','ModelExtractor']
 
 
 def get_custome_model(data):
@@ -106,3 +106,13 @@ class ModelLoader(nn.Module):
     
     def forward(self,x):
         return self.model(x)
+    
+
+class ModelExtractor(nn.Module):
+    def __init__(self, model):
+        super(ModelExtractor, self).__init__()
+        self.model = model
+        self.feature_extractor = torch.nn.Sequential(*list(self.model.children())[:-1])
+                
+    def __call__(self, x):
+        return self.feature_extractor(x)[:, :, 0, 0]

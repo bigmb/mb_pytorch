@@ -37,7 +37,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
         
         ##train loop
         
-        model.train()
+        model.train(True)
         train_loss = 0
         
         if logger:
@@ -93,13 +93,14 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
         new_val_loss = 0
         #num_samples = 0
     
-        model.eval()
+        print('lr = ',optimizer.param_groups[0]['lr'])
+        model.train(False)
         with torch.no_grad():
             for x_val, y_val in val_loader:
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
                 val_loss += loss_attr(output, y_val).item() * x_val.size(0)
-                pred_val, preds = torch.max(output, 1) #no need of softmax. max returns the index of the max value
+                _, preds = torch.max(output, 1) #no need of softmax. max returns the index of the max value
                 val_acc += torch.sum(preds == y_val.data)
                 new_val_loss = val_loss/x_val.size(0)
                 #num_samples += x_val.size(0)
@@ -113,15 +114,22 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if logger:
                 logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}')
                 logger.info(f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')
+
+        print(preds)
+        print(y_val.data)
+
     
         if writer is not None:
             writer.add_scalar('Loss/val', val_loss, global_step=i)
-            writer.add_scalar('Accuracy/val', val_acc, global_step=i)
-            writer.add_figure('predictions vs. actuals', fig1, global_step=i)
-    
-        if i==0:
-            print(preds)
-            print(y_val.data)
+            writer.add_scalar('Accuracy/val', val_acc, global_step=i)    
+            
+            #get classes/labels in a dict for the last batch
+            if len(x_val)<4:
+                logger.info('Batch size of last batch is less than 4. Cannot plot classes')
+            else:
+                prob_val = torch.nn.functional.softmax(output, dim=1)
+                fig1 = plot_classes_pred(x_val, y_val, prob_val, preds)
+                writer.add_figure('predictions vs. actuals', fig1, global_step=i)
     
         # save best model
         if i == 0:
@@ -135,13 +143,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if logger:
                 logger.info(f'Epoch {i+1} - Best Model Saved')
         
-        #get classes/labels in a dict for the last batch
-        if writer is not None:
-            if len(x_val)<4:
-                logger.info('Batch size of last batch is less than 4. Cannot plot classes')
-            else:
-                prob_val = torch.nn.functional.softmax(output, dim=1)
-                fig1 = plot_classes_pred(x_val, y_val, prob_val, preds)
+
 
         
         

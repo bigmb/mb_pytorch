@@ -241,15 +241,20 @@ def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False
             cam_img = show_cam_on_image(x_grad_new, cr,use_rgb=gradcam_rgb)
     return cam_img
     
-def plot_classes_pred(images,labels,predictions_prob,preds):
-    fig = plt.figure(figsize=(12, 48))
-    predictions_prob_val = predictions_prob
+
+def plot_classes_pred(images, labels, predictions_prob, preds):
+    fig = plt.figure(figsize=(15.0, 60.0))
+    preds_np = preds.numpy()
+    predictions_prob_np = predictions_prob.numpy()
+    labels_np = labels.numpy()
+
     for idx in np.arange(4):
         ax = fig.add_subplot(1, 4, idx+1, xticks=[], yticks=[])
-        plt.imshow(images[idx], one_channel=True)
-        ax.set_title("{0}, {1:.1f}%\n(label: {2})".format(
-                    classes[preds[idx]],
-                    preds[idx] * 100.0,
-                    classes[labels[idx]]),
-        color=("green" if preds[idx]==labels[idx].item() else "red"))
+        images_permuted = images.permute(0, 2, 3, 1)
+        plt.imshow(images_permuted[idx,:])
+        ax.set_title("{}, {:.1f}%\n(label: {})".format(
+                    str(preds_np[idx]),
+                    float(predictions_prob_np[idx].max()) * 100.0,
+                    str(labels_np[idx])),
+                    color=("green" if preds[idx]==labels[idx] else "red"))
     return fig

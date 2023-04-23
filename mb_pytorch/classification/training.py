@@ -52,9 +52,24 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if logger:
                 logger.info(f'Epoch {i+1} - Batch {j+1} - Train Loss: {current_loss.item()}')
             
-            model.train(False)
-            #get grad cam images
-            if gradcam and writer is not None:  ##register hooks for gradcam and shit it to top
+
+        avg_train_loss = train_loss / len(train_loader)
+        if logger:
+            logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
+
+
+        print('lr = ',optimizer.param_groups[0]['lr'])
+        model.train(False)
+    
+        if writer is not None:
+            writer.add_graph(model, x)
+            writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
+            for name, param in model.named_parameters():
+                writer.add_histogram(name, param, global_step=i)
+            create_img_grid(x,y,writer,global_step=i)
+
+            ##gradcam       
+            if gradcam is not None:
                 x_grad = x[0,:].to('cpu')
                 x_grad = x_grad.unsqueeze(0)
                 #y_grad = y[0].to('cpu')
@@ -65,34 +80,20 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                     grad_img = gradcam_viewer(cam_layers,model,x_grad,gradcam_rgb=gradcam_rgb,use_cuda=use_cuda)
                     if grad_img is not None:
                         grad_img = np.transpose(grad_img,(2,0,1))
-                        writer.add_image(f'Gradcam/{cam_layers}',grad_img,global_step=i)
+                        writer.add_image(f'Gradcam training/{cam_layers}',grad_img,global_step=i)
                     if j == 0:
                         if grad_img is None:
                             if logger:
-                                logger.info(f'Gradcam not supported for {cam_layers}')
-            if writer is not None and j==1:
-                create_img_grid(x,y,writer,global_step=i)
-            model.train(True)
+                                logger.info(f'Gradcam not supported for {cam_layers}')            
 
-        avg_train_loss = train_loss / len(train_loader)
-        if logger:
-            logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
-    
-        if writer is not None:
-            writer.add_graph(model, x)
-            writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
-            for name, param in model.named_parameters():
-                writer.add_histogram(name, param, global_step=i)
+            
             
         #validation loop
 
         val_loss = 0
         val_acc = 0
         new_val_loss = 0
-        #num_samples = 0
     
-        print('lr = ',optimizer.param_groups[0]['lr'])
-        model.train(False)
         with torch.no_grad():
             for x_val, y_val in val_loader:
                 x_val, y_val = x_val.to(device), y_val.to(device)
@@ -124,6 +125,24 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                 prob_val = torch.nn.functional.softmax(output, dim=1)
                 fig1 = plot_classes_pred(x_val, y_val, prob_val, preds)
                 writer.add_figure('predictions vs. actuals', fig1, global_step=i)
+            
+            ##gradcam       
+            if gradcam is not None:
+                x_grad = x_val[0,:].to('cpu')
+                x_grad = x_grad.unsqueeze(0)
+                #y_grad = y_val[0].to('cpu')
+                use_cuda=False
+                if device.type != 'cpu':
+                    use_cuda = True
+                for cam_layers in gradcam:
+                    grad_img = gradcam_viewer(cam_layers,model,x_grad,gradcam_rgb=gradcam_rgb,use_cuda=use_cuda)
+                    if grad_img is not None:
+                        grad_img = np.transpose(grad_img,(2,0,1))
+                        writer.add_image(f'Gradcam/{cam_layers}',grad_img,global_step=i)
+                    if j == 0:
+                        if grad_img is None:
+                            if logger:
+                                logger.info(f'Gradcam not supported for {cam_layers}')   
     
         # save best model
         if i == 0:
@@ -137,7 +156,4 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if logger:
                 logger.info(f'Epoch {i+1} - Best Model Saved')
     
-
-
-        
         

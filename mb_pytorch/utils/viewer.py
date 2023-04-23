@@ -203,7 +203,7 @@ def model_viewer(model,input_shape = (1,3,128,128), location='model',view=False)
     dot.render(location,view=view)
     return None
     
-def new_show_cam_on_image(img, mask, use_rgb=True):
+def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.5):
     """
     Input:
         img: Image on which the cam is to be superimposed
@@ -214,14 +214,29 @@ def new_show_cam_on_image(img, mask, use_rgb=True):
     #mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY) # Convert to single channel
     mask = np.float32(mask) / 255 # Convert to float32
     heatmap = cv2.applyColorMap(np.uint8(255 * mask), cv2.COLORMAP_JET) # Convert to uint8
+    if use_rgb:
+        heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
     heatmap = np.float32(heatmap) / 255
 
-    if use_rgb:
-        cam = heatmap[..., ::-1] + np.float32(img)
-    else:
-        cam = heatmap[..., 0] * np.float32(img)
+    if np.max(img) > 1:
+        raise Exception(
+            "The input image should np.float32 in the range [0, 1]")
+    if image_weight < 0 or image_weight > 1:
+        raise Exception(
+            f"image_weight should be in the range [0, 1].\
+                Got: {image_weight}")
+        
+    #if use_rgb:
+    #    cam = heatmap[..., ::-1] + np.float32(img)
+    #else:
+    #    cam = heatmap[..., 0] * np.float32(img)
     
+    if use_rgb:
+        cam = (1 - image_weight) * heatmap[..., ::-1] + image_weight * img
+    else:
+        cam = (1 - image_weight) * heatmap[..., 0] + image_weight * img
     cam = cam / np.max(cam)
+    
     return np.uint8(255 * cam)
 
 def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False):
@@ -243,7 +258,7 @@ def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False
     
 
 def plot_classes_pred(images, labels, predictions_prob, preds):
-    fig = plt.figure(figsize=(15.0, 60.0))
+    fig = plt.figure(figsize=(20.0, 60.0))
     preds_np = preds.numpy()
     predictions_prob_np = predictions_prob.numpy()
     labels_np = labels.numpy()

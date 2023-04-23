@@ -66,13 +66,17 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
             for name, param in model.named_parameters():
                 writer.add_histogram(name, param, global_step=i)
+            
+            x = x.to('cpu')
+            y = y.to('cpu')
+            x_grad = x[0,:]
+            x_grad = x_grad.unsqueeze(0)
+            #y_grad = y[0].to('cpu')
+            
             create_img_grid(x,y,writer,global_step=i)
 
             ##gradcam       
             if gradcam is not None:
-                x_grad = x[0,:].to('cpu')
-                x_grad = x_grad.unsqueeze(0)
-                #y_grad = y[0].to('cpu')
                 use_cuda=False
                 if device.type != 'cpu':
                     use_cuda = True

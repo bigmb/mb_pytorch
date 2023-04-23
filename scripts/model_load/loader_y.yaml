@@ -73,7 +73,7 @@ model:
   model_path: /home/malav/mb_pytorch/models/ #path to save the model if model_name is not in models otherise it will use the saved one
   model_optimizer: Adam #Adam, SGD, RMSprop ,any other available in torch.optim
   model_loss: cross_entropy #mse, cross_entropy, any other available in torch.nn.functional
-  model_scheduler: StepLR #none, StepLR, ExponentialLR ,any other available in torch.optim.lr_scheduler
+  model_scheduler: ExponentialLR #none, StepLR, ExponentialLR ,any other available in torch.optim.lr_scheduler
   model_pretrained: False  ##if True, then it will use the pretrained model
   model_num_classes: 102 ##number of classes in the dataset
   model_initialization: None 
@@ -86,6 +86,8 @@ model:
       {lr: 0.01, momentum: 0.9, dampening: 0, weight_decay: 0, nesterov: False}
     RMSprop:
       {lr: 0.01, alpha: 0.99, eps: 1.0e-08, weight_decay: 0, momentum: 0, centered: False}
+    ReduceLROnPlateau:
+      {mode: 'min', factor: 0.1, patience: 5, min_lr: 0, threshold: 0.0001, threshold_mode: 'rel', cooldown: 0, eps: 1e-08, verbose: False}
     cross_entropy:
       {weight: None, size_average: None, ignore_index: -100, reduce: None, reduction: 'mean'}
     mse:

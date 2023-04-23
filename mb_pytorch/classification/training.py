@@ -1,7 +1,4 @@
-from ..models.modelloader import ModelLoader
-from ..dataloader.loader import DataLoader
 import torch
-from ..training.train_params import train_helper
 import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import os
@@ -30,7 +27,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
     output:
         None
     """
-
+    
     model.to(device)
 
     for i in tqdm.tqdm(range(data_model['model_epochs'])):
@@ -55,9 +52,9 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if logger:
                 logger.info(f'Epoch {i+1} - Batch {j+1} - Train Loss: {current_loss.item()}')
             
-            
+            model.train(False)
             #get grad cam images
-            if gradcam and writer is not None:
+            if gradcam and writer is not None:  ##register hooks for gradcam and shit it to top
                 x_grad = x[0,:].to('cpu')
                 x_grad = x_grad.unsqueeze(0)
                 #y_grad = y[0].to('cpu')
@@ -75,6 +72,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                                 logger.info(f'Gradcam not supported for {cam_layers}')
             if writer is not None and j==1:
                 create_img_grid(x,y,writer,global_step=i)
+            model.train(True)
 
         avg_train_loss = train_loss / len(train_loader)
         if logger:
@@ -114,10 +112,6 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             if logger:
                 logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}')
                 logger.info(f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')
-
-        print(preds)
-        print(y_val.data)
-
     
         if writer is not None:
             writer.add_scalar('Loss/val', val_loss, global_step=i)
@@ -142,7 +136,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             torch.save(best_model, path)
             if logger:
                 logger.info(f'Epoch {i+1} - Best Model Saved')
-        
+    
 
 
         

@@ -118,9 +118,16 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                 logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}')
                 logger.info(f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')
     
+    
         if writer is not None:
             writer.add_scalar('Loss/val', val_loss, global_step=i)
             writer.add_scalar('Accuracy/val', val_acc, global_step=i)    
+            
+            x_val = x_val.to('cpu')
+            y_val = y_val.to('cpu')
+            x_grad = x_val[0,:]
+            x_grad = x_grad.unsqueeze(0)
+            #y_grad = y_val[0].to('cpu')
             
             #get classes/labels in a dict for the last batch
             if len(x_val)<4:
@@ -132,9 +139,6 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
             
             ##gradcam       
             if gradcam is not None:
-                x_grad = x_val[0,:].to('cpu')
-                x_grad = x_grad.unsqueeze(0)
-                #y_grad = y_val[0].to('cpu')
                 use_cuda=False
                 if device.type != 'cpu':
                     use_cuda = True

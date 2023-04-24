@@ -218,6 +218,9 @@ def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.5):
         heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
     heatmap = np.float32(heatmap) / 255
 
+    print(np.max(img))
+    print(np.max(heatmap))
+    print(np.min(img))
     # if np.max(img) > 1:
     #     raise Exception(
     #         "The input image should np.float32 in the range [0, 1]")

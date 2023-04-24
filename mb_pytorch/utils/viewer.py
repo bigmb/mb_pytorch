@@ -221,6 +221,8 @@ def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.5):
     print(np.max(img))
     print(np.max(heatmap))
     print(np.min(img))
+    print(heatmap.shape)
+    print(img.shape)
     # if np.max(img) > 1:
     #     raise Exception(
     #         "The input image should np.float32 in the range [0, 1]")

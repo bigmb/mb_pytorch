@@ -259,6 +259,10 @@ def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False
 
 def plot_classes_pred(images, labels, predictions_prob, preds):
     fig = plt.figure(figsize=(20.0, 60.0))
+    if type(preds) == torch.Tensor:
+        preds = preds.to('cpu')
+    if type(labels) == torch.Tensor:
+        labels = labels.to('cpu')
     preds_np = preds.numpy()
     predictions_prob_np = predictions_prob.numpy()
     labels_np = labels.numpy()

@@ -134,8 +134,12 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                 logger.info('Batch size of last batch is less than 4. Cannot plot classes')
             else:
                 prob_val = torch.nn.functional.softmax(output, dim=1)
+                print(type(prob_val))
+                print(type(preds))
                 prob_val = prob_val.to('cpu')
                 preds = preds.to('cpu')
+                print(type(prob_val))
+                print(type(preds))
                 fig1 = plot_classes_pred(x_val, y_val, prob_val, preds)
                 writer.add_figure('predictions vs. actuals', fig1, global_step=i)
             

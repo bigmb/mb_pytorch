@@ -203,7 +203,7 @@ def model_viewer(model,input_shape = (1,3,128,128), location='model',view=False)
     dot.render(location,view=view)
     return None
     
-def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.5):
+def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.4):
     """
     Input:
         img: Image on which the cam is to be superimposed
@@ -218,11 +218,6 @@ def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.5):
         heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
     heatmap = np.float32(heatmap) / 255
 
-    print(np.max(img))
-    print(np.max(heatmap))
-    print(np.min(img))
-    print(heatmap.shape)
-    print(img.shape)
     # if np.max(img) > 1:
     #     raise Exception(
     #         "The input image should np.float32 in the range [0, 1]")
@@ -258,6 +253,7 @@ def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False
         if cr is not None:        
             #cam_img = new_show_cam_on_image(x_grad[0].numpy(),cr,use_rgb=gradcam_rgb)
             x_grad_new = x_grad[0].permute(1,2,0).numpy()
+            #cam_img = show_cam_on_image(x_grad_new, cr,use_rgb=gradcam_rgb)
             cam_img = new_show_cam_on_image(x_grad_new, cr,use_rgb=gradcam_rgb)
     return cam_img
     

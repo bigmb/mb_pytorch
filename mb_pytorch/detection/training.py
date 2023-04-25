@@ -6,9 +6,9 @@ from mb_utils.src.logging import logger
 import numpy as np
 from ..utils.viewer import gradcam_viewer,create_img_grid,plot_classes_pred
 
-__all__ = ['classification_train_loop']
+__all__ = ['detection_train_loop']
 
-def classification_train_loop( k_data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
+def detection_train_loop(k_data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
     """
     Function to train the model
     Args:

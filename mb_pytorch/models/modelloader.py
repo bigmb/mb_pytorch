@@ -20,8 +20,9 @@ def get_custom_model(data):
     if model_name=='Unet':
         if data['unet_parameters']['attention']:
             model_name = 'Unet_attention'
-        model_class = getattr(model_module, model_name)   
-        model_out = model_class(**data['unet_parameters'])
+        model_out = getattr(model_module, model_name)(**data['unet_parameters'])
+    else:
+        model_out = getattr(model_module, model_name)()
     return model_out
     
 

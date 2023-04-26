@@ -66,9 +66,7 @@ transformation:
 model:
   model_type: classification #classification, segmentation, detection
   load_model: False ## if False, then it will create a new model or else it will load the model from the path provided here
-  use_torchvision_models: True ##if True, then it will use the model from torchvision.models
   model_name: resnet50 #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
-  model_version: null  ##if model_name is in torchvision.models, then this is the version of the model. Null will send None to the model.
   model_custom: mb_pytorch.models.unet_models   ##python file where the model is defined
   model_path: /home/malav/mb_pytorch/models/ #path to save the model if model_name is not in models otherise it will use the saved one
   model_optimizer: Adam #Adam, SGD, RMSprop ,any other available in torch.optim
@@ -106,5 +104,4 @@ model:
     n_filters: 64 #default : 64
     linear_layers: 0 #default : 0
     attention: False  #default : False
-
- 
+    

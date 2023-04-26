@@ -89,9 +89,7 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
                         if grad_img is None:
                             if logger:
                                 logger.info(f'Gradcam not supported for {cam_layers}')            
-
-            
-            
+                        
         #validation loop
 
         val_loss = 0

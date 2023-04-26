@@ -29,7 +29,6 @@ class ModelLoader(nn.Module):
     def __init__(self, data : dict,logger=None):
         super().__init__()
         self._data= data 
-        self._use_torchvision_models=self._data['use_torchvision_models']
         self._model_name=self._data['model_name']
         self._model_path=self._data['model_path']
         self._model_pretrained=self._data['model_pretrained']

@@ -94,6 +94,9 @@ model:
       {step_size: 3, gamma: 0.2}
     ExponentialLR:
       {gamma: 0.9}
+  
+  model_custom_params:   ##parameters for the custom model
+    out_ch: 102
 
   unet_parameters:
     conv_depth: 1 #default : 2

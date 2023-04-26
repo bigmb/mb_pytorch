@@ -22,7 +22,7 @@ def get_custom_model(data):
             model_name = 'Unet_attention'
         model_out = getattr(model_module, model_name)(**data['unet_parameters'])
     else:
-        model_out = getattr(model_module, model_name)()
+        model_out = getattr(model_module, model_name)(**data['model_custom_params'])
     return model_out
     
 

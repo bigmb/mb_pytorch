@@ -5,20 +5,17 @@ import os
 from mb_utils.src.logging import logger
 import numpy as np
 from ..utils.viewer import gradcam_viewer,create_img_grid,plot_classes_pred
+from mb_pytorch.models.modelloader import ModelLoader
+from mb_pytorch.training.train_params import train_helper
+
 
 __all__ = ['classification_train_loop']
 
-def classification_train_loop( k_data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
+def classification_train_loop( k_data,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
     """
     Function to train the model
     Args:
-        data: data dictionary YAML of DataLoader
-        data_model: model parameters - data.data_dict['model']
-        model: model to be trained
-        train_loader: train dataloader
-        val_loader: validation dataloader
-        loss_attr: loss function
-        optimizer: optimizer
+        k_data: data dictionary YAML of DataLoader
         scheduler: scheduler
         writer: tensorboard writer
         logger: logger
@@ -27,6 +24,27 @@ def classification_train_loop( k_data,data_model,model,train_loader,val_loader,l
     output:
         None
     """
+    
+    if logger:
+        logger.info('Training loop Starting')
+    data_model = k_data.data_dict['model']
+    model_data_load = ModelLoader(k_data.data_dict['model'])
+    model =  model_data_load.get_model()
+    
+    if logger:
+        logger.info('Model Loaded')
+    
+    train_loader,val_loader,_,_ = k_data.data_load()
+    loss_attr,optimizer_attr,optimizer_dict,scheduler_attr,scheduler_dict = train_helper(data_model) 
+    optimizer = optimizer_attr(model.parameters(),**optimizer_dict)
+    if scheduler is not None:
+        scheduler = scheduler_attr(optimizer,**scheduler_dict)
+
+    if logger:
+        logger.info('Optimizer and Scheduler Loaded')
+        logger.info(f'Loss: {loss_attr}')
+        logger.info(f'Optimizer: {optimizer}')
+        logger.info(f'Scheduler: {scheduler}')
     
     model.to(device)
 

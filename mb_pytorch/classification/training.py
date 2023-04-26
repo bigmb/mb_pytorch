@@ -1,6 +1,6 @@
 import torch
+from typing import Optional
 import tqdm
-from torch.utils.tensorboard import SummaryWriter
 import os
 from mb_utils.src.logging import logger
 import numpy as np
@@ -8,14 +8,15 @@ from ..utils.viewer import gradcam_viewer,create_img_grid,plot_classes_pred
 from mb_pytorch.models.modelloader import ModelLoader
 from mb_pytorch.training.train_params import train_helper
 
-
 __all__ = ['classification_train_loop']
 
-def classification_train_loop( k_data,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
+def classification_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer: Optional[object] =None,
+                              logger: Optional[object] =None,gradcam: Optional[object] =None,
+                              gradcam_rgb: str =False,device: str ='cpu'):
     """
     Function to train the model
     Args:
-        k_data: data dictionary YAML of DataLoader
+        k_yaml: data dictionary YAML of DataLoader
         scheduler: scheduler
         writer: tensorboard writer
         logger: logger
@@ -27,14 +28,15 @@ def classification_train_loop( k_data,scheduler=None,writer=None,logger=None,gra
     
     if logger:
         logger.info('Training loop Starting')
-    data_model = k_data.data_dict['model']
-    model_data_load = ModelLoader(k_data.data_dict['model'])
+    k_data = k_yaml.data_dict['data']
+    data_model = k_yaml.data_dict['model']
+    model_data_load = ModelLoader(k_yaml.data_dict['model'])
     model =  model_data_load.get_model()
     
     if logger:
         logger.info('Model Loaded')
     
-    train_loader,val_loader,_,_ = k_data.data_load()
+    train_loader,val_loader,_,_ = k_yaml.data_load()
     loss_attr,optimizer_attr,optimizer_dict,scheduler_attr,scheduler_dict = train_helper(data_model) 
     optimizer = optimizer_attr(model.parameters(),**optimizer_dict)
     if scheduler is not None:
@@ -74,9 +76,8 @@ def classification_train_loop( k_data,scheduler=None,writer=None,logger=None,gra
         avg_train_loss = train_loss / len(train_loader)
         if logger:
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
-
-
-        print('lr = ',optimizer.param_groups[0]['lr'])
+            logger.info('lr = ',optimizer.param_groups[0]['lr'])
+        
         model.train(False)
     
         if writer is not None:

@@ -82,8 +82,6 @@ class U_Net(nn.Module):
         self.Conv = nn.Conv2d(filters[0], out_ch, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
-        batch_size = x.size(0)
-
         e1 = self.Conv1(x)
 
         e2 = self.Maxpool1(e1)
@@ -116,13 +114,7 @@ class U_Net(nn.Module):
         d2 = self.Up_conv2(d2)
 
         out = self.Conv(d2)
-
-        # apply sigmoid activation to each channel of the output separately
-        out = torch.sigmoid(out)
-
-        # reshape output to match the input shape
-        out = out.view(batch_size, -1, out.size(2), out.size(3))
-
+        
         return out
 
 

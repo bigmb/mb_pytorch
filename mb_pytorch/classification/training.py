@@ -76,7 +76,7 @@ def classification_train_loop( k_yaml: dict,scheduler: Optional[object] =None,wr
         avg_train_loss = train_loss / len(train_loader)
         if logger:
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
-            logger.info('lr = ',optimizer.param_groups[0]['lr'])
+            logger.info(f"lr = {optimizer.param_groups[0]['lr']}")
         
         model.train(False)
     
@@ -116,21 +116,19 @@ def classification_train_loop( k_yaml: dict,scheduler: Optional[object] =None,wr
         new_val_loss = 0
     
         with torch.no_grad():
-            for l,(x_val, y_val) in val_loader:
+            for l,(x_val, y_val) in enumerate(val_loader):
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
                 val_loss += loss_attr(output, y_val).item() * x_val.size(0)
                 _, preds = torch.max(output, 1) #no need of softmax. max returns the index of the max value
                 val_acc += torch.sum(preds == y_val.data)
                 new_val_loss = val_loss/x_val.size(0)
-                #num_samples += x_val.size(0)
                 if logger: 
                     logger.info(f'Epoch {i+1} - Batch {l+1} - Val Loss: {new_val_loss:.3f}')
             
             avg_val_loss = val_loss / len(val_loader.dataset)
             val_acc = val_acc/len(val_loader.dataset)
-            #val_loss /= num_samples
-            #val_acc = val_acc / num_samples
+
             if logger:
                 logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}')
                 logger.info(f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')

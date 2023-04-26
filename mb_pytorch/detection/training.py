@@ -99,7 +99,7 @@ def detection_train_loop(k_data,data_model,model,train_loader,val_loader,loss_at
         new_val_loss = 0
     
         with torch.no_grad():
-            for l,(x_val, y_val) in val_loader:
+            for l,(x_val, y_val) in enumerate(val_loader):
                 x_val, y_val = x_val.to(device), y_val.to(device)
                 output = model(x_val)
                 val_loss += loss_attr(output, y_val).item() * x_val.size(0)

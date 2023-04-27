@@ -99,6 +99,7 @@ model:
     out_ch: 1
     num_classes: 102
     classification: True
+    input_size: 128
 
   unet_parameters:
     conv_depth: 1 #default : 2

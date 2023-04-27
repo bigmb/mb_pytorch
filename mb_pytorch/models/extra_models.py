@@ -50,7 +50,7 @@ class U_Net(nn.Module):
     UNet - Basic Implementation
     Paper : https://arxiv.org/abs/1505.04597
     """
-    def __init__(self, in_ch=3, out_ch=1,num_classes=2,classification=False):
+    def __init__(self, in_ch=3, out_ch=1,num_classes=2,classification=False,input_size=128):
         super(U_Net, self).__init__()
 
         n1 = 64
@@ -82,7 +82,7 @@ class U_Net(nn.Module):
         self.Conv = nn.Conv2d(filters[0], out_ch, kernel_size=1, stride=1, padding=0)
         self.classification = classification
         if self.classification:
-            self.flatten = nn.Flatten()
+            self.input_size = input_size
             self.linear = nn.Linear(out_ch*64*64, num_classes)
 
     def forward(self, x):
@@ -118,9 +118,13 @@ class U_Net(nn.Module):
         d2 = self.Up_conv2(d2)
 
         out = self.Conv(d2)
-        out = self.Maxpool1(out)
         if self.classification:
-            out_flatten = self.flatten(out.size(0), -1)
+            if out.shape[2] != self.input_size or out.shape[3] != self.input_size:
+                if out.shape[2] > self.input_size or out.shape[3] > self.input_size:
+                    out = nn.AvgPool2d(kernel_size=2, stride=2)(out)
+                elif out.shape[2] < self.input_size or out.shape[3] < self.input_size:
+                    out = nn.Upsample(size=self.input_size)(out)
+            out_flatten = nn.Flatten(out.size(0), -1)
             out = self.linear(out_flatten)
         return out
 

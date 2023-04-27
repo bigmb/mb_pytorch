@@ -80,7 +80,7 @@ class U_Net(nn.Module):
         self.Up_conv2 = conv_block(filters[1], filters[0])
 
         self.Conv = nn.Conv2d(filters[0], out_ch, kernel_size=1, stride=1, padding=0)
-        self.linear = nn.Linear(filters[0], out_ch)
+        self.linear = nn.Linear(out_ch, out_ch)
 
     def forward(self, x):
         e1 = self.Conv1(x)
@@ -114,8 +114,8 @@ class U_Net(nn.Module):
         d2 = torch.cat((e1, d2), dim=1)
         d2 = self.Up_conv2(d2)
 
-        #out = self.Conv(d2)
-        out = self.linear(d2)
+        out_conv = self.Conv(d2)
+        out = self.linear(out_conv)
         return out
 
 

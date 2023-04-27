@@ -50,7 +50,7 @@ class U_Net(nn.Module):
     UNet - Basic Implementation
     Paper : https://arxiv.org/abs/1505.04597
     """
-    def __init__(self, in_ch=3, out_ch=1,num_classes=2):
+    def __init__(self, in_ch=3, out_ch=1,num_classes=2,classification=False):
         super(U_Net, self).__init__()
 
         n1 = 64
@@ -80,7 +80,10 @@ class U_Net(nn.Module):
         self.Up_conv2 = conv_block(filters[1], filters[0])
 
         self.Conv = nn.Conv2d(filters[0], out_ch, kernel_size=1, stride=1, padding=0)
-        self.linear = nn.Linear(out_ch, num_classes)
+        self.classification = classification
+        if self.classification:
+            self.flatten = nn.Flatten()
+            self.linear = nn.Linear(out_ch*64*64, num_classes)
 
     def forward(self, x):
         e1 = self.Conv1(x)
@@ -114,8 +117,10 @@ class U_Net(nn.Module):
         d2 = torch.cat((e1, d2), dim=1)
         d2 = self.Up_conv2(d2)
 
-        out_conv = self.Conv(d2)
-        out = self.linear(out_conv)
+        out = self.Conv(d2)
+        if self.classification:
+            out_flatten = self.flatten(out)
+            out = self.linear(out_flatten)
         return out
 
 

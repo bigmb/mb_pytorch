@@ -84,7 +84,7 @@ class U_Net(nn.Module):
         if self.classification:
             self.flatten = nn.Flatten()
             self.input_size = input_size
-            self.linear = nn.Linear(out_ch*64*64, num_classes)
+            self.linear = nn.Linear(out_ch*input_size*input_size, num_classes)
 
     def forward(self, x):
         e1 = self.Conv1(x)

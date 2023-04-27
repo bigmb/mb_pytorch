@@ -118,8 +118,9 @@ class U_Net(nn.Module):
         d2 = self.Up_conv2(d2)
 
         out = self.Conv(d2)
+        out = self.Maxpool1(out)
         if self.classification:
-            out_flatten = self.flatten(out)
+            out_flatten = self.flatten(out.size(0), -1)
             out = self.linear(out_flatten)
         return out
 

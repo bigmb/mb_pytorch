@@ -82,6 +82,7 @@ class U_Net(nn.Module):
         self.Conv = nn.Conv2d(filters[0], out_ch, kernel_size=1, stride=1, padding=0)
         self.classification = classification
         if self.classification:
+            self.flatten = nn.Flatten()
             self.input_size = input_size
             self.linear = nn.Linear(out_ch*64*64, num_classes)
 
@@ -124,7 +125,7 @@ class U_Net(nn.Module):
                     out = nn.AvgPool2d(kernel_size=2, stride=2)(out)
                 elif out.shape[2] < self.input_size or out.shape[3] < self.input_size:
                     out = nn.Upsample(size=self.input_size)(out)
-            out_flatten = nn.Flatten(out.size(0), -1)
+            out_flatten = self.flatten(out)
             out = self.linear(out_flatten)
         return out
 

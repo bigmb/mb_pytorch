@@ -50,7 +50,7 @@ class U_Net(nn.Module):
     UNet - Basic Implementation
     Paper : https://arxiv.org/abs/1505.04597
     """
-    def __init__(self, in_ch=3, out_ch=1):
+    def __init__(self, in_ch=3, out_ch=1,num_classes=2):
         super(U_Net, self).__init__()
 
         n1 = 64
@@ -80,7 +80,7 @@ class U_Net(nn.Module):
         self.Up_conv2 = conv_block(filters[1], filters[0])
 
         self.Conv = nn.Conv2d(filters[0], out_ch, kernel_size=1, stride=1, padding=0)
-        self.linear = nn.Linear(out_ch, out_ch)
+        self.linear = nn.Linear(out_ch, num_classes)
 
     def forward(self, x):
         e1 = self.Conv1(x)

@@ -16,5 +16,6 @@ setup(
         "torch",
         "torchvision",
         "tqdm",
-        "torchsummary",],
+        "torchsummary",
+        "cv2"],
     python_requires='>=3.8',)

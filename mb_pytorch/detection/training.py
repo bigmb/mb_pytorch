@@ -1,24 +1,22 @@
 import torch
+from typing import Optional
 import tqdm
-from torch.utils.tensorboard import SummaryWriter
 import os
 from mb_utils.src.logging import logger
 import numpy as np
 from ..utils.viewer import gradcam_viewer,create_img_grid,plot_classes_pred
+from mb_pytorch.models.modelloader import ModelLoader
+from mb_pytorch.training.train_params import train_helper
 
-__all__ = ['detection_train_loop']
+__all__ = ['segmentation_train_loop']
 
-def detection_train_loop(k_data,data_model,model,train_loader,val_loader,loss_attr,optimizer,scheduler=None,writer=None,logger=None,gradcam=None,gradcam_rgb=False,device='cpu'):
+def segmentation_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer: Optional[object] =None,
+                              logger: Optional[object] =None,gradcam: Optional[object] =None,
+                              gradcam_rgb: str =False,device: str ='cpu'):
     """
     Function to train the model
     Args:
-        data: data dictionary YAML of DataLoader
-        data_model: model parameters - data.data_dict['model']
-        model: model to be trained
-        train_loader: train dataloader
-        val_loader: validation dataloader
-        loss_attr: loss function
-        optimizer: optimizer
+        k_yaml: data dictionary YAML of DataLoader
         scheduler: scheduler
         writer: tensorboard writer
         logger: logger
@@ -27,6 +25,28 @@ def detection_train_loop(k_data,data_model,model,train_loader,val_loader,loss_at
     output:
         None
     """
+    
+    if logger:
+        logger.info('Training loop Starting')
+    k_data = k_yaml.data_dict['data']
+    data_model = k_yaml.data_dict['model']
+    model_data_load = ModelLoader(k_yaml.data_dict['model'])
+    model =  model_data_load.get_model()
+    
+    if logger:
+        logger.info('Model Loaded')
+    
+    train_loader,val_loader,_,_ = k_yaml.data_load()
+    loss_attr,optimizer_attr,optimizer_dict,scheduler_attr,scheduler_dict = train_helper(data_model) 
+    optimizer = optimizer_attr(model.parameters(),**optimizer_dict)
+    if scheduler is not None:
+        scheduler = scheduler_attr(optimizer,**scheduler_dict)
+
+    if logger:
+        logger.info('Optimizer and Scheduler Loaded')
+        logger.info(f'Loss: {loss_attr}')
+        logger.info(f'Optimizer: {optimizer}')
+        logger.info(f'Scheduler: {scheduler}')
     
     model.to(device)
 
@@ -56,9 +76,8 @@ def detection_train_loop(k_data,data_model,model,train_loader,val_loader,loss_at
         avg_train_loss = train_loss / len(train_loader)
         if logger:
             logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
-
-
-        print('lr = ',optimizer.param_groups[0]['lr'])
+            logger.info(f"lr = {optimizer.param_groups[0]['lr']}")
+        
         model.train(False)
     
         if writer is not None:
@@ -89,9 +108,7 @@ def detection_train_loop(k_data,data_model,model,train_loader,val_loader,loss_at
                         if grad_img is None:
                             if logger:
                                 logger.info(f'Gradcam not supported for {cam_layers}')            
-
-            
-            
+                        
         #validation loop
 
         val_loss = 0
@@ -106,14 +123,12 @@ def detection_train_loop(k_data,data_model,model,train_loader,val_loader,loss_at
                 _, preds = torch.max(output, 1) #no need of softmax. max returns the index of the max value
                 val_acc += torch.sum(preds == y_val.data)
                 new_val_loss = val_loss/x_val.size(0)
-                #num_samples += x_val.size(0)
                 if logger: 
                     logger.info(f'Epoch {i+1} - Batch {l+1} - Val Loss: {new_val_loss:.3f}')
             
             avg_val_loss = val_loss / len(val_loader.dataset)
             val_acc = val_acc/len(val_loader.dataset)
-            #val_loss /= num_samples
-            #val_acc = val_acc / num_samples
+
             if logger:
                 logger.info(f'Epoch {i+1} -Avg Val Loss: {avg_val_loss:.3f}')
                 logger.info(f'Epoch {i+1} - Val Accuracy: {val_acc:.3f}')

@@ -4,6 +4,7 @@ malav pytorch files
 
 
 [![Close inactive issues](https://github.com/bigmb/mb_pytorch/actions/workflows/stale.yml/badge.svg)](https://github.com/bigmb/mb_pytorch/actions/workflows/stale.yml)
+[![Downloads](https://static.pepy.tech/personalized-badge/mb-pytorch?period=month&units=international_system&left_color=black&right_color=blue&left_text=Downloads)](https://pepy.tech/project/mb-pytorch)
 
 ## Applications
 Segmentation

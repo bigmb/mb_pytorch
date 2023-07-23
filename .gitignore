@@ -9,6 +9,7 @@ __pycache__/
 # Files
 model.png
 model
+/mb_pytorch/llm/readme_llm.txt
 
 # Distribution / packaging
 .Python

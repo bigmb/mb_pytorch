@@ -2,8 +2,8 @@
 data:
   from_datasets: 'Flowers102' ##if from_file = True, then this model from torchvision will be used
   from_file: False  ##if False, then from_datasets is used
-  work_dir: /home/malav/mb_pytorch/data/
-  file: /home/malav/mb_pytorch/data/csv/file_data.csv
+  work_dir: /home/winnow/mb_packages/mb_pytorch/data/
+  file: /home/winnow/mb_packages/mb_pytorch/data/csv/file_data.csv
   use_img_dir: True
   img_dir: /home/malav/mb_pytorch/data/images1/
   thresholding_pd: 0

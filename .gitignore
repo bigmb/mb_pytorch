@@ -15,6 +15,7 @@ model
 .Python
 torch_compile_debug/
 data/
+.vscode
 logs/
 .vscode/
 build/

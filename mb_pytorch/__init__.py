@@ -1,4 +1,4 @@
-from .version import *
+from ..version import *
 from .models import *
 from .utils import *
 from .dataloader import *

@@ -1,21 +1,30 @@
-from setuptools import setup,find_packages,find_namespace_packages
-from mb_pytorch.version import version
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+from setuptools import setup,find_packages
+import os
+
+VERSION_FILE = os.path.join(os.path.dirname(__file__), "VERSION.txt")
+print(VERSION_FILE)
 setup(
     name="mb_pytorch",
-    version=version,
-    description="Pytorch functions functions package",
+    description="Pytorch functions",
     author=["Malav Bateriwala"],
-    packages=find_namespace_packages(include=["mb_pytorch.*"]),
+    packages=find_packages(),
     #packages=find_packages(),
-    scripts=['scripts/embeddings/emb.py','scripts/extra_utils/dataload_results.py'],
+    scripts=[],
     install_requires=[
-        "numpy",
-        "mb_pandas",
+        "mb_base",
         "mb_utils",
-        "torch",
-        "torchvision",
-        "tqdm",
-        "torchsummary",
-        "cv2"],
-    python_requires='>=3.8',)
+        "mb_pandas",],
+    setup_requires=["setuptools-git-versioning<2"],
+    python_requires='>=3.8',
+    setuptools_git_versioning={
+        "enabled": True,
+        "version_file": VERSION_FILE,
+        "count_commits_from_version_file": True,
+        "template": "{tag}",
+        "dev_template": "{tag}.dev{ccount}+{branch}",
+        "dirty_template": "{tag}.post{ccount}",
+    },
+)

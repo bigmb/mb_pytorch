@@ -25,10 +25,10 @@ os.system('./make_version.sh')
 print("version file updated")
 print('*'*100)
 
-subprocess.run(["git", "add", "."], check=True, stdout=subprocess.PIPE).stdout
-subprocess.run(["git", "commit", "-am", "Bug fix commit"], check=True, stdout=subprocess.PIPE).stdout
+# subprocess.run(["git", "add", "."], check=True, stdout=subprocess.PIPE).stdout
+# subprocess.run(["git", "commit", "-am", "Bug fix commit"], check=True, stdout=subprocess.PIPE).stdout
 
-print('git commit done')
+# print('git commit done')
 
 subprocess.run(["git", "pull"], check=True, stdout=subprocess.PIPE).stdout
 print('git pull done')
@@ -44,7 +44,7 @@ if os.path.exists(file+'/dist'):
 #subprocess.run(["ls"]),check=True, stdout=subprocess.PIPE).stdout
 os.system("ls")
 
-os.system(py_requires + ' -m setup bdist_wheel')
+os.system(py_requires + ' -m build')
 
 print('*'*100)
 print('wheel built')

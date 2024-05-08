@@ -8,8 +8,8 @@ import sys
 
 py_version = sys.version
 print(py_version)
-if py_version[:4] == '3.10':
-    py_requires = 'python3.10'
+if py_version[:4] == '3.9' or py_version[:4] == '3.10' or py_version[:4] == '3.11':
+    py_requires = 'python' + sys.version[:4]
 else:
     py_requires = 'python3.8'
 print(py_requires)

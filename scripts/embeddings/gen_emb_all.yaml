@@ -1,18 +1,18 @@
 data:
   from_datasets: 'CIFAR10'
   from_file: True  ##if False, then from_datasets is used
-  work_dir: /home/winnow/mb_packages/mb_pytorch/data/
-  file: /home/winnow/mb_packages/mb_pytorch/data/csv/file_data.csv
+  work_dir: /home/malav/Desktop/mb_packages/mb_pytorch/data/
+  file: /home/malav/Desktop/mb_packages/mb_pytorch/data/csv/file_data.csv
   use_img_dir: True
-  img_dir: /home/winnow/mb_packages/mb_pytorch/data/images1/
+  img_dir: /home/malav/Desktop/mb_packages/mb_pytorch/data/images1/
   thresholding_pd: 0
 
-emb_data:
+model:
   model: 'resnet18'
   use_pretrained: True  
   use_own_model: False
-  model_path: '/home/winnow/mb_packages/mb_pytorch/models/...'
-  model_layer : 'avgpool'
+  model_path: '/home/malav/Desktop/mb_packages/mb_pytorch/models/...' ## if use_own_model is True
+  model_layer : 'avgpool' # generally used for generating embeddings
 
 train_params:
   batch_size: 4

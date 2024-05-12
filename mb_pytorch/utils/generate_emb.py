@@ -1,18 +1,13 @@
 ##Class for generating embeddings for the given data
 
 import torch
-from torch import optim, nn
-from torchvision import models, transforms
 from mb_pytorch.dataloader.loader import DataLoader
 import cv2
 import numpy as np
-from PIL import Image
 from tqdm import tqdm_notebook as tqdm
-import pandas as pd
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb_pandas.src.transform import *
-import torchvision
 import os
 
 __all__ = ['EmbeddingGenerator']
@@ -79,6 +74,7 @@ class customdl_emb(torch.utils.data.Dataset):
 
         out_dict = {'image':img}                                           
         return out_dict
+    
 class EmbeddingGenerator(DataLoader):
     def __init__(self, yaml, logger=None) -> None:
         super().__init__(yaml,logger=logger)
@@ -86,13 +82,13 @@ class EmbeddingGenerator(DataLoader):
         self._data = self.load_data_all
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.data_file = self._data['data']['file']
-        self.model = self._data['emb_data']['model']
-        self.use_pretrained = self._data['emb_data']['use_pretrained']
-        self.use_own_model = self._data['emb_data']['use_own_model']
+        self.model = self._data['model']['model']
+        self.use_pretrained = self._data['model']['use_pretrained']
+        self.use_own_model = self._data['model']['use_own_model']
         if self.use_own_model:
             self.model = torch.load(self._data['emb_data']['model_path'])
 
-        self.ext_layer = self._data['emb_data']['model_layer']
+        self.ext_layer = self._data['model']['model_layer']
         self.transforms_final = self.get_transforms
         self._emb = None
         self.logger = logger

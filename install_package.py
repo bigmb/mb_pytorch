@@ -48,6 +48,7 @@ os.system(py_requires + ' -m build')
 
 print('*'*100)
 print('wheel built')
+print(py_requires + ' -m pip install '+file + '/dist/' +os.listdir(file +'/dist')[-1] + '--break-system-packages')
 os.system(py_requires + ' -m pip install '+file + '/dist/' +os.listdir(file +'/dist')[-1] + '--break-system-packages')
 
 print('package installed')

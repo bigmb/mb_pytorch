@@ -86,7 +86,7 @@ class EmbeddingGenerator(DataLoader):
         self.use_pretrained = self._data['model']['use_pretrained']
         self.use_own_model = self._data['model']['use_own_model']
         if self.use_own_model:
-            self.model = torch.load(self._data['emb_data']['model_path'])
+            self.model = torch.load(self._data['model']['model_path'])
 
         self.ext_layer = self._data['model']['model_layer']
         self.transforms_final = self.get_transforms
@@ -103,7 +103,7 @@ class EmbeddingGenerator(DataLoader):
             k=eval("torchvision.models."+self.model)
         self.model = k(pretrained=True)
         if self.logger:
-            self.logger.info("Model set to {}".format(self._data['emb_data']['model']))
+            self.logger.info("Model set to {}".format(self._data['model']['model']))
         return self.model
     
     def generate_emb(self, data):

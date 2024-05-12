@@ -9,6 +9,10 @@ from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb_pandas.src.transform import *
 import os
+import torchvision
+import torch.nn as nn
+from torch.utils import hooks
+
 
 __all__ = ['EmbeddingGenerator']
 

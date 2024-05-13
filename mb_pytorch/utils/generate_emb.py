@@ -105,10 +105,10 @@ class EmbeddingGenerator(DataLoader):
             k=eval("torchvision.models."+name)
         else:
             k=eval("torchvision.models."+self.model)
-        self.model = k(pretrained=True)
+        self.model_val = k(pretrained=True)
         if self.logger:
             self.logger.info("Model set to {}".format(self._data['model']['model']))
-        return self.model
+        return self.model_val
     
     def generate_emb(self, data):
         """
@@ -146,14 +146,14 @@ class EmbeddingGenerator(DataLoader):
             self.logger.info("Embedding generation completed")
         return self.emb
     
-    def file_save(self,emb,logger=None):
+    def file_save(self,logger=None):
         """
         Save the embeddings to a wrnagled file
         """
         work_dir = self._data['data']['work_dir']
         if os.path.exists(self.folder_name):
             df = load_any_df(os.path.join(self.folder_name,'emb_wrangled_file.csv'))
-        df['embedding'] = emb.tolist()
+        df['embedding'] = self.emb.tolist()
         df.to_csv(os.path.join(self.folder_name,'emb_wrangled_file.csv'),index=False)
         if self.logger:
             self.logger.info("Embeddings saved to {}".format(os.path.join(self.folder_name,'emb_wrangled_file.csv')))

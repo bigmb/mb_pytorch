@@ -4,7 +4,7 @@ import torch
 from mb_pytorch.dataloader.loader import DataLoader
 import cv2
 import numpy as np
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb_pandas.src.transform import *

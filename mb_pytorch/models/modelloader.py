@@ -39,10 +39,16 @@ class ModelLoader(nn.Module):
 
     def model_type(self):
         """
-        Function to get default model resnet, vgg, densenet, googlenet, inception, mobilenet, mnasnet, shufflenet_v2, squeezenet
+        Function to get default model resnet, vgg, densenet, googlenet, inception, mobilenet, mnasnet, shufflenet_v2, squeezenet, or object_detection
         """
-        model_out = getattr(torchvision.models,self._model_name)(pretrained=self._model_pretrained)
+
+        if self._model_type=='detection':
+            model_out = getattr(torchvision.models.detection,self._model_name)(pretrained=self._model_pretrained)
+            return model_out
+
+
         if self._model_type=='classification':
+            model_out = getattr(torchvision.models,self._model_name)(pretrained=self._model_pretrained)
             if hasattr(model_out,'fc'):
                 num_ftrs = model_out.fc.in_features
                 model_out.fc = nn.Linear(num_ftrs, self._model_num_classes)            
@@ -53,8 +59,8 @@ class ModelLoader(nn.Module):
                         num_ftrs = first_layer.in_features
                         model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
                         break
-                    
-        return model_out
+            return model_out
+    
 
     def model_params(self):
         """

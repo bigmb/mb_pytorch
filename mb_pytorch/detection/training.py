@@ -8,9 +8,9 @@ from ..utils.viewer import gradcam_viewer,create_img_grid,plot_classes_pred
 from mb_pytorch.models.modelloader import ModelLoader
 from mb_pytorch.training.train_params import train_helper
 
-__all__ = ['segmentation_train_loop']
+__all__ = ['detection_train_loop']
 
-def segmentation_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer: Optional[object] =None,
+def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer: Optional[object] =None,
                               logger: Optional[object] =None,gradcam: Optional[object] =None,
                               gradcam_rgb: str =False,device: str ='cpu'):
     """

@@ -83,7 +83,7 @@ class ModelLoader(nn.Module):
 
         try:
             # Try to load the model from the specified path
-            if hasattr(models, self._model_name):
+            if hasattr(models, self._model_name) or hasattr(torchvision.models.detection, self._model_name):
                 self.model = self.model_type() 
                 if logger:
                     logger.info(f"Model {self._model_name} loaded from torchvision.models.") 

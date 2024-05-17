@@ -17,11 +17,11 @@ model:
 
   load_model: False
   use_torchvision_models: True
-  model_name: 'faster_rcnn' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
+  model_name: 'fasterrcnn_resnet50_fpn' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
   model_version: '50'  ##if model_name is in torchvision.models, then this is the version of the model
   model_optimizer: 'adam' #adam, sgd, rmsprop,none
   model_loss: 'cross_entropy' #cross_entropy, mse,none
-  model_pretrained: False
+  model_pretrained: True
   model_num_classes: 5
   model_initialization: None
 

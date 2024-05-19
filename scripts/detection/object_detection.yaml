@@ -19,23 +19,29 @@ model:
   use_torchvision_models: True
   model_name: 'fasterrcnn_resnet50_fpn' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
   model_version: '50'  ##if model_name is in torchvision.models, then this is the version of the model
-  model_optimizer: 'adam' #adam, sgd, rmsprop,none
+  model_optimizer: 'Adam' #adam, sgd, rmsprop,none
   model_loss: 'cross_entropy' #cross_entropy, mse,none
+  model_scheduler: 'StepLR' #StepLR, ExponentialLR,none
   model_pretrained: True
+  model_epochs: 10
   model_num_classes: 5
   model_initialization: None
 
-  model_parameters:
-    adam: 
-      {lr: 0.001, betas: [0.9, 0.999], eps: 1e-08, weight_decay: 0, amsgrad: False}
-    sgd:
+  model_train_parameters:
+    Adam: 
+      {lr: 0.001, betas: [0.9, 0.999], eps: !!float 1e-08, weight_decay: 0, amsgrad: False}
+    SGD:
       {lr: 0.01, momentum: 0.9, dampening: 0, weight_decay: 0, nesterov: False}
-    rmsprop:
-      {lr: 0.01, alpha: 0.99, eps: 1e-08, weight_decay: 0, momentum: 0, centered: False}
+    RMSprop:
+      {lr: 0.01, alpha: 0.99, eps: !!float 1e-08, weight_decay: 0, momentum: 0, centered: False}
     cross_entropy:
       {weight: None, size_average: None, ignore_index: -100, reduce: None, reduction: 'mean'}
-    mse:
+    mse_loss:
       {size_average: None, reduce: None, reduction: 'mean'}
+    StepLR:
+      {step_size: 3, gamma: 0.2}
+    ExponentialLR:
+      {gamma: 0.9}
 
 
 
@@ -47,7 +53,11 @@ train_params:
   seed: 42
 
 test_params:
-  null: null
+  batch_size: 4
+  num_workers: 4
+  pin_memory: True
+  shuffle: False
+  seed: 42  
 
 transformation:
   transform : True

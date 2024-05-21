@@ -242,11 +242,6 @@ class DataLoader(data_fetcher):
             if self.data_file in dir(torchvision.datasets):
                 if self.logger:
                     self.logger.info("Data file: {} loading from torchvision.datasets.".format(self.data_file))
-                if self.data_file in os.listdir(self.dataset_params['folder_name']):
-                    download_flag = False
-                else:
-                    download_flag = True
-
                 self.trainset = getattr(torchvision.datasets,self.data_file)(self.dataset_params_train)
                 self.testset = getattr(torchvision.datasets,self.data_file)(self.dataset_params_test)
                 if self.data_dict['data']['thresholding_pd']>0:

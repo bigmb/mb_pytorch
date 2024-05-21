@@ -114,6 +114,7 @@ class customdl(torch.utils.data.Dataset):
         self.transform=transform
         self.logger=logger
         self.folder_name=data['work_dir']
+        self.data_type = data['model']['model_type']
         self.data = load_any_df(data['file'],logger=self.logger)
 
         if self.logger:
@@ -219,16 +220,18 @@ class DataLoader(data_fetcher):
         self.transforms_final=[]
         self.trainloader = None
         self.testloader = None
-        self.folder_name = self.data_dict['data']['work_dir']
+        self.dataset_params_train = self.data_dict['data']['datasets_params_train']
+        self.dataset_params_test = self.data_dict['data']['datasets_params_test']
+
         self.data_file= self.data_dict['data']['from_datasets']
 
-        if os.path.exists(self.folder_name):
+        if os.path.exists(self.dataset_params_train['root']):
             if self.logger:
-                self.logger.info("Data folder already exists. Using existing data folder :  {}".format(self.folder_name))
+                self.logger.info("Data folder already exists. Using existing data folder :  {}".format(self.dataset_params_train['root']))
         else:
-            os.mkdir(self.folder_name)
+            os.mkdir(self.dataset_params_train['root'])
             if self.logger:
-                self.logger.info("Data folder created : {}".format(self.folder_name))
+                self.logger.info("Data folder created : {}".format(self.dataset_params_train['root']))
     
     def data_load(self):
         """
@@ -239,16 +242,13 @@ class DataLoader(data_fetcher):
             if self.data_file in dir(torchvision.datasets):
                 if self.logger:
                     self.logger.info("Data file: {} loading from torchvision.datasets.".format(self.data_file))
-                if self.data_file in os.listdir(self.folder_name):
+                if self.data_file in os.listdir(self.dataset_params['folder_name']):
                     download_flag = False
                 else:
                     download_flag = True
-                if self.data_file == 'CIFAR10' or self.data_file == 'CIFAR100':
-                    self.trainset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=True, download=download_flag,transform=self.get_transforms)
-                    self.testset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, train=False, download=download_flag,transform=self.get_transforms)
-                else:
-                    self.trainset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, split='train', download=download_flag,transform=self.get_transforms)
-                    self.testset = getattr(torchvision.datasets,self.data_file)(root=self.folder_name, split='val', download=download_flag,transform=self.get_transforms)
+
+                self.trainset = getattr(torchvision.datasets,self.data_file)(self.dataset_params_train)
+                self.testset = getattr(torchvision.datasets,self.data_file)(self.dataset_params_test)
                 if self.data_dict['data']['thresholding_pd']>0:
                     subset_indices = range(self.data_dict['data']['thresholding_pd'])
                     self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)

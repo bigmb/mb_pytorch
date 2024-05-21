@@ -1,5 +1,7 @@
 data:
   from_datasets: 'CIFAR10'
+  datasets_params:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
+    {root : '', train}
   from_file: True  ##if False, then from_datasets is used
   work_dir: /home/malav/Desktop/mb_packages/mb_pytorch/data/
   file: /home/malav/Desktop/mb_packages/mb_pytorch/data/csv/file_data.csv

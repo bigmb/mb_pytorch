@@ -274,10 +274,14 @@ class DataLoader(data_fetcher):
         self.testloader = None
         self.model_type = self.data_dict['model']['model_type']
         self.dataset_params_train = self.data_dict['data']['datasets_params_train']
+        if 'transform' in self.data_dict['data']['datasets_params_train']:
+            train_transform_str = self.data_dict['data']['datasets_params_train']['transform']
         self.transformations = self.data_dict['transformation']
-        self.dataset_params_train['transform'] = JointTransforms(self.transformations,logger=self.logger) 
+        self.dataset_params_train[train_transform_str] = JointTransforms(self.transformations,logger=self.logger) 
         self.dataset_params_test = self.data_dict['data']['datasets_params_test']
-        self.dataset_params_test['transform'] = JointTransforms(self.transformations,logger=self.logger)
+        if 'test_transform' in self.data_dict['data']['datasets_params_train']:
+            test_transform_str = self.data_dict['data']['datasets_params_train']['test_transform']
+        self.dataset_params_test[test_transform_str] = JointTransforms(self.transformations,logger=self.logger)
         self.data_params_file = self.data_dict['data']['from_file']
 
         self.data_file= self.data_dict['data']['from_datasets']

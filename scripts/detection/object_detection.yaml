@@ -1,12 +1,20 @@
 data:
-  from_datasets: 'CIFAR10'    ## datasets from torchvision.datasets
+  from_datasets: 'CelebA'    ## datasets from torchvision.datasets
   datasets_params_train:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
     {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/', 
-    train : , 
+    split : 'train',
+    target_type : 'bbox',
+    transform : 'transform',
+    target_transform : 'target_transform',
+    download : True
     }
   datasets_params_test:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
-    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/',
-    test : , 
+    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/', 
+    split : 'test',
+    target_type : 'bbox',
+    transform : 'transform',
+    target_transform : 'target_transform',
+    download : True
     }
   from_file: False  ##if False, then from_datasets is used if True, then file data is used
   file:

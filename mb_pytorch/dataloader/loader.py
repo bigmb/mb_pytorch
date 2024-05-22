@@ -242,17 +242,20 @@ class customdl(torch.utils.data.Dataset):
         
         if self.data_type == 'segmentation':
             if self.transform:
-                img = self.transform(img)
-                mask_transform = self.transform(mask)
+                mask = cv2.imread(self.masks.iloc[idx],cv2.IMREAD_GRAYSCALE) ## considering mask is just binary class
+                img,mask = self.transform(img,mask)
             out_dict = {'image':img}
-            out_dict['mask'] = self.masks.iloc[idx]
+            out_dict['mask'] = mask
             out_dict['label'] = self.label.iloc[idx]
+            
             return out_dict
         
         if self.data_type == 'detection':
             if self.transform:
                 img = self.transform(img)
             out_dict = {'image':img}
+            out_dict['bbox'] = torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
+                                             for x in len(self.bbox.iloc[idx])],dtype=torch.float32)  ## should be list in a list. 
             out_dict['label'] = self.label.iloc[idx]
 
             return out_dict

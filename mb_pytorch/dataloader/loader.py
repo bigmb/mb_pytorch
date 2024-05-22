@@ -347,8 +347,8 @@ class DataLoader(data_fetcher):
         else:
             self.dataset_params_train['transform'] = JointTransforms(self.transformations,logger=self.logger)
         self.dataset_params_test = self.data_dict['data']['datasets_params_test']
-        if 'transform' in self.data_dict['data']['datasets_params_train']:
-            test_transform_str = self.data_dict['data']['datasets_params_train']['transform']
+        if 'transform' in self.data_dict['data']['datasets_params_test']:
+            test_transform_str = self.data_dict['data']['datasets_params_test']['transform']
             self.dataset_params_test[test_transform_str] = JointTransforms(self.transformations,logger=self.logger)
         else:
             self.dataset_params_test['transform'] = JointTransforms(self.transformations,logger=self.logger)

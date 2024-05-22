@@ -19,6 +19,7 @@ examples/
 .Python
 torch_compile_debug/
 data/
+data/celeba
 .vscode
 logs/
 .vscode/

@@ -75,11 +75,13 @@ class JointTransforms:
         if self.transform_data['transform']==False:
             return None
 
-    def __call__(self,img,mask=None):
+    def __call__(self,img,mask=None,bbox=None):
         if self.transform_data['to_tensor']['val']:
             img = transforms.ToTensor()(img)
             if mask is not None:
                 mask = transforms.ToTensor()(mask)
+            if bbox is not None:
+                bbox = torch.tensor([[bbox[0],bbox[1],bbox[2],bbox[3]]],dtype=torch.float32)
 
         if self.transform_data['normalize']['val']:
             img = transforms.Normalize(self.transform_data['normalize']['args']['mean'],self.transform_data['normalize']['args']['std'])(img)
@@ -88,26 +90,36 @@ class JointTransforms:
             img = transforms.Resize(self.transform_data['resize']['args']['size'])(img)
             if mask is not None:
                 mask = transforms.Resize(self.transform_data['resize']['args']['size'])(mask)
+            if bbox is not None:
+                bbox = self.resize_boxes(bbox, img.size)
 
         if self.transform_data['random_crop']['val']:
             img = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(img)
             if mask is not None:
                 mask = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(mask)
+            if bbox is not None:
+                bbox = self.crop_boxes(bbox, *self.transform_data['random_crop']['args']['size'])
 
         if self.transform_data['random_horizontal_flip']['val']:
             img = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(img)
             if mask is not None:
                 mask = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(mask)
+            if bbox is not None:
+                bbox = self.hflip_boxes(bbox, img.size[0])
 
         if self.transform_data['random_vertical_flip']['val']:
             img = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(img)
             if mask is not None:
                 mask = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(mask)
+            if bbox is not None:
+                bbox = self.vflip_boxes(bbox, img.size[1])
 
         if self.transform_data['random_rotation']['val']:
             img = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(img)
             if mask is not None:
                 mask = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(mask)
+            if bbox is not None:
+                bbox = self.rotate_boxes(bbox, self.transform_data['random_rotation']['args']['degrees'], img.size[1], img.size[0])
 
         if self.transform_data['random_color_jitter']['val']:
             img = transforms.ColorJitter(brightness=self.transform_data['random_color_jitter']['args']['brightness'],contrast=self.transform_data['random_color_jitter']['args']['contrast'],saturation=self.transform_data['random_color_jitter']['args']['saturation'],hue=self.transform_data['random_color_jitter']['args']['hue'])(img)
@@ -120,9 +132,62 @@ class JointTransforms:
         
         if mask is not None:
             return img,mask
+        elif bbox is not None:
+            return img,bbox
         else:
             return img
+        
+    def resize_boxes(self, boxes, original_size):
+        original_height, original_width = original_size
+        new_height, new_width = self.resize
+
+        boxes[:, [0, 2]] = boxes[:, [0, 2]] * new_width / original_width
+        boxes[:, [1, 3]] = boxes[:, [1, 3]] * new_height / original_height
+        return boxes
+
+    def crop_boxes(self, boxes, top, left, height, width):
+        boxes[:, [0, 2]] = boxes[:, [0, 2]] - left
+        boxes[:, [1, 3]] = boxes[:, [1, 3]] - top
+
+        boxes[:, [0, 2]] = boxes[:, [0, 2]].clamp(min=0, max=width)
+        boxes[:, [1, 3]] = boxes[:, [1, 3]].clamp(min=0, max=height)
+        return boxes
+
+    def hflip_boxes(self, boxes, image_width):
+        boxes[:, [0, 2]] = image_width - boxes[:, [2, 0]]
+        return boxes
    
+    def vflip_boxes(self, boxes, image_height):
+        boxes[:, [1, 3]] = image_height - boxes[:, [3, 1]]
+        return boxes
+    
+    def rotate_boxes(self, boxes, angle, image_height, image_width):
+        # Convert the angle to radians
+        angle = -angle * np.pi / 180.0
+        boxes = self.rotate_polygon(boxes, angle, image_height, image_width)
+        return boxes
+
+    def rotate_polygon(self, polygon, angle, image_height, image_width):
+        # Get the center of the polygon
+        center = polygon.mean(axis=0)
+
+        # Shift the polygon so that the center of the polygon is at the origin
+        shifted_polygon = polygon - center
+
+        # Rotate the polygon
+        rotated_polygon = self.rotate_point(shifted_polygon, angle)
+
+        # Shift the polygon back
+        rotated_polygon += center
+
+        return rotated_polygon
+    
+    def rotate_point(self, point, angle):
+        # Get the rotation matrix
+        rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+        return np.dot(point, rotation_matrix)
+
+
 class customdl(torch.utils.data.Dataset):
     def __init__(self,data,model_type,transform=None,train_file=True,logger=None):
         self.transform=transform
@@ -252,7 +317,7 @@ class customdl(torch.utils.data.Dataset):
         
         if self.data_type == 'detection':
             if self.transform:
-                img = self.transform(img)
+                img,bbox = self.transform(img,bbox)
             out_dict = {'image':img}
             out_dict['bbox'] = torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
                                              for x in len(self.bbox.iloc[idx])],dtype=torch.float32)  ## should be list in a list. 
@@ -274,16 +339,21 @@ class DataLoader(data_fetcher):
         self.testloader = None
         self.model_type = self.data_dict['model']['model_type']
         self.dataset_params_train = self.data_dict['data']['datasets_params_train']
+        self.transformations = self.data_dict['transformation']
+
         if 'transform' in self.data_dict['data']['datasets_params_train']:
             train_transform_str = self.data_dict['data']['datasets_params_train']['transform']
-        self.transformations = self.data_dict['transformation']
-        self.dataset_params_train[train_transform_str] = JointTransforms(self.transformations,logger=self.logger) 
+            self.dataset_params_train[train_transform_str] = JointTransforms(self.transformations,logger=self.logger) 
+        else:
+            self.dataset_params_train['transform'] = JointTransforms(self.transformations,logger=self.logger)
         self.dataset_params_test = self.data_dict['data']['datasets_params_test']
-        if 'test_transform' in self.data_dict['data']['datasets_params_train']:
-            test_transform_str = self.data_dict['data']['datasets_params_train']['test_transform']
-        self.dataset_params_test[test_transform_str] = JointTransforms(self.transformations,logger=self.logger)
-        self.data_params_file = self.data_dict['data']['from_file']
+        if 'transform' in self.data_dict['data']['datasets_params_train']:
+            test_transform_str = self.data_dict['data']['datasets_params_train']['transform']
+            self.dataset_params_test[test_transform_str] = JointTransforms(self.transformations,logger=self.logger)
+        else:
+            self.dataset_params_test['transform'] = JointTransforms(self.transformations,logger=self.logger)
 
+        self.data_params_file = self.data_dict['data']['from_file']
         self.data_file= self.data_dict['data']['from_datasets']
 
         if os.path.exists(self.dataset_params_train['root']):

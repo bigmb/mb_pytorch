@@ -63,81 +63,90 @@ class data_fetcher:
         self.all = data
         return self.all
 
-    @property
-    def get_transforms(self):
+class JointTransforms:
+    def __init__(self,transform_yaml,logger=None):
         """
         get transforms from yaml file
         """
 
-        transforms_list = self.load_data_params['transforms_list']
+        self.transform_data = transform_yaml
+        self.logger = logger
 
-        if transforms_list['transform']==False:
+        if self.transform_data['transform']==False:
             return None
 
-        # for t_list in transforms_list:
-        #     if t_list in dir(transforms):
-        #         self.transforms_final.append(transforms.t_list)
+    def __call__(self,img,mask=None):
+        if self.transform_data['to_tensor']['val']:
+            img = transforms.ToTensor()(img)
+            if mask is not None:
+                mask = transforms.ToTensor()(mask)
 
-        if 'transforms' in dir(self.transforms_final):
-            self.transforms_final = []
+        if self.transform_data['normalize']['val']:
+            img = transforms.Normalize(self.transform_data['normalize']['args']['mean'],self.transform_data['normalize']['args']['std'])(img)
 
-        if len(self.transforms_final) != 0:
-            self.transforms_final = []
+        if self.transform_data['resize']['val']:
+            img = transforms.Resize(self.transform_data['resize']['args']['size'])(img)
+            if mask is not None:
+                mask = transforms.Resize(self.transform_data['resize']['args']['size'])(mask)
 
-        #for t_list in transforms_list:
-        if transforms_list['to_tensor']['val']:
-            self.transforms_final.append(transforms.ToTensor())
-        if transforms_list['normalize']['val']:
-            self.transforms_final.append(transforms.Normalize(transforms_list['normalize']['args']['mean'],transforms_list['normalize']['args']['std']))
-        if transforms_list['resize']['val']:
-            self.transforms_final.append(transforms.Resize(transforms_list['resize']['args']['size']))
-        if transforms_list['random_crop']['val']:
-            self.transforms_final.append(transforms.RandomCrop(transforms_list['random_crop']['args']['size']))
-        if transforms_list['random_horizontal_flip']['val']:
-            self.transforms_final.append(transforms.RandomHorizontalFlip(transforms_list['random_horizontal_flip']['args']['p']))
-        if transforms_list['random_vertical_flip']['val']:
-            self.transforms_final.append(transforms.RandomVerticalFlip(transforms_list['random_vertical_flip']['args']['p']))
-        if transforms_list['random_rotation']['val']:
-            self.transforms_final.append(transforms.RandomRotation(transforms_list['random_rotation']['args']['degrees']))
-        if transforms_list['random_color_jitter']['val']:
-            self.transforms_final.append(transforms.ColorJitter(transforms_list['random_color_jitter']['args']['brightness'],transforms_list['random_color_jitter']['args']['contrast'],transforms_list['random_color_jitter']['args']['saturation'],transforms_list['random_color_jitter']['args']['hue']))
-        if transforms_list['random_grayscale']['val']:
-            self.transforms_final.append(transforms.RandomGrayscale(transforms_list['random_grayscale']['args']['p']))
-        if self.logger:
-            self.logger.info("transforms: {}".format(self.transforms_final))
+        if self.transform_data['random_crop']['val']:
+            img = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(img)
+            if mask is not None:
+                mask = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(mask)
+
+        if self.transform_data['random_horizontal_flip']['val']:
+            img = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(img)
+            if mask is not None:
+                mask = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(mask)
+
+        if self.transform_data['random_vertical_flip']['val']:
+            img = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(img)
+            if mask is not None:
+                mask = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(mask)
+
+        if self.transform_data['random_rotation']['val']:
+            img = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(img)
+            if mask is not None:
+                mask = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(mask)
+
+        if self.transform_data['random_color_jitter']['val']:
+            img = transforms.ColorJitter(brightness=self.transform_data['random_color_jitter']['args']['brightness'],contrast=self.transform_data['random_color_jitter']['args']['contrast'],saturation=self.transform_data['random_color_jitter']['args']['saturation'],hue=self.transform_data['random_color_jitter']['args']['hue'])(img)
         
-        self.transforms_final = transforms.Compose(self.transforms_final)
-        return self.transforms_final
+        if self.transform_data['random_grayscale']['val']:
+            img = transforms.RandomGrayscale(self.transform_data['random_grayscale']['args']['p'])(img)
+
+        if self.logger:
+            self.logger.info("transforms: {}".format(self.transform_data))
+        
+        if mask is not None:
+            return img,mask
+        else:
+            return img
    
 class customdl(torch.utils.data.Dataset):
-    def __init__(self,data,transform=None,train_file=True,logger=None):
+    def __init__(self,data,model_type,transform=None,train_file=True,logger=None):
         self.transform=transform
         self.logger=logger
-        self.folder_name=data['work_dir']
-        self.data_type = data['model']['model_type']
-        self.data = load_any_df(data['file'],logger=self.logger)
+        self.folder_name=os.path.dirname(data['root'])
+        self.data_type = model_type
+        self.csv_data = load_any_df(data['root'],logger=self.logger)
 
         if self.logger:
             self.logger.info("Data file: {} loaded with mb_pandas.".format(data))
-            self.logger.info("Data columns: {}".format(self.data.columns))
+            self.logger.info("Data columns: {}".format(self.csv_data.columns))
             self.logger.info("Data will be split into train and validation according to train_file input : {}".format(train_file))
             self.logger.info("If unnamed columns are present, they will be removed.")
             self.logger.info("If duplicate rows are present, they will be removed.")
-        assert 'image_path' in self.data.columns, "image_path column not found in data"
-        assert 'image_type' in self.data.columns, "image_type column not found in data"
+        assert 'image_path' in self.csv_data.columns, "image_path column not found in data"
+        assert 'image_type' in self.csv_data.columns, "image_type column not found in data"
 
-        if train_file:
-            self.data = self.data[self.data['image_type'] == 'training']
+        if train_file: ## used this to differentiate between train and validation data in the data file
+            self.csv_data = self.csv_data[self.csv_data['image_type'] == 'training']
         else:
-            self.data = self.data[self.data['image_type'] == 'validation']
+            self.csv_data = self.csv_data[self.csv_data['image_type'] == 'validation']
 
-        if 'label' in self.data.columns:
-            self.label = self.data['label']
-        else:
-            self.label = None
-
-        self.data = check_drop_duplicates(self.data,columns=['image_path'],drop=True,logger=self.logger)
-        self.data = remove_unnamed(self.data,logger=self.logger)
+        self.csv_data = check_drop_duplicates(self.csv_data,columns=['image_path'],drop=True,logger=self.logger)
+        self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)
 
         # else:
         #     date_now = today.strftime("%d_%m_%Y_%H_%M")
@@ -145,67 +154,108 @@ class customdl(torch.utils.data.Dataset):
         # os.mkdir('./data'+str(self.folder_name))
 
         if data['use_img_dir']:
-            img_path = [os.path.join(str(data['img_dir']),self.data['image_path'].iloc[i]) for i in range(len(self.data))]
+            img_path = [os.path.join(str(data['img_dir']),self.csv_data['image_path'].iloc[i]) for i in range(len(self.csv_data))]
         else:
-            img_path = [self.data['image_path'].iloc[i] for i in range(len(self.data))]
-        self.data['image_path_new'] = img_path
+            img_path = [self.csv_data['image_path'].iloc[i] for i in range(len(self.csv_data))]
+        self.csv_data['image_path_new'] = img_path
         if self.logger:
             self.logger.info("Verifying paths")
             self.logger.info("first path : {}".format(img_path[0]))
 
         path_check_res= [os.path.exists(img_path[i]) for i in range(len(img_path))]
-        self.data['img_path_check'] = path_check_res
-        self.data = self.data[self.data['img_path_check'] == True]
-        self.data = self.data.reset_index(drop=True)
+        self.csv_data['img_path_check'] = path_check_res
+        self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
+        self.csv_data = self.csv_data.reset_index(drop=True)
         if logger:
-            self.logger.info("self.data: {}".format(self.data))
+            self.logger.info("self.data: {}".format(self.csv_data))
 
         if data['thresholding_pd']>0:
-            if len(self.data) <= data['thresholding_pd']:
-                self.logger.info("Length of data after removing invalid paths: {}".format(len(self.data)))
+            if len(self.csv_data) <= data['thresholding_pd']:
+                self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))
                 self.logger.info("Less than thresholding_pd data points. Please check the data file.")
                 self.logger.info("Exiting")
                 sys.exit('Less than thresholding_pd data points. Please check the data file.')
 
         if self.logger:
-            self.logger.info("Length of data after removing invalid paths: {}".format(len(self.data)))
-            self.logger.info("Verifying images")
-        verify_image_res = [verify_image(self.data['image_path_new'].iloc[i],logger=self.logger) for i in range(len(self.data))]  
-        self.data['img_verify'] = verify_image_res
-        self.data = self.data[self.data['img_verify'] == True]
-        self.data = self.data.reset_index()
+            self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))
 
-        if data['thresholding_pd']>0:
-            if len(self.data) <= data['thresholding_pd']:
-                self.logger.info("Length of data after removing invalid images: {}".format(len(self.data)))
-                self.logger.info("Less than thresholding_pd data points. Please check the data file.")
-                self.logger.info("Exiting")
-                sys.exit('Less than thresholding_pd data points. Please check the data file.')
+        if data['verify_image']:
+            if self.logger:
+                self.logger.info("Verifying images")
+            verify_image_res = [verify_image(self.csv_data['image_path_new'].iloc[i],logger=self.logger) for i in range(len(self.csv_data))]  
+            self.csv_data['img_verify'] = verify_image_res
+            self.csv_data = self.csv_data[self.csv_data['img_verify'] == True]
+            self.csv_data = self.csv_data.reset_index()
+
+            if data['thresholding_pd']>0:
+                if len(self.csv_data) <= data['thresholding_pd']:
+                    self.logger.info("Length of data after removing invalid images: {}".format(len(self.csv_data)))
+                    self.logger.info("Less than thresholding_pd data points. Please check the data file.")
+                    self.logger.info("Exiting")
+                    sys.exit('Less than thresholding_pd data points. Please check the data file.')
+        else:   
+            if self.logger:
+                self.logger.info("Skipping image verification")
         
-        if os.path.exists(self.folder_name):
-            self.data.to_csv(os.path.join(self.folder_name,'wrangled_file.csv'),index=False)
+        if self.data_type == 'classification':
+            assert 'label' in self.csv_data.columns, "label column not found in data"
+            self.label = self.csv_data['label']
+    
+
+        if self.data_type == 'segmentation':
+            assert 'mask_path' in self.csv_data.columns, "mask_path column not found in data"
+            self.masks = self.csv_data['mask_path']
+
+        if self.data_type == 'detection':
+            assert 'label' in self.csv_data.columns, "label column not found in data"
+            assert 'bbox' in self.csv_data.columns, "bbox column not found in data"
+            self.label = self.csv_data['label']
+            self.bbox = self.csv_data['bbox']
+
+        ## save wrangled file
+        try:
+            if os.path.exists(self.folder_name):
+                self.csv_data.to_csv(os.path.join(self.folder_name,'wrangled_file.csv'),index=False)
+        except:
+            if self.logger:
+                self.logger.info("Could not save wrangled file. Please check the folder name.")
 
     def __len__(self):
-        return len(self.data)
+        return len(self.csv_data)
     
     def __repr__(self) -> str:
-        return "self.data: {},self.transform: {},self.label: {}".format(self.data,self.transform,self.label)
+        return "self.data: {},self.transform: {},self.label: {}".format(self.csv_data,self.transform,self.label)
 
     def __getitem__(self,idx):
         
-        img = self.data['image_path_new'].iloc[idx]
+        img = self.csv_data['image_path_new'].iloc[idx]
         #img = Image.open(img)
         img = cv2.imread(img)
-        if self.label:
-            label = self.label[idx]
-        
-        if self.transform:
-            img = self.transform(img)
 
-        out_dict = {'image':img}
-        if self.label:
-            out_dict['label'] = label                                                
-        return out_dict
+        if self.data_type == 'classification':
+            if self.transform:
+                img = self.transform(img)
+            out_dict = {'image':img}
+            out_dict['label'] = self.label.iloc[idx]   
+
+            return out_dict
+        
+        if self.data_type == 'segmentation':
+            if self.transform:
+                img = self.transform(img)
+                mask_transform = self.transform(mask)
+            out_dict = {'image':img}
+            out_dict['mask'] = self.masks.iloc[idx]
+            out_dict['label'] = self.label.iloc[idx]
+            return out_dict
+        
+        if self.data_type == 'detection':
+            if self.transform:
+                img = self.transform(img)
+            out_dict = {'image':img}
+            out_dict['label'] = self.label.iloc[idx]
+
+            return out_dict
 
 class DataLoader(data_fetcher):
     """
@@ -217,11 +267,15 @@ class DataLoader(data_fetcher):
         self.logger = logger
         self._yaml_data = None
         self.data_dict = self.load_data_params
-        self.transforms_final=[]
         self.trainloader = None
         self.testloader = None
+        self.model_type = self.data_dict['model']['model_type']
         self.dataset_params_train = self.data_dict['data']['datasets_params_train']
+        self.transformations = self.data_dict['transformation']
+        self.dataset_params_train['transform'] = JointTransforms(self.transformations,logger=self.logger) 
         self.dataset_params_test = self.data_dict['data']['datasets_params_test']
+        self.dataset_params_test['transform'] = JointTransforms(self.transformations,logger=self.logger)
+        self.data_params_file = self.data_dict['data']['from_file']
 
         self.data_file= self.data_dict['data']['from_datasets']
 
@@ -242,8 +296,8 @@ class DataLoader(data_fetcher):
             if self.data_file in dir(torchvision.datasets):
                 if self.logger:
                     self.logger.info("Data file: {} loading from torchvision.datasets.".format(self.data_file))
-                self.trainset = getattr(torchvision.datasets,self.data_file)(self.dataset_params_train)
-                self.testset = getattr(torchvision.datasets,self.data_file)(self.dataset_params_test)
+                self.trainset = getattr(torchvision.datasets,self.data_file)(**self.dataset_params_train)
+                self.testset = getattr(torchvision.datasets,self.data_file)(**self.dataset_params_test)
                 if self.data_dict['data']['thresholding_pd']>0:
                     subset_indices = range(self.data_dict['data']['thresholding_pd'])
                     self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)
@@ -254,16 +308,18 @@ class DataLoader(data_fetcher):
                     self.logger.info("Exiting")
                 sys.exit("Data file: {} could not be loaded from torchvision.datasets.".format(self.data_file))
         else:
-            self.trainset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=True,logger=self.logger)
-            self.testset = self.data_train(self.data_dict['data'],transform=self.get_transforms,train_file=False,logger=self.logger)
+            self.trainset = self.data_train(self.data_params_file,self.model_type, 
+                                            transform=JointTransforms(self.transformations),train_file=True,logger=self.logger)
+            self.testset = self.data_train(self.data_params_file,self.model_type,
+                                           transform=JointTransforms(self.transformations),train_file=False,logger=self.logger)
 
         self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.data_dict['train_params']['batch_size'], shuffle=self.data_dict['train_params']['shuffle'], num_workers=self.data_dict['train_params']['num_workers'],worker_init_fn = lambda id: np.array(self.data_dict['train_params']['seed']))
         self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.data_dict['test_params']['batch_size'], shuffle=self.data_dict['test_params']['shuffle'], num_workers=self.data_dict['test_params']['num_workers'],worker_init_fn = lambda id: np.array(self.data_dict['test_params']['seed']))
         return self.trainloader,self.testloader,self.trainset,self.testset
 
-    def data_train(self,data_file,transform,train_file,logger=None):
+    def data_train(self,data,model_type,transform=None,train_file=True,**kwargs):
         """
         get train data from yaml file
         """
-        data_t = customdl(data_file,transform=transform,train_file=train_file,logger=logger)
+        data_t = customdl(data,model_type,transform=transform,train_file=train_file,**kwargs)
         return data_t

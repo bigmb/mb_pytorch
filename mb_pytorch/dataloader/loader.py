@@ -376,7 +376,7 @@ class DataLoader(data_fetcher):
                 self.trainset = getattr(torchvision.datasets,self.data_file)(**self.dataset_params_train)
                 self.testset = getattr(torchvision.datasets,self.data_file)(**self.dataset_params_test)
                 if self.data_dict['data']['thresholding_pd']>0:
-                    subset_indices = range(self.data_dict['data']['thresholding_pd'])
+                    subset_indices = range(self.data_dict['data']['thresholding_dataset'])
                     self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)
                     self.testset = torch.utils.data.Subset(self.testset, subset_indices)
             else:

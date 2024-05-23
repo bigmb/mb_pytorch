@@ -16,6 +16,8 @@ data:
     target_transform : 'target_transform',
     download : True
     }
+  thresholding_dataset : 0  ## if 0, then all the data is used, else thresholding is done on the data
+
   from_file: False  ##if False, then from_datasets is used if True, then file data is used
   file:
     {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/csv/file_data.csv', ## path to the csv file

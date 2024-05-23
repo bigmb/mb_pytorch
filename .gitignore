@@ -12,7 +12,7 @@ model
 
 ## ignore all examples files and folders
 *.ipynb_checkpoints
-examples/
+#examples/
 
 # Distribution / packaging
 .Python

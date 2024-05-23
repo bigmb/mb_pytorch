@@ -1,14 +1,14 @@
 data:
   from_datasets: 'CelebA'    ## datasets from torchvision.datasets
   datasets_params_train:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
-    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/', 
+    {root : '/home/winnow/mb_packages/mb_pytorch/data/',  #/home/malav/Desktop/mb_packages/mb_pytorch/data/
     split : 'train',
     target_type : 'bbox',
     transform : 'transform',
     download : True
     }
   datasets_params_test:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
-    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/', 
+    {root : '/home/winnow/mb_packages/mb_pytorch/data/', #/home/malav/Desktop/mb_packages/mb_pytorch/data/
     split : 'test',
     target_type : 'bbox',
     transform : 'transform',
@@ -32,7 +32,7 @@ model:
   model: 'faster_rcnn'
   use_pretrained: True  
   use_own_model: False
-  model_path: '/home/malav/Desktop/mb_packages/mb_pytorch/models/...' ## if use_own_model is True
+  model_path: '/home/winnow/Desktop/mb_packages/mb_pytorch/models/...' ## if use_own_model is True        #/home/malav/Desktop/mb_packages/mb_pytorch/models/...
   model_layer : 'avgpool' # generally used for generating embeddings
 
   load_model: False

@@ -5,8 +5,8 @@ import torch
 import torchvision
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 import torchvision.transforms.functional as TF
-from pytorch_grad_cam import GradCAM
-from pytorch_grad_cam.utils.image import show_cam_on_image
+# from pytorch_grad_cam import GradCAM
+# from pytorch_grad_cam.utils.image import show_cam_on_image
 import io
 import PIL
 
@@ -196,6 +196,7 @@ def model_viewer(model,input_shape = (1,3,128,128), location='model',view=False)
         None
     """
     from torchviz import make_dot
+    
     x = torch.randn(input_shape)
     y = model(x)
     dot= make_dot(y.mean(), params=dict(model.named_parameters()),show_attrs=True)
@@ -240,6 +241,9 @@ def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.4):
     return np.uint8(255 * cam)
 
 def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False):
+    from pytorch_grad_cam import GradCAM
+    from pytorch_grad_cam.utils.image import show_cam_on_image
+    
     split_val = gradcam_layer.split('.')[1]
     new_layer_name = 'model.' + split_val
     gradcam_eval = eval(new_layer_name)

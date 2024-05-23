@@ -12,7 +12,6 @@ model
 
 ## ignore all examples files and folders
 *.ipynb_checkpoints
-*.ipynb
 examples/
 
 # Distribution / packaging

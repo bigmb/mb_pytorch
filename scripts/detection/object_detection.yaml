@@ -5,7 +5,6 @@ data:
     split : 'train',
     target_type : 'bbox',
     transform : 'transform',
-    target_transform : 'target_transform',
     download : True
     }
   datasets_params_test:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
@@ -13,7 +12,6 @@ data:
     split : 'test',
     target_type : 'bbox',
     transform : 'transform',
-    target_transform : 'target_transform',
     download : True
     }
   thresholding_dataset : 0  ## if 0, then all the data is used, else thresholding is done on the data
@@ -46,7 +44,7 @@ model:
   model_scheduler: 'StepLR' #StepLR, ExponentialLR,none
   model_pretrained: True
   model_epochs: 10
-  model_num_classes: 5
+  model_num_classes: 41
   model_initialization: None
 
   model_train_parameters:

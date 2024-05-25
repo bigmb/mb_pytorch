@@ -61,7 +61,11 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             logger.info('Training Started')
         for batch_idx, (images, targets) in enumerate(train_loader):
             images = list(image.to(device) for image in images)
-            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+            temp_dict = {}
+            temp_dict['bbox'] = targets[1][:]
+            temp_dict['labels'] = targets[0][:]
+            final_list = [temp_dict]
+            targets = [{k: v.to(device) for k, v in t.items()} for t in final_list]
             
             optimizer.zero_grad()
             loss_dict = model(images, targets)

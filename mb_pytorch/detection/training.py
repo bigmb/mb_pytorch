@@ -62,6 +62,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         for batch_idx, (images, targets) in enumerate(train_loader):
             images = list(image.to(device) for image in images)
             temp_dict = {}
+            final_list = []
             temp_dict['boxes'] = targets[1][:]
             temp_dict['labels'] = targets[0][:]
             final_list = [temp_dict]
@@ -111,10 +112,8 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
                     if grad_img is not None:
                         grad_img = np.transpose(grad_img,(2,0,1))
                         writer.add_image(f'Gradcam training/{cam_layers}',grad_img,global_step=i)
-                    if j == 0:
-                        if grad_img is None:
-                            if logger:
-                                logger.info(f'Gradcam not supported for {cam_layers}')            
+                    if grad_img is None and logger:
+                            logger.info(f'Gradcam not supported for {cam_layers}')            
                         
         ## Validation loop
         val_loss = 0
@@ -122,7 +121,12 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         with torch.no_grad():
             for batch_idx, (images, targets) in enumerate(val_loader):
                 images = list(image.to(device) for image in images)
-                targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+                temp_dict = {}
+                final_list = []
+                temp_dict['boxes'] = targets[1][:]
+                temp_dict['labels'] = targets[0][:]
+                final_list = [temp_dict]
+                targets = [{k: v.to(device) for k, v in t.items()} for t in final_list]
                 
                 loss_dict = model(images, targets)
                 losses = sum(loss for loss in loss_dict.values())

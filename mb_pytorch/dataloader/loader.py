@@ -391,7 +391,7 @@ class DataLoader(data_fetcher):
                                            transform=JointTransforms(self.transformations),train_file=False,logger=self.logger)
 
         def collate_fn(batch):
-            return tuple(zip(*batch))
+            return list(zip(*batch))
         self.trainloader = torch.utils.data.DataLoader(self.trainset, 
                                                        batch_size=self.data_dict['train_params']['batch_size'], 
                                                        shuffle=self.data_dict['train_params']['shuffle'], 

@@ -300,16 +300,16 @@ class customdl(torch.utils.data.Dataset):
         if self.data_type == 'classification':
             if self.transform:
                 img = self.transform(img)
-            out_dict = {'image':img}
-            out_dict['label'] = self.label.iloc[idx]   
-
-            return out_dict
+            label = {}
+            label['label'] = self.label.iloc[idx]   
+            return img,label
         
         if self.data_type == 'segmentation':
             if self.transform:
                 mask = cv2.imread(self.masks.iloc[idx],cv2.IMREAD_GRAYSCALE) ## considering mask is just binary class
                 img,mask = self.transform(img,mask)
-            mask_dict = {'mask':mask}
+            mask_dict={}
+            mask_dict['mask'] = mask
             mask_dict['label'] = self.label.iloc[idx]
             
             return img,mask_dict
@@ -317,8 +317,9 @@ class customdl(torch.utils.data.Dataset):
         if self.data_type == 'detection':
             if self.transform:
                 img,bbox = self.transform(img,bbox)
-            bbox_dict = {'boxes':torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
-                                             for x in len(self.bbox.iloc[idx])],dtype=torch.float32)}  ## should be list in a list.
+            bbox_dict={}
+            bbox_dict['boxes'] = torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
+                                             for x in len(self.bbox.iloc[idx])],dtype=torch.int32)  ## should be list in a list.
             bbox_dict['label'] = self.label.iloc[idx]
 
             return img,bbox_dict

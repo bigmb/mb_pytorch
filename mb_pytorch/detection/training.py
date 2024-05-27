@@ -66,10 +66,10 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             temp_dict['boxes'] = targets[1][:]
             temp_dict['labels'] = targets[0][:]
             final_list = [temp_dict]
-            targets_final = [{k: v.to(device) for k, v in t.items()} for t in final_list]
+            targets = [{k: v.to(device) for k, v in t.items()} for t in final_list]
             
             optimizer.zero_grad()
-            loss_dict = model(images, targets_final)
+            loss_dict = model(images, targets)
             losses = sum(loss for loss in loss_dict.values())
             
             losses.backward()
@@ -113,7 +113,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
                         grad_img = np.transpose(grad_img,(2,0,1))
                         writer.add_image(f'Gradcam training/{cam_layers}',grad_img,global_step=i)
                     if grad_img is None and logger:
-                            logger.info(f'Gradcam not supported for {cam_layers}')            
+                        logger.info(f'Gradcam not supported for {cam_layers}')            
                         
         ## Validation loop
         val_loss = 0

@@ -390,8 +390,20 @@ class DataLoader(data_fetcher):
             self.testset = self.data_train(self.data_params_file,self.model_type,
                                            transform=JointTransforms(self.transformations),train_file=False,logger=self.logger)
 
-        self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.data_dict['train_params']['batch_size'], shuffle=self.data_dict['train_params']['shuffle'], num_workers=self.data_dict['train_params']['num_workers'],worker_init_fn = lambda id: np.array(self.data_dict['train_params']['seed']))
-        self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.data_dict['test_params']['batch_size'], shuffle=self.data_dict['test_params']['shuffle'], num_workers=self.data_dict['test_params']['num_workers'],worker_init_fn = lambda id: np.array(self.data_dict['test_params']['seed']))
+        def collate_fn(batch):
+            return tuple(zip(*batch))
+        self.trainloader = torch.utils.data.DataLoader(self.trainset, 
+                                                       batch_size=self.data_dict['train_params']['batch_size'], 
+                                                       shuffle=self.data_dict['train_params']['shuffle'], 
+                                                       num_workers=self.data_dict['train_params']['num_workers'],
+                                                       worker_init_fn = lambda id: np.array(self.data_dict['train_params']['seed']),
+                                                       collate_fn=collate_fn)
+        self.testloader = torch.utils.data.DataLoader(self.testset, 
+                                                      batch_size=self.data_dict['test_params']['batch_size'], 
+                                                      shuffle=self.data_dict['test_params']['shuffle'], 
+                                                      num_workers=self.data_dict['test_params']['num_workers'],
+                                                      worker_init_fn = lambda id: np.array(self.data_dict['test_params']['seed']),
+                                                      collate_fn=collate_fn)
         return self.trainloader,self.testloader,self.trainset,self.testset
 
     def data_train(self,data,model_type,transform=None,train_file=True,**kwargs):

@@ -66,10 +66,10 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             temp_dict['boxes'] = targets[1][:]
             temp_dict['labels'] = targets[0][:]
             final_list = [temp_dict]
-            targets = [{k: v.to(device) for k, v in t.items()} for t in final_list]
+            targets_final = [{k: v.to(device) for k, v in t.items()} for t in final_list]
             
             optimizer.zero_grad()
-            loss_dict = model(images, targets)
+            loss_dict = model(images, targets_final)
             losses = sum(loss for loss in loss_dict.values())
             
             losses.backward()

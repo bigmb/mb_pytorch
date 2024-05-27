@@ -309,21 +309,19 @@ class customdl(torch.utils.data.Dataset):
             if self.transform:
                 mask = cv2.imread(self.masks.iloc[idx],cv2.IMREAD_GRAYSCALE) ## considering mask is just binary class
                 img,mask = self.transform(img,mask)
-            out_dict = {'image':img}
-            out_dict['mask'] = mask
-            out_dict['label'] = self.label.iloc[idx]
+            mask_dict = {'mask':mask}
+            mask_dict['label'] = self.label.iloc[idx]
             
-            return out_dict
+            return img,mask_dict
         
         if self.data_type == 'detection':
             if self.transform:
                 img,bbox = self.transform(img,bbox)
-            out_dict = {'image':img}
-            out_dict['bbox'] = torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
-                                             for x in len(self.bbox.iloc[idx])],dtype=torch.float32)  ## should be list in a list. 
-            out_dict['label'] = self.label.iloc[idx]
+            bbox_dict = {'boxes':torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
+                                             for x in len(self.bbox.iloc[idx])],dtype=torch.float32)}  ## should be list in a list.
+            bbox_dict['label'] = self.label.iloc[idx]
 
-            return out_dict
+            return img,bbox_dict
 
 class DataLoader(data_fetcher):
     """

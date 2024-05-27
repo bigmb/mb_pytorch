@@ -81,7 +81,7 @@ class JointTransforms:
             if mask is not None:
                 mask = transforms.ToTensor()(mask)
             if bbox is not None:
-                bbox = torch.tensor([[bbox[0],bbox[1],bbox[2],bbox[3]]],dtype=torch.float32)
+                bbox = torch.tensor([[bbox[0],bbox[1],bbox[2],bbox[3]]],dtype=torch.int32)
 
         if self.transform_data['normalize']['val']:
             img = transforms.Normalize(self.transform_data['normalize']['args']['mean'],self.transform_data['normalize']['args']['std'])(img)
@@ -320,7 +320,7 @@ class customdl(torch.utils.data.Dataset):
             bbox_dict={}
             bbox_dict['boxes'] = torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
                                              for x in len(self.bbox.iloc[idx])],dtype=torch.int32)  ## should be list in a list.
-            bbox_dict['label'] = self.label.iloc[idx]
+            bbox_dict['label'] = [self.label.iloc[idx]]
 
             return img,bbox_dict
 

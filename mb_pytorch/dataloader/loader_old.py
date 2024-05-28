@@ -1,10 +1,12 @@
 #dataloader for pytorch1.0
 
 import torch
+import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from mb_pytorch.utils.yaml_reader import YamlReader
 import os
+import sys
 import numpy as np
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
@@ -60,7 +62,6 @@ class data_fetcher:
         data = YamlReader(self.yaml).data(self.logger)
         self.all = data
         return self.all
-
 
 class JointTransforms:
     def __init__(self,transform_yaml,logger=None):
@@ -125,6 +126,9 @@ class JointTransforms:
         
         if self.transform_data['random_grayscale']['val']:
             img = transforms.RandomGrayscale(self.transform_data['random_grayscale']['args']['p'])(img)
+
+        # if self.logger:
+        #     self.logger.info("transforms: {}".format(self.transform_data))
         
         if mask is not None:
             return img,mask
@@ -209,6 +213,11 @@ class customdl(torch.utils.data.Dataset):
         self.csv_data = check_drop_duplicates(self.csv_data,columns=['image_path'],drop=True,logger=self.logger)
         self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)
 
+        # else:
+        #     date_now = today.strftime("%d_%m_%Y_%H_%M")
+        #     self.folder_name='data_'+date_now
+        # os.mkdir('./data'+str(self.folder_name))
+
         if data['use_img_dir']:
             img_path = [os.path.join(str(data['img_dir']),self.csv_data['image_path'].iloc[i]) for i in range(len(self.csv_data))]
         else:
@@ -223,6 +232,16 @@ class customdl(torch.utils.data.Dataset):
         self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
         self.csv_data = self.csv_data.reset_index(drop=True)
         if logger:
+            self.logger.info("self.data: {}".format(self.csv_data))
+
+        if data['thresholding_pd']>0:
+            if len(self.csv_data) <= data['thresholding_pd']:
+                self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))
+                self.logger.info("Less than thresholding_pd data points. Please check the data file.")
+                self.logger.info("Exiting")
+                sys.exit('Less than thresholding_pd data points. Please check the data file.')
+
+        if self.logger:
             self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))
 
         if data['verify_image']:
@@ -232,6 +251,13 @@ class customdl(torch.utils.data.Dataset):
             self.csv_data['img_verify'] = verify_image_res
             self.csv_data = self.csv_data[self.csv_data['img_verify'] == True]
             self.csv_data = self.csv_data.reset_index()
+
+            if data['thresholding_pd']>0:
+                if len(self.csv_data) <= data['thresholding_pd']:
+                    self.logger.info("Length of data after removing invalid images: {}".format(len(self.csv_data)))
+                    self.logger.info("Less than thresholding_pd data points. Please check the data file.")
+                    self.logger.info("Exiting")
+                    sys.exit('Less than thresholding_pd data points. Please check the data file.')
         else:   
             if self.logger:
                 self.logger.info("Skipping image verification")
@@ -240,6 +266,7 @@ class customdl(torch.utils.data.Dataset):
             assert 'label' in self.csv_data.columns, "label column not found in data"
             self.label = self.csv_data['label']
     
+
         if self.data_type == 'segmentation':
             assert 'mask_path' in self.csv_data.columns, "mask_path column not found in data"
             self.masks = self.csv_data['mask_path']
@@ -313,10 +340,17 @@ class DataLoader(data_fetcher):
         self.dataset_params_train = self.data_dict['data']['datasets_params_train']
         self.transformations = self.data_dict['transformation']
 
-        self.dataset_params_train['transform'] = JointTransforms(self.transformations,logger=self.logger)
+        if 'transform' in self.data_dict['data']['datasets_params_train']:
+            train_transform_str = self.data_dict['data']['datasets_params_train']['transform']
+            self.dataset_params_train[train_transform_str] = JointTransforms(self.transformations,logger=self.logger) 
+        else:
+            self.dataset_params_train['transform'] = JointTransforms(self.transformations,logger=self.logger)
         self.dataset_params_test = self.data_dict['data']['datasets_params_test']
-
-        self.dataset_params_test['transform'] = JointTransforms(self.transformations,logger=self.logger)
+        if 'transform' in self.data_dict['data']['datasets_params_test']:
+            test_transform_str = self.data_dict['data']['datasets_params_test']['transform']
+            self.dataset_params_test[test_transform_str] = JointTransforms(self.transformations,logger=self.logger)
+        else:
+            self.dataset_params_test['transform'] = JointTransforms(self.transformations,logger=self.logger)
 
         self.data_params_file = self.data_dict['data']['from_file']
         self.data_file= self.data_dict['data']['from_datasets']
@@ -334,10 +368,26 @@ class DataLoader(data_fetcher):
         return all data loaders
         """
 
-        self.trainset = self.data_train(self.data_params_file,self.model_type, 
-                                        transform=JointTransforms(self.transformations),train_file=True,logger=self.logger)
-        self.testset = self.data_train(self.data_params_file,self.model_type,
-                                        transform=JointTransforms(self.transformations),train_file=False,logger=self.logger)
+        if self.data_dict['data']['from_file']==False:
+            if self.data_file in dir(torchvision.datasets):
+                if self.logger:
+                    self.logger.info("Data file: {} loading from torchvision.datasets.".format(self.data_file))
+                self.trainset = getattr(torchvision.datasets,self.data_file)(**self.dataset_params_train)
+                self.testset = getattr(torchvision.datasets,self.data_file)(**self.dataset_params_test)
+                if self.data_dict['data']['thresholding_dataset']>0:
+                    subset_indices = range(self.data_dict['data']['thresholding_dataset'])
+                    self.trainset = torch.utils.data.Subset(self.trainset, subset_indices)
+                    self.testset = torch.utils.data.Subset(self.testset, subset_indices)
+            else:
+                if self.logger:
+                    self.logger.info("Data file: {} could not be loaded from torchvision.datasets.".format(self.data_file))
+                    self.logger.info("Exiting")
+                sys.exit("Data file: {} could not be loaded from torchvision.datasets.".format(self.data_file))
+        else:
+            self.trainset = self.data_train(self.data_params_file,self.model_type, 
+                                            transform=JointTransforms(self.transformations),train_file=True,logger=self.logger)
+            self.testset = self.data_train(self.data_params_file,self.model_type,
+                                           transform=JointTransforms(self.transformations),train_file=False,logger=self.logger)
 
         self.trainloader = torch.utils.data.DataLoader(self.trainset, 
                                                        batch_size=self.data_dict['train_params']['batch_size'], 

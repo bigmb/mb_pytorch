@@ -159,7 +159,7 @@ class EmbeddingGenerator(DataLoader):
             self.logger.info("Embeddings saved to {}".format(os.path.join(self.folder_name,'emb_wrangled_file.csv')))
 
 
-    def data_emb_loader(self,logger=None):
+    def data_emb_loader(self):
         """
         get embedding data from yaml file
         """

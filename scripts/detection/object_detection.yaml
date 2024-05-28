@@ -1,29 +1,6 @@
 data:
-  from_datasets: 'CelebA'    ## datasets from torchvision.datasets
-  datasets_params_train:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
-    { #root : '/home/winnow/mb_packages/mb_pytorch/data/',  
-    root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/',
-    split : 'train',
-    target_type : ['identity','bbox'],
-    transform : 'transform',
-    download : True
-    }
-  datasets_params_test:      ## params for dataset - find out the **kwargs from https://pytorch.org/vision/stable/datasets.html
-    { #root : '/home/winnow/mb_packages/mb_pytorch/data/', 
-    root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/',
-    split : 'test',
-    target_type : ['identity','bbox'],
-    transform : 'transform',
-    download : True
-    }
-  thresholding_dataset : 0  ## if 0, then all the data is used, else thresholding is done on the data
-
-  from_file: False  ##if False, then from_datasets is used if True, then file data is used
   file:
     {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/csv/file_data.csv', ## path to the csv file
-    use_img_dir: True ,  ## if True, then img_dir is used where the images are stored
-    img_dir: /home/malav/Desktop/mb_packages/mb_pytorch/data/images1/',  ## path to the image directory
-    thresholding_pd: 0, ## if 0, then all the data is used, else thresholding is done on the data
     verify_image_path: True,  ## if True, then image path is verified
     verify_image : False} ## if Ture, verifying images using mb.
 
@@ -42,6 +19,7 @@ model:
   use_torchvision_models: True
   model_name: 'fasterrcnn_resnet50_fpn' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
   model_version: '50'  ##if model_name is in torchvision.models, then this is the version of the model
+  model_backbone: 'resnet'  ##if model_name is in torchvision.models, then this is the backbone of the model
   model_optimizer: 'Adam' #adam, sgd, rmsprop,none
   model_loss: 'cross_entropy' #cross_entropy, mse,none
   model_scheduler: 'StepLR' #StepLR, ExponentialLR,none
@@ -66,8 +44,6 @@ model:
     ExponentialLR:
       {gamma: 0.9}
 
-
-
 train_params:
   batch_size: 4
   num_workers: 4
@@ -83,7 +59,7 @@ test_params:
   seed: 42  
 
 transformation:
-  transform : True
+  transform : True ## if True, then the following transformations are used
   resize:
     val : False
     args:
@@ -93,7 +69,7 @@ transformation:
     args:
       size: [224, 224]
   random_horizontal_flip:
-    val : True
+    val : False
     args:
       p: 0.5
   random_vertical_flip:
@@ -101,7 +77,7 @@ transformation:
     args:
        p: 0.5
   random_rotation:
-    val : True
+    val : False
     args:
       degrees: 90
   random_grayscale:
@@ -109,7 +85,7 @@ transformation:
     args:
       p: 0.1
   random_color_jitter:
-    val : True
+    val : False
     args:
       brightness: 0.4
       contrast: 0.4

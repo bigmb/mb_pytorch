@@ -17,8 +17,11 @@ model
 # Distribution / packaging
 .Python
 torch_compile_debug/
-data/
+data/emb_wrangled_file.csv
+data/wrangled_file.csv
+data/logs/
 data/celeba
+data/celeba/
 .vscode
 logs/
 .vscode/

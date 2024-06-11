@@ -202,9 +202,21 @@ class customdl(torch.utils.data.Dataset):
         assert 'image_type' in self.csv_data.columns, "image_type column not found in data"
 
         if train_file: ## used this to differentiate between train and validation data in the data file
-            self.csv_data = self.csv_data[self.csv_data['image_type'] == 'training']
+            try:
+                if 'training' not in self.csv_data['image_type'].unique():
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'train']
+                else:   
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'training']
+            except:
+                return "image_type column (train/training) not found in data"
         else:
-            self.csv_data = self.csv_data[self.csv_data['image_type'] == 'validation']
+            try:
+                if 'validation' not in self.csv_data['image_type'].unique():
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'val']
+                else:
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'validation']
+            except:
+                return "image_type column (val/validation) not found in data"
 
         self.csv_data = check_drop_duplicates(self.csv_data,columns=['image_path'],drop=True,logger=self.logger)
         self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)

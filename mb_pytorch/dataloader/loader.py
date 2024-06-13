@@ -322,24 +322,9 @@ class DataLoader(data_fetcher):
         self.trainloader = None
         self.testloader = None
         self.model_type = self.data_dict['model']['model_type']
-        self.dataset_params_train = self.data_dict['data']['datasets_params_train']
         self.transformations = self.data_dict['transformation']
+        self.data_params_file = self.data_dict['data']['file']
 
-        self.dataset_params_train['transform'] = JointTransforms(self.transformations,logger=self.logger)
-        self.dataset_params_test = self.data_dict['data']['datasets_params_test']
-
-        self.dataset_params_test['transform'] = JointTransforms(self.transformations,logger=self.logger)
-
-        self.data_params_file = self.data_dict['data']['from_file']
-        self.data_file= self.data_dict['data']['from_datasets']
-
-        if os.path.exists(self.dataset_params_train['root']):
-            if self.logger:
-                self.logger.info("Data folder already exists. Using existing data folder :  {}".format(self.dataset_params_train['root']))
-        else:
-            os.mkdir(self.dataset_params_train['root'])
-            if self.logger:
-                self.logger.info("Data folder created : {}".format(self.dataset_params_train['root']))
     
     def data_load(self):
         """

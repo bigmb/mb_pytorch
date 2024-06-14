@@ -221,18 +221,8 @@ class customdl(torch.utils.data.Dataset):
 
         self.csv_data = check_drop_duplicates(self.csv_data,columns=['image_path'],drop=True,logger=self.logger)
         self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)
-        print(self.csv_data.head())
-        # if data['use_img_dir']:
-        #     img_path = [os.path.join(str(data['img_dir']),self.csv_data['image_path'].iloc[i]) for i in range(len(self.csv_data))]
-        # else:
-        img_path = [self.csv_data['image_path'].iloc[i] for i in range(len(self.csv_data))]
-        self.csv_data['image_path_new'] = img_path
-        print(img_path[:3])
-        if self.logger:
-            self.logger.info("Verifying paths")
-            self.logger.info("first path : {}".format(img_path[0]))
 
-        path_check_res= [os.path.exists(img_path[i]) for i in range(len(img_path))]
+        path_check_res= [os.path.exists(self.csv_data.image_path[i]) for i in range(len(self.csv_data))]
         self.csv_data['img_path_check'] = path_check_res
         self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
         self.csv_data = self.csv_data.reset_index(drop=True)

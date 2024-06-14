@@ -203,6 +203,25 @@ class customdl(torch.utils.data.Dataset):
         assert 'image_path' in self.csv_data.columns, "image_path column not found in data"
         assert 'image_type' in self.csv_data.columns, "image_type column not found in data"
 
+        #checking paths
+        path_check_res= [os.path.exists(self.csv_data.image_path[i]) for i in range(len(self.csv_data))]
+        self.csv_data['img_path_check'] = path_check_res ## check why test loader doesnt get this column
+        self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
+        self.csv_data = self.csv_data.reset_index(drop=True)
+        if logger:
+            self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))
+
+        if data['verify_image']:
+            if self.logger:
+                self.logger.info("Verifying images")
+            verify_image_res = [verify_image(self.csv_data['image_path'].iloc[i],logger=self.logger) for i in range(len(self.csv_data))]  
+            self.csv_data['img_verify'] = verify_image_res
+            self.csv_data = self.csv_data[self.csv_data['img_verify'] == True]
+            self.csv_data = self.csv_data.reset_index()
+        else:   
+            if self.logger:
+                self.logger.info("Skipping image verification")
+
         if train_file: ## used this to differentiate between train and validation data in the data file
             try:
                 if 'training' in pd.unique(self.csv_data['image_type']):
@@ -228,24 +247,6 @@ class customdl(torch.utils.data.Dataset):
         self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)
         if logger:
             self.logger.info("Length of data after removing duplicates and unnamed columns: {}".format(len(self.csv_data)))
-        
-        path_check_res= [os.path.exists(self.csv_data.image_path[i]) for i in range(len(self.csv_data))]
-        self.csv_data['img_path_check'] = path_check_res ## check why test loader doesnt get this column
-        self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
-        self.csv_data = self.csv_data.reset_index(drop=True)
-        if logger:
-            self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))
-
-        if data['verify_image']:
-            if self.logger:
-                self.logger.info("Verifying images")
-            verify_image_res = [verify_image(self.csv_data['image_path'].iloc[i],logger=self.logger) for i in range(len(self.csv_data))]  
-            self.csv_data['img_verify'] = verify_image_res
-            self.csv_data = self.csv_data[self.csv_data['img_verify'] == True]
-            self.csv_data = self.csv_data.reset_index()
-        else:   
-            if self.logger:
-                self.logger.info("Skipping image verification")
         
         if self.data_type == 'classification':
             assert 'label' in self.csv_data.columns, "label column not found in data"

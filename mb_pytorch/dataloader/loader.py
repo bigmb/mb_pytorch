@@ -9,6 +9,7 @@ import numpy as np
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb_pandas.src.transform import *
+from mb.pandas import check_drop_duplicates,remove_unnamed
 from datetime import datetime
 import cv2
 
@@ -226,6 +227,7 @@ class customdl(torch.utils.data.Dataset):
         # else:
         img_path = [self.csv_data['image_path'].iloc[i] for i in range(len(self.csv_data))]
         self.csv_data['image_path_new'] = img_path
+        print(img_path[:3])
         if self.logger:
             self.logger.info("Verifying paths")
             self.logger.info("first path : {}".format(img_path[0]))

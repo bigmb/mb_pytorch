@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from mb_pytorch.utils.yaml_reader import YamlReader
 import os
 import numpy as np
+import pandas as pd
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb_pandas.src.transform import *
@@ -204,21 +205,21 @@ class customdl(torch.utils.data.Dataset):
 
         if train_file: ## used this to differentiate between train and validation data in the data file
             try:
-                if 'training' in self.csv_data['image_type'].unique():
+                if 'training' in pd.unique(self.csv_data['image_type']):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'training']
-                if 'train' in self.csv_data['image_type'].unique():   
+                if 'train' in pd.unique(self.csv_data['image_type']):   
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'train']
             except:
                 return "image_type column (train/training) not found in data"
         else:
             try:
-                if 'validation' in self.csv_data['image_type'].unique():
+                if 'validation' in pd.unique(self.csv_data['image_type']):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'validation']
-                if 'val'  in self.csv_data['image_type'].unique():
+                if 'val'  in pd.unique(self.csv_data['image_type']):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'val']
-                if 'test' in self.csv_data['image_type'].unique():
+                if 'test' in pd.unique(self.csv_data['image_type']):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'test']
-                if 'testing' in self.csv_data['image_type'].unique():
+                if 'testing' in pd.unique(self.csv_data['image_type']):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'testing']
             except:
                 return "image_type column (val/validation/test/testing) not found in data"
@@ -228,16 +229,9 @@ class customdl(torch.utils.data.Dataset):
         if logger:
             self.logger.info("Length of data after removing duplicates and unnamed columns: {}".format(len(self.csv_data)))
         
-        print(self.csv_data.head())
         path_check_res= [os.path.exists(self.csv_data.image_path[i]) for i in range(len(self.csv_data))]
-        print(path_check_res[:3])
-        self.csv_data['img_path_check'] = path_check_res
-        print('img_path_check')
-        print(self.csv_data.head())
-        print(self.csv_data.columns)
+        self.csv_data['img_path_check'] = path_check_res ## check why test loader doesnt get this column
         self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
-        print('path check truee')
-        print(self.csv_data.columns)
         self.csv_data = self.csv_data.reset_index(drop=True)
         if logger:
             self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))

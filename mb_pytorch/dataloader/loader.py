@@ -79,9 +79,9 @@ class JointTransforms:
     def __call__(self,img,mask=None,bbox=None):
         if self.transform_data['to_tensor']['val']:
             img = transforms.ToTensor()(img)
-            if mask is not None:
+            if mask:
                 mask = transforms.ToTensor()(mask)
-            if bbox is not None:
+            if bbox:
                 bbox = torch.tensor([[bbox[0],bbox[1],bbox[2],bbox[3]]],dtype=torch.int32)
 
         if self.transform_data['normalize']['val']:
@@ -89,37 +89,37 @@ class JointTransforms:
 
         if self.transform_data['resize']['val']:
             img = transforms.Resize(self.transform_data['resize']['args']['size'])(img)
-            if mask is not None:
+            if mask:
                 mask = transforms.Resize(self.transform_data['resize']['args']['size'])(mask)
-            if bbox is not None:
+            if bbox:
                 bbox = self.resize_boxes(bbox, img.size)
 
         if self.transform_data['random_crop']['val']:
             img = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(img)
-            if mask is not None:
+            if mask:
                 mask = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(mask)
-            if bbox is not None:
+            if bbox:
                 bbox = self.crop_boxes(bbox, *self.transform_data['random_crop']['args']['size'])
 
         if self.transform_data['random_horizontal_flip']['val']:
             img = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(img)
-            if mask is not None:
+            if mask:
                 mask = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(mask)
-            if bbox is not None:
+            if bbox:
                 bbox = self.hflip_boxes(bbox, img.size[0])
 
         if self.transform_data['random_vertical_flip']['val']:
             img = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(img)
-            if mask is not None:
+            if mask:
                 mask = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(mask)
-            if bbox is not None:
+            if bbox:
                 bbox = self.vflip_boxes(bbox, img.size[1])
 
         if self.transform_data['random_rotation']['val']:
             img = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(img)
-            if mask is not None:
+            if mask:
                 mask = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(mask)
-            if bbox is not None:
+            if bbox:
                 bbox = self.rotate_boxes(bbox, self.transform_data['random_rotation']['args']['degrees'], img.size[1], img.size[0])
 
         if self.transform_data['random_color_jitter']['val']:
@@ -128,9 +128,9 @@ class JointTransforms:
         if self.transform_data['random_grayscale']['val']:
             img = transforms.RandomGrayscale(self.transform_data['random_grayscale']['args']['p'])(img)
         
-        if mask is not None:
+        if mask:
             return img,mask
-        elif bbox is not None:
+        elif bbox:
             return img,bbox
         else:
             return img
@@ -300,7 +300,7 @@ class customdl(torch.utils.data.Dataset):
         if self.data_type == 'segmentation':
             if self.transform:
                 mask = cv2.imread(self.masks.iloc[idx],cv2.IMREAD_GRAYSCALE) ## considering mask is just binary class
-                img,mask = self.transform(img,mask)
+                img,mask = self.transform(img,mask=mask)
             mask_dict={}
             mask_dict['mask'] = mask
             mask_dict['label'] = self.label.iloc[idx]
@@ -308,9 +308,9 @@ class customdl(torch.utils.data.Dataset):
             return img,mask_dict
         
         if self.data_type == 'detection':
-            bbox = self.bbox.iloc[idx]
+            bbox = eval(self.bbox.iloc[idx])
             if self.transform:
-                img,bbox = self.transform(img,bbox)
+                img,bbox = self.transform(img,bbox=bbox)
             bbox_dict={}
             bbox_dict['boxes'] = torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
                                              for x in len(self.bbox.iloc[idx])],dtype=torch.int32)  ## should be list in a list.

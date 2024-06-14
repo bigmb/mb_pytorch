@@ -204,20 +204,24 @@ class customdl(torch.utils.data.Dataset):
 
         if train_file: ## used this to differentiate between train and validation data in the data file
             try:
-                if 'training' not in self.csv_data['image_type'].unique():
-                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'train']
-                else:   
+                if 'training' in self.csv_data['image_type'].unique():
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'training']
+                if 'train' in self.csv_data['image_type'].unique():   
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'train']
             except:
                 return "image_type column (train/training) not found in data"
         else:
             try:
-                if 'validation' not in self.csv_data['image_type'].unique():
-                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'val']
-                else:
+                if 'validation' in self.csv_data['image_type'].unique():
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'validation']
+                if 'val'  in self.csv_data['image_type'].unique():
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'val']
+                if 'test' in self.csv_data['image_type'].unique():
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'test']
+                if 'testing' in self.csv_data['image_type'].unique():
+                    self.csv_data = self.csv_data[self.csv_data['image_type'] == 'testing']
             except:
-                return "image_type column (val/validation) not found in data"
+                return "image_type column (val/validation/test/testing) not found in data"
 
         self.csv_data = check_drop_duplicates(self.csv_data,columns=['image_path'],drop=True,logger=self.logger)
         self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)
@@ -232,7 +236,7 @@ class customdl(torch.utils.data.Dataset):
         if data['verify_image']:
             if self.logger:
                 self.logger.info("Verifying images")
-            verify_image_res = [verify_image(self.csv_data['image_path_new'].iloc[i],logger=self.logger) for i in range(len(self.csv_data))]  
+            verify_image_res = [verify_image(self.csv_data['image_path'].iloc[i],logger=self.logger) for i in range(len(self.csv_data))]  
             self.csv_data['img_verify'] = verify_image_res
             self.csv_data = self.csv_data[self.csv_data['img_verify'] == True]
             self.csv_data = self.csv_data.reset_index()
@@ -270,7 +274,7 @@ class customdl(torch.utils.data.Dataset):
 
     def __getitem__(self,idx):
         
-        img = self.csv_data['image_path_new'].iloc[idx]
+        img = self.csv_data['image_path'].iloc[idx]
         #img = Image.open(img)
         img = cv2.imread(img)
 

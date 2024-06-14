@@ -227,6 +227,8 @@ class customdl(torch.utils.data.Dataset):
         self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)
         if logger:
             self.logger.info("Length of data after removing duplicates and unnamed columns: {}".format(len(self.csv_data)))
+        
+        print(self.csv_data.head())
         path_check_res= [os.path.exists(self.csv_data.image_path[i]) for i in range(len(self.csv_data))]
         self.csv_data['img_path_check'] = path_check_res
         self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]

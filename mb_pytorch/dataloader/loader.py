@@ -311,9 +311,11 @@ class customdl(torch.utils.data.Dataset):
             bbox = eval(self.bbox.iloc[idx])
             if self.transform:
                 img,bbox = self.transform(img,bbox=bbox)
+            else:
+                img = transforms.ToTensor()(img)
+                bbox = torch.tensor([[bbox[0],bbox[1],bbox[2],bbox[3]]],dtype=torch.int32)
             bbox_dict={}
-            bbox_dict['boxes'] = torch.tensor([[self.bbox.iloc[idx][0],self.bbox.iloc[idx][1],self.bbox.iloc[idx][2],self.bbox.iloc[idx][3]] 
-                                             for x in len(self.bbox.iloc[idx])],dtype=torch.int32)  ## should be list in a list.
+            bbox_dict['bbox'] = bbox
             bbox_dict['label'] = [self.label.iloc[idx]]
 
             return img,bbox_dict

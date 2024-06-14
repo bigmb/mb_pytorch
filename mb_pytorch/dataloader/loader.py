@@ -263,12 +263,20 @@ class customdl(torch.utils.data.Dataset):
             self.bbox = self.csv_data['bbox']
 
         ## save wrangled file
-        try:
-            if os.path.exists(self.folder_name):
-                self.csv_data.to_csv(os.path.join(self.folder_name,'wrangled_file.csv'),index=False)
-        except:
-            if self.logger:
-                self.logger.info("Could not save wrangled file. Please check the folder name.")
+        if train_file:
+            try:
+                if os.path.exists(self.folder_name):
+                    self.csv_data.to_csv(os.path.join(self.folder_name,'train_wrangled_file.csv'),index=False)
+            except:
+                if self.logger:
+                    self.logger.info("Could not save wrangled file. Please check the folder name.")
+        else:
+            try:
+                if os.path.exists(self.folder_name):
+                    self.csv_data.to_csv(os.path.join(self.folder_name,'val_wrangled_file.csv'),index=False)
+            except:
+                if self.logger:
+                    self.logger.info("Could not save wrangled file. Please check the folder name.")
 
     def __len__(self):
         return len(self.csv_data)
@@ -300,6 +308,7 @@ class customdl(torch.utils.data.Dataset):
             return img,mask_dict
         
         if self.data_type == 'detection':
+            bbox = self.bbox.iloc[idx]
             if self.transform:
                 img,bbox = self.transform(img,bbox)
             bbox_dict={}

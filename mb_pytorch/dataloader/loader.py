@@ -230,8 +230,12 @@ class customdl(torch.utils.data.Dataset):
         
         print(self.csv_data.head())
         path_check_res= [os.path.exists(self.csv_data.image_path[i]) for i in range(len(self.csv_data))]
+        print(path_check_res[:3])
         self.csv_data['img_path_check'] = path_check_res
+        print('img_path_check')
+        print(self.csv_data.head())
         self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
+        print('path check truee')
         self.csv_data = self.csv_data.reset_index(drop=True)
         if logger:
             self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))

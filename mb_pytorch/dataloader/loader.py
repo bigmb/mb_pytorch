@@ -359,6 +359,11 @@ class DataLoader(data_fetcher):
                                                       worker_init_fn = lambda id: np.array(self.data_dict['test_params']['seed']))
         return self.trainloader,self.testloader,self.trainset,self.testset
 
+    def collate_fn(batch):
+        return {
+        'pixel_values': torch.stack([x['pixel_values'] for x in batch]),
+        'labels': torch.tensor([x['labels'] for x in batch])}
+    
     def data_train(self,data,model_type,transform=None,train_file=True,**kwargs):
         """
         get train data from yaml file

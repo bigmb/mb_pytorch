@@ -228,7 +228,9 @@ class customdl(torch.utils.data.Dataset):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'training']
                 if 'train' in pd.unique(self.csv_data['image_type']):   
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'train']
-            except:
+            except Exception as e:
+                if self.logger:
+                    self.logger.info(e)
                 return "image_type column (train/training) not found in data"
         else:
             try:
@@ -240,7 +242,9 @@ class customdl(torch.utils.data.Dataset):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'test']
                 if 'testing' in pd.unique(self.csv_data['image_type']):
                     self.csv_data = self.csv_data[self.csv_data['image_type'] == 'testing']
-            except:
+            except Exception as e:
+                if self.logger:
+                    self.logger.info(e)
                 return "image_type column (val/validation/test/testing) not found in data"
 
         self.csv_data = check_drop_duplicates(self.csv_data,columns=['image_path'],drop=True,logger=self.logger)
@@ -267,15 +271,17 @@ class customdl(torch.utils.data.Dataset):
             try:
                 if os.path.exists(self.folder_name):
                     self.csv_data.to_csv(os.path.join(self.folder_name,'train_wrangled_file.csv'),index=False)
-            except:
+            except Exception as e:
                 if self.logger:
+                    self.logger.info(e)
                     self.logger.info("Could not save wrangled file. Please check the folder name.")
         else:
             try:
                 if os.path.exists(self.folder_name):
                     self.csv_data.to_csv(os.path.join(self.folder_name,'val_wrangled_file.csv'),index=False)
-            except:
+            except Exception as e:
                 if self.logger:
+                    self.logger.info(e)
                     self.logger.info("Could not save wrangled file. Please check the folder name.")
 
     def __len__(self):
@@ -347,22 +353,36 @@ class DataLoader(data_fetcher):
         self.testset = self.data_train(self.data_params_file,self.model_type,
                                         transform=JointTransforms(self.transformations),train_file=False,logger=self.logger)
 
+        if self.model_type == 'classification':
+            def collate_fn(batch):
+                return {'image': torch.stack([b[0] for b in batch]),
+                         'label': torch.tensor([b[1]['label'] for b in batch])}
+        elif self.model_type == 'segmentation':
+            def collate_fn(batch):
+                return {'image': torch.stack([b[0] for b in batch]),
+                         'mask': torch.stack([b[1]['mask'] for b in batch]), 
+                        'label': torch.tensor([b[1]['label'] for b in batch])}
+        elif self.model_type == 'detection':
+            def collate_fn(batch):
+                return {'image': torch.stack([b[0] for b in batch]),
+                         'bbox': torch.stack([b[1]['bbox'] for b in batch]), 
+                        'label': torch.tensor([b[1]['label'] for b in batch])}
+
+
         self.trainloader = torch.utils.data.DataLoader(self.trainset, 
                                                        batch_size=self.data_dict['train_params']['batch_size'], 
                                                        shuffle=self.data_dict['train_params']['shuffle'], 
                                                        num_workers=self.data_dict['train_params']['num_workers'],
-                                                       worker_init_fn = lambda id: np.array(self.data_dict['train_params']['seed']))
+                                                       worker_init_fn = lambda id: np.array(self.data_dict['train_params']['seed']),
+                                                       collate_fn=collate_fn)
         self.testloader = torch.utils.data.DataLoader(self.testset, 
                                                       batch_size=self.data_dict['test_params']['batch_size'], 
                                                       shuffle=self.data_dict['test_params']['shuffle'], 
                                                       num_workers=self.data_dict['test_params']['num_workers'],
-                                                      worker_init_fn = lambda id: np.array(self.data_dict['test_params']['seed']))
+                                                      worker_init_fn = lambda id: np.array(self.data_dict['test_params']['seed']),
+                                                      collate_fn=collate_fn)
         return self.trainloader,self.testloader,self.trainset,self.testset
 
-    def collate_fn(batch):
-        return {
-        'pixel_values': torch.stack([x['pixel_values'] for x in batch]),
-        'labels': torch.tensor([x['labels'] for x in batch])}
     
     def data_train(self,data,model_type,transform=None,train_file=True,**kwargs):
         """

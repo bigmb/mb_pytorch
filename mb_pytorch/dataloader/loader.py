@@ -155,7 +155,7 @@ class JointTransforms:
         new_x2 = int(orig_x2 * x_scale)
         new_y2 = int(orig_y2 * y_scale)
     
-        return [new_x1, new_y1, new_x2, new_y2]
+        return torch.tensor([new_x1, new_y1, new_x2, new_y2],dtype=torch.int32)
 
     def crop_boxes(self, boxes, top, left, height, width):
         boxes[:, [0, 2]] = boxes[:, [0, 2]] - left

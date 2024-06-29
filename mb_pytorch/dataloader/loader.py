@@ -136,7 +136,7 @@ class JointTransforms:
         else:
             return img
         
-    def resize_boxes(original_size, new_size, bbox):
+    def resize_boxes(self,original_size, new_size, bbox):
         """
         Resize bounding boxes according to the new image size
         Input:

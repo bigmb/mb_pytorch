@@ -81,7 +81,7 @@ class JointTransforms:
             if mask is not None:
                 mask = transforms.ToTensor()(mask)
             if bbox is not None:
-                bbox = torch.tensor([[bbox[0],bbox[1],bbox[2],bbox[3]]],dtype=torch.int32)
+                bbox = torch.tensor([bbox[0],bbox[1],bbox[2],bbox[3]],dtype=torch.int32)
 
         if self.transform_data['normalize']['val']:
             img = transforms.Normalize(self.transform_data['normalize']['args']['mean'],self.transform_data['normalize']['args']['std'])(img)

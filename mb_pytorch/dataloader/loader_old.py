@@ -10,7 +10,7 @@ import sys
 import numpy as np
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
-from mb_pandas.src.transform import *
+from mb_pandas.src.transform import check_drop_duplicates,remove_unnamed
 from datetime import datetime
 import cv2
 

@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
-from mb_pandas.src.transform import *
 from mb.pandas import check_drop_duplicates,remove_unnamed
 from datetime import datetime
 import cv2
@@ -73,7 +72,7 @@ class JointTransforms:
         self.transform_data = transform_yaml
         self.logger = logger
 
-        if self.transform_data['transform']==False:
+        if self.transform_data['transform']==False:  # noqa: E712
             return None
 
     def __call__(self,img,mask=None,bbox=None):
@@ -92,6 +91,7 @@ class JointTransforms:
             if mask is not None:
                 mask = transforms.Resize(self.transform_data['resize']['args']['size'])(mask)
             if bbox is not None:
+                print('Image size: {}'.format(img.size))
                 bbox = self.resize_boxes(bbox, img.size)
 
         if self.transform_data['random_crop']['val']:
@@ -206,7 +206,7 @@ class customdl(torch.utils.data.Dataset):
         #checking paths
         path_check_res= [os.path.exists(self.csv_data.image_path[i]) for i in range(len(self.csv_data))]
         self.csv_data['img_path_check'] = path_check_res ## check why test loader doesnt get this column
-        self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]
+        self.csv_data = self.csv_data[self.csv_data['img_path_check'] == True]  # noqa: E712
         self.csv_data = self.csv_data.reset_index(drop=True)
         if logger:
             self.logger.info("Length of data after removing invalid paths: {}".format(len(self.csv_data)))
@@ -216,7 +216,7 @@ class customdl(torch.utils.data.Dataset):
                 self.logger.info("Verifying images")
             verify_image_res = [verify_image(self.csv_data['image_path'].iloc[i],logger=self.logger) for i in range(len(self.csv_data))]  
             self.csv_data['img_verify'] = verify_image_res
-            self.csv_data = self.csv_data[self.csv_data['img_verify'] == True]
+            self.csv_data = self.csv_data[self.csv_data['img_verify'] == True]  # noqa: E712
             self.csv_data = self.csv_data.reset_index()
         else:   
             if self.logger:

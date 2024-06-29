@@ -92,9 +92,6 @@ class JointTransforms:
             if mask is not None:
                 mask = transforms.Resize(self.transform_data['resize']['args']['size'])(mask)
             if bbox is not None:
-                print('Image size: {}'.format(img.size()))
-                print('Original size: {}'.format(ori_size))
-                print('Bbox: {}'.format(bbox))
                 bbox = self.resize_boxes(ori_size,img.size(),bbox)
 
         if self.transform_data['random_crop']['val']:
@@ -153,10 +150,10 @@ class JointTransforms:
         x_scale = new_width / orig_width
         y_scale = new_height / orig_height
     
-        new_x1 = orig_x1 * x_scale
-        new_y1 = orig_y1 * y_scale
-        new_x2 = orig_x2 * x_scale
-        new_y2 = orig_y2 * y_scale
+        new_x1 = int(orig_x1 * x_scale)
+        new_y1 = int(orig_y1 * y_scale)
+        new_x2 = int(orig_x2 * x_scale)
+        new_y2 = int(orig_y2 * y_scale)
     
         return [new_x1, new_y1, new_x2, new_y2]
 

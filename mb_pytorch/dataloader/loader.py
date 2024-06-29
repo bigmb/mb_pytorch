@@ -91,8 +91,8 @@ class JointTransforms:
             if mask is not None:
                 mask = transforms.Resize(self.transform_data['resize']['args']['size'])(mask)
             if bbox is not None:
-                print('Image size: {}'.format(img.size))
-                bbox = self.resize_boxes(bbox, img.size)
+                print('Image size: {}'.format(img.size()))
+                bbox = self.resize_boxes(bbox, img.size())
 
         if self.transform_data['random_crop']['val']:
             img = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(img)
@@ -106,14 +106,14 @@ class JointTransforms:
             if mask is not None:
                 mask = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(mask)
             if bbox is not None:
-                bbox = self.hflip_boxes(bbox, img.size[0])
+                bbox = self.hflip_boxes(bbox, img.size()[0])
 
         if self.transform_data['random_vertical_flip']['val']:
             img = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(img)
             if mask is not None:
                 mask = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(mask)
             if bbox is not None:
-                bbox = self.vflip_boxes(bbox, img.size[1])
+                bbox = self.vflip_boxes(bbox, img.size()[1])
 
         if self.transform_data['random_rotation']['val']:
             img = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(img)

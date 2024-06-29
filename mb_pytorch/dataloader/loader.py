@@ -87,12 +87,13 @@ class JointTransforms:
             img = transforms.Normalize(self.transform_data['normalize']['args']['mean'],self.transform_data['normalize']['args']['std'])(img)
 
         if self.transform_data['resize']['val']:
+            ori_size = img.size()
             img = transforms.Resize(self.transform_data['resize']['args']['size'])(img)
             if mask is not None:
                 mask = transforms.Resize(self.transform_data['resize']['args']['size'])(mask)
             if bbox is not None:
                 print('Image size: {}'.format(img.size()))
-                bbox = self.resize_boxes(bbox, img.size())
+                bbox = self.resize_boxes(ori_size,img.size(),bbox)
 
         if self.transform_data['random_crop']['val']:
             img = transforms.RandomCrop(self.transform_data['random_crop']['args']['size'])(img)
@@ -106,14 +107,14 @@ class JointTransforms:
             if mask is not None:
                 mask = transforms.RandomHorizontalFlip(self.transform_data['random_horizontal_flip']['args']['p'])(mask)
             if bbox is not None:
-                bbox = self.hflip_boxes(bbox, img.size()[0])
+                bbox = self.hflip_boxes(bbox, img.size()[1])
 
         if self.transform_data['random_vertical_flip']['val']:
             img = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(img)
             if mask is not None:
                 mask = transforms.RandomVerticalFlip(self.transform_data['random_vertical_flip']['args']['p'])(mask)
             if bbox is not None:
-                bbox = self.vflip_boxes(bbox, img.size()[1])
+                bbox = self.vflip_boxes(bbox, img.size()[2])
 
         if self.transform_data['random_rotation']['val']:
             img = transforms.RandomRotation(self.transform_data['random_rotation']['args']['degrees'])(img)
@@ -135,13 +136,27 @@ class JointTransforms:
         else:
             return img
         
-    def resize_boxes(self, boxes, original_size):
-        original_height, original_width = original_size
-        new_height, new_width = self.resize
-
-        boxes[:, [0, 2]] = boxes[:, [0, 2]] * new_width / original_width
-        boxes[:, [1, 3]] = boxes[:, [1, 3]] * new_height / original_height
-        return boxes
+    def resize_boxes(original_size, new_size, bbox):
+        """
+        Resize bounding boxes according to the new image size
+        Input:
+        original_size: torch.tensor, (channel, original_height, original_width)
+        new_size: tuple, (channel, new_height,new_width)
+        bbox: list, [x1, y1, x2, y2]
+        """
+        orig_x1, orig_y1, orig_x2, orig_y2 = bbox
+        _, orig_height,orig_width = original_size
+        _, new_height, new_width = new_size
+    
+        x_scale = new_width / orig_width
+        y_scale = new_height / orig_height
+    
+        new_x1 = orig_x1 * x_scale
+        new_y1 = orig_y1 * y_scale
+        new_x2 = orig_x2 * x_scale
+        new_y2 = orig_y2 * y_scale
+    
+        return [new_x1, new_y1, new_x2, new_y2]
 
     def crop_boxes(self, boxes, top, left, height, width):
         boxes[:, [0, 2]] = boxes[:, [0, 2]] - left

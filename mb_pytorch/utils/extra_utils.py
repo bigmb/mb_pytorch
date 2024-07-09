@@ -55,7 +55,8 @@ def overwrite_layer_weights(model, layer_index, new_weights,logger=None):
 def labels_num_map(input_csv, output_csv=None):
     if isinstance(input_csv, str):
         df = pd.read_csv(input_csv)
-            
+    else:
+        df = input_csv  
     labels_list = [ast.literal_eval(label) for label in df['label']]
     unique_labels = list(set([label for labels in labels_list for label in labels]))
     label_num_map = {label: i for i, label in enumerate(unique_labels)}

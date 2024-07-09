@@ -53,7 +53,8 @@ def overwrite_layer_weights(model, layer_index, new_weights,logger=None):
         raise ValueError("The specified layer is not a convolutional layer or linear layer.")
 
 def labels_num_map(input_csv, output_csv=None):
-    df = pd.read_csv(input_csv)
+    if isinstance(input_csv, str):
+        df = pd.read_csv(input_csv)
             
     labels_list = [ast.literal_eval(label) for label in df['label']]
     unique_labels = list(set([label for labels in labels_list for label in labels]))

@@ -63,6 +63,7 @@ def labels_num_map(input_csv, output_csv=None):
     label_num_map = {label: i for i, label in enumerate(unique_labels)}
 
     new_pd = pd.DataFrame(columns=['label', 'label_num'])
+    print(new_pd)
     new_pd['label'] = list(labels_num_map.keys())
     new_pd['label_num'] = list(labels_num_map.values())
     if output_csv:

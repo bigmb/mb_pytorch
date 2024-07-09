@@ -1,6 +1,6 @@
 data:
   file:
-    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final.csv', ## path to the csv file
+    {root : '/home/winnow/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final.csv', ## path to the csv file
     verify_image_path: True,  ## if True, then image path is verified
     verify_image : False} ## if Ture, verifying images using mb.
 

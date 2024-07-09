@@ -10,6 +10,7 @@ import pandas as pd
 from mb_pandas.src.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb.pandas import check_drop_duplicates,remove_unnamed
+from ..utils.extra_utils import labels_num_map
 from datetime import datetime
 import cv2
 
@@ -261,23 +262,36 @@ class customdl(torch.utils.data.Dataset):
                     self.logger.info(e)
                 return "image_type column (val/validation/test/testing) not found in data"
 
+        assert 'label' in self.csv_data.columns, "label column not found in data"
+
         self.csv_data = check_drop_duplicates(self.csv_data,columns=['image_path'],drop=True,logger=self.logger)
         self.csv_data = remove_unnamed(self.csv_data,logger=self.logger)
+
+        ## save label_num_map
+        if os.path.exists(self.folder_name):
+            output_num_labels = os.path.join(self.folder_name,'label_num_map.csv')
+        else:
+            output_num_labels = None
+            print("Folder name not found. Please check the folder name.")
+        self.csv_data = labels_num_map(self.csv_data,output_csv=output_num_labels)
+
         if logger:
             self.logger.info("Length of data after removing duplicates and unnamed columns: {}".format(len(self.csv_data)))
         
         if self.data_type == 'classification':
-            assert 'label' in self.csv_data.columns, "label column not found in data"
             self.label = self.csv_data['label']
+            self.label_num = self.csv_data['label_num']
     
         if self.data_type == 'segmentation':
             assert 'mask_path' in self.csv_data.columns, "mask_path column not found in data"
             self.masks = self.csv_data['mask_path']
+            self.label = self.csv_data['label']
+            self.label_num = self.csv_data['label_num']
 
         if self.data_type == 'detection':
-            assert 'label' in self.csv_data.columns, "label column not found in data"
             assert 'bbox' in self.csv_data.columns, "bbox column not found in data"
             self.label = self.csv_data['label']
+            self.label_num = self.csv_data['label_num']
             self.bbox = self.csv_data['bbox']
 
         ## save wrangled file
@@ -314,7 +328,7 @@ class customdl(torch.utils.data.Dataset):
             if self.transform:
                 img = self.transform(img)
             label = {}
-            label['label'] = self.label.iloc[idx]   
+            label['label'] = self.label_num.iloc[idx]   
             return img,label
         
         if self.data_type == 'segmentation':
@@ -323,7 +337,7 @@ class customdl(torch.utils.data.Dataset):
                 img,mask = self.transform(img,mask=mask)
             mask_dict={}
             mask_dict['mask'] = mask
-            mask_dict['label'] = self.label.iloc[idx]
+            mask_dict['label'] = self.label_num.iloc[idx]
             
             return img,mask_dict
         
@@ -336,7 +350,7 @@ class customdl(torch.utils.data.Dataset):
                 bbox = torch.tensor([[bbox[0],bbox[1],bbox[2],bbox[3]]],dtype=torch.int32)
             bbox_dict={}
             bbox_dict['bbox'] = bbox
-            bbox_dict['label'] = [self.label.iloc[idx]]
+            bbox_dict['label'] = [self.label_num.iloc[idx]]
 
             return img,bbox_dict
 

@@ -5,8 +5,10 @@ import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import  mb.pandas as pd
+import ast 
 
-__all__ = ['get_model_summary','onnx2torch','overwrite_layer_weights','feature_extractor']
+__all__ = ['get_model_summary','onnx2torch','overwrite_layer_weights','feature_extractor','feature_view','labels_num_map']
 
 
 def get_model_summary(model, input_size):
@@ -50,6 +52,21 @@ def overwrite_layer_weights(model, layer_index, new_weights,logger=None):
     else:
         raise ValueError("The specified layer is not a convolutional layer or linear layer.")
 
+def labels_num_map(input_csv, output_csv=None):
+    df = pd.read_csv(input_csv)
+            
+    labels_list = [ast.literal_eval(label) for label in df['label']]
+    unique_labels = list(set([label for labels in labels_list for label in labels]))
+    label_num_map = {label: i for i, label in enumerate(unique_labels)}
+
+    new_pd = pd.DataFrame(columns=['label', 'label_num'])
+    new_pd['label'] = list(labels_num_map.keys())
+    new_pd['label_num'] = list(labels_num_map.values())
+    if output_csv:
+        new_pd.to_csv(output_csv, index=False)
+    
+    df['label_num'] = df['label'].apply(lambda x: [label_num_map[label] for label in ast.literal_eval(x)])
+    return df
 
 
 def feature_extractor(model, layer_name):

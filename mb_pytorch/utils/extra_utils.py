@@ -58,8 +58,9 @@ def labels_num_map(input_csv, output_csv=None):
     else:
         df = input_csv
 
-    labels_list = [ast.literal_eval(str(label)) for label in df['label']]
-    unique_labels = list(set([label for labels in labels_list for label in labels]))
+    labels_list = df['label'].to_list()
+    labels_list2 = list(set([label for labels in labels_list for label in labels]))
+    unique_labels = list(set([label for labels in labels_list2 for label in labels]))
     label_num_map = {label: i for i, label in enumerate(unique_labels)}
 
     new_pd = pd.DataFrame(columns=['label', 'label_num'])

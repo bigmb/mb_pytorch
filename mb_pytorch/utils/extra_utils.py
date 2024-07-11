@@ -64,12 +64,13 @@ def labels_num_map(input_csv, output_csv=None):
     label_num_map = {label: i for i, label in enumerate(unique_labels)}
 
     new_pd = pd.DataFrame(columns=['label', 'label_num'])
-    new_pd['label'] = list(labels_num_map.keys())
-    new_pd['label_num'] = list(labels_num_map.values())
+    new_pd['label'] = list(label_num_map.keys())
+    new_pd['label_num'] = list(label_num_map.values())
     if output_csv:
         new_pd.to_csv(output_csv, index=False)
     
-    df['label_num'] = df['label'].apply(lambda x: [label_num_map[label] for label in ast.literal_eval(x)])
+    labels_nums = [[label_num_map[label]] if label in label_num_map else None for label in labels_list2]
+    df['label_num'] = labels_nums
     return df
 
 

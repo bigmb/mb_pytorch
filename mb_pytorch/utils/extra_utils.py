@@ -69,8 +69,13 @@ def labels_num_map(input_csv, output_csv=None):
     if output_csv:
         new_pd.to_csv(output_csv, index=False)
     
-    labels_nums = [[label_num_map[label]] if label in label_num_map else None for label in labels_list2]
-    df['label_num'] = labels_nums
+    labels_num =[]
+    for i in labels_list2:
+        temp_list = []
+        for j in range(len(i)):
+            temp_list.append(label_num_map[i[j]])
+        labels_num.append(temp_list)
+    df['label_num'] = labels_num
     return df
 
 

@@ -394,7 +394,7 @@ class DataLoader(data_fetcher):
             def collate_fn(batch):
                 return {'image': torch.stack([b[0] for b in batch]),
                          'bbox': torch.stack([b[1]['bbox'] for b in batch]), 
-                        'label': torch.tensor([b[1]['label'] for b in batch])} ## label is a list of labels or should be hot encoded?
+                        'label': torch.tensor([b[1]['label'] for b in batch])}
 
 
         self.trainloader = torch.utils.data.DataLoader(self.trainset, 

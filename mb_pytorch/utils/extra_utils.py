@@ -75,6 +75,7 @@ def labels_num_map(input_csv, output_csv=None):
         for j in range(len(i)):
             temp_list.append(label_num_map[i[j]])
         labels_num.append(temp_list)
+        labels_num = [x for xs in labels_num for x in xs]
     df['label_num'] = labels_num
     return df
 

@@ -392,7 +392,7 @@ class DataLoader(data_fetcher):
                         'label': torch.tensor([b[1]['label'] for b in batch])}
         elif self.model_type == 'detection':
             def collate_fn(batch):
-                return {'image': torch.stack([b[0] for b in batch]),
+                return {'image': list(torch.stack([b[0] for b in batch])),
                          'bbox': torch.stack([b[1]['bbox'] for b in batch]), 
                         'label': torch.tensor([b[1]['label'] for b in batch])}
 

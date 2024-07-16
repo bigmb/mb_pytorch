@@ -63,6 +63,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             images,bbox,labels = data.values()
             images = list(image.to(device) for image in images)
             bbox = list(b.to(device) for b in bbox)
+            bbox = [b.view(-1, 4) if b.dim() == 1 else b for b in bbox]
             labels = list(label.to(device) for label in labels)  
             targets = [{'boxes': b,'labels': label} for b,label in zip(bbox, labels)]      
                     

@@ -47,10 +47,18 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         logger.info(f'Loss: {loss_attr}')
         logger.info(f'Optimizer: {optimizer}')
         logger.info(f'Scheduler: {scheduler}')
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if device.type == 'cuda':
+        if logger:
+            logger.info(torch.cuda.get_device_name(0))
+            logger.info('Memory Usage - Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
+            logger.info('Memory Usage - Cached: ', round(torch.cuda.memory_reserved(0)/1024**3,1), 'GB')
     
     model.to(device)
+    best_val_loss = float('inf')
 
-    for i in tqdm.tqdm(range(data_model['model_epochs'])):
+    for epoch in tqdm.tqdm(range(data_model['model_epochs']), desc="Epochs"):
         
         ##train loop
         
@@ -59,7 +67,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         
         if logger:
             logger.info('Training Started')
-        for batch_idx, data in enumerate(train_loader):
+        for batch_idx, data in enumerate(tqdm.tqdm(train_loader),desc='Training'):
             images,bbox,labels = data.values()
             images = list(image.to(device) for image in images)
             bbox = list(b.to(device) for b in bbox)
@@ -78,89 +86,69 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             
             train_loss += losses.item()
             if logger:
-                logger.info(f'Epoch {i+1} - Batch {batch_idx+1} - Train Loss: {losses.item()}')
+                logger.info(f'Epoch {epoch+1} - Batch {batch_idx+1} - Train Loss: {losses.item()}')
         
         avg_train_loss = train_loss / len(train_loader)
         if logger:
-            logger.info(f'Epoch {i+1} - Train Loss: {avg_train_loss}')
+            logger.info(f'Epoch {epoch+1} - Train Loss: {avg_train_loss}')
             logger.info(f"lr = {optimizer.param_groups[0]['lr']}")
 
         model.train(False)
-    
-        if writer is not None:
-            #writer.add_graph(model, images[0,:])
-            writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
-            for name, param in model.named_parameters():
-                writer.add_histogram(name, param, global_step=i)
-            
-            x = images.to('cpu')
-            y = images.to('cpu')
-            x_grad = x[0,:]
-            x_grad = x_grad.unsqueeze(0)
-            #y_grad = y[0].to('cpu')
-            
-            create_img_grid(x,y,writer,global_step=i)
 
-            ##gradcam       
-            if gradcam is not None:
-                use_cuda=False
-                if device.type != 'cpu':
-                    use_cuda = True
-                for cam_layers in gradcam:
-                    grad_img = gradcam_viewer(cam_layers,model,x_grad,gradcam_rgb=gradcam_rgb,use_cuda=use_cuda)
-                    if grad_img is not None:
-                        grad_img = np.transpose(grad_img,(2,0,1))
-                        writer.add_image(f'Gradcam training/{cam_layers}',grad_img,global_step=i)
-                    if grad_img is None and logger:
-                        logger.info(f'Gradcam not supported for {cam_layers}')            
-                        
         ## Validation loop
         val_loss = 0
         
         with torch.no_grad():
-            for batch_idx, (images, targets) in enumerate(val_loader):
+            for batch_idx, (images, targets) in enumerate(tqdm.tqdm(val_loader),desc='Validation'):
                 images = list(image.to(device) for image in images)
-                temp_dict = {}
-                final_list = []
-                temp_dict['boxes'] = targets[1][:]
-                temp_dict['labels'] = targets[0][:]
-                final_list = [temp_dict]
-                targets = [{k: v.to(device) for k, v in t.items()} for t in final_list]
-                
+                bbox = list(b.to(device) for b in bbox)
+                bbox = [b.view(-1, 4) if b.dim() == 1 else b for b in bbox]
+                labels = list(label.to(device) for label in labels)  
+                targets = [{'boxes': b,'labels': label} for b,label in zip(bbox, labels)]    
+
                 loss_dict = model(images, targets)
                 losses = sum(loss for loss in loss_dict.values())
                 
                 val_loss += losses.item() * len(images)
                 if logger: 
-                    logger.info(f'Epoch {i+1} - Batch {batch_idx+1} - Val Loss: {losses.item()}')
+                    logger.info(f'Epoch {epoch+1} - Batch {batch_idx+1} - Val Loss: {losses.item()}')
             
             avg_val_loss = val_loss / len(val_loader.dataset)
             
             if logger:
-                logger.info(f'Epoch {i+1} - Avg Val Loss: {avg_val_loss:.3f}')
-    
+                logger.info(f'Epoch {epoch+1} - Avg Val Loss: {avg_val_loss:.3f}')
+
+        # TensorBoard logging
         if writer is not None:
-            writer.add_scalar('Loss/val', avg_val_loss, global_step=i)
+            writer.add_scalar('Loss/train', avg_train_loss, global_step=epoch)
+            writer.add_scalar('Loss/val', avg_val_loss, global_step=epoch)
+            writer.add_scalar('Learning_rate', optimizer.param_groups[0]['lr'], global_step=epoch)
             
-            # Grad-CAM visualization for validation images
-            if gradcam is not None:
-                use_cuda = device != 'cpu'
-                for cam_layers in gradcam:
-                    grad_img = gradcam_viewer(cam_layers, model, images[0].unsqueeze(0), gradcam_rgb=gradcam_rgb, use_cuda=use_cuda)
-                    if grad_img is not None:
-                        grad_img = np.transpose(grad_img, (2, 0, 1))
-                        writer.add_image(f'Gradcam/{cam_layers}', grad_img, global_step=i)
-                    if grad_img is None and logger:
-                        logger.info(f'Gradcam not supported for {cam_layers}')   
+            for name, param in model.named_parameters():
+                writer.add_histogram(name, param, global_step=epoch)
+            
+            # Visualizations
+            if len(images) > 0:
+                x = images[0].to('cpu')
+                create_img_grid(x, x, writer, global_step=epoch)
+
+                # Grad-CAM visualization
+                if gradcam is not None:
+                    use_cuda = device != 'cpu'
+                    for cam_layers in gradcam:
+                        grad_img = gradcam_viewer(cam_layers, model, x.unsqueeze(0), gradcam_rgb=gradcam_rgb, use_cuda=use_cuda)
+                        if grad_img is not None:
+                            grad_img = np.transpose(grad_img, (2, 0, 1))
+                            writer.add_image(f'Gradcam/{cam_layers}', grad_img, global_step=epoch)
+                        elif logger:
+                            logger.info(f'Gradcam not supported for {cam_layers}')   
    
         # Save best model
-        if i == 0:
-            best_val_loss = float('inf')
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
             best_model = model.state_dict()
 
             path = os.path.join(k_data['work_dir'], 'best_model.pth')
             torch.save(best_model, path)
             if logger:
-                logger.info(f'Epoch {i+1} - Best Model Saved')
+                logger.info(f'Epoch {epoch + 1} - Best Model Saved (Val Loss: {best_val_loss:.4f})')

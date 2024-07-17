@@ -23,7 +23,9 @@ data/logs/
 data/celeba
 data/celeba/
 data/fruit_dataset
-data/fruit_dataset/
+data/fruit_dataset/label_num_map.csv
+data/fruit_dataset/train_wrangled_file.csv
+data/fruit_dataset/val_wrangled_file.csv
 .vscode
 logs/
 .vscode/

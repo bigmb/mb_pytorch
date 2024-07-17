@@ -101,7 +101,8 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         val_loss = 0
         
         with torch.no_grad():
-            for batch_idx, (images, targets) in enumerate(tqdm.tqdm(val_loader, desc="Validation", leave=False)):
+            for batch_idx, data in enumerate(tqdm.tqdm(val_loader, desc="Validation", leave=False)):
+                images,bbox,labels = data.values()
                 images = list(image.to(device) for image in images)
                 bbox = list(b.to(device) for b in bbox)
                 bbox = [b.view(-1, 4) if b.dim() == 1 else b for b in bbox]

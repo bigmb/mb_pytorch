@@ -110,9 +110,12 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
                 targets = [{'boxes': b,'labels': label} for b,label in zip(bbox, labels)]    
 
                 loss_dict = model(images, targets)
-                print(loss_dict)
-                print(len(loss_dict))
-                losses = sum(loss for loss in loss_dict[0].values())
+                if isinstance(loss_dict, tuple):
+                    loss_dict = loss_dict[0] 
+                elif isinstance(loss_dict, list):
+                    loss_dict = loss_dict[0]
+
+                losses = sum(loss for loss in loss_dict.values() if loss.numel()>0)
                 
                 val_loss += losses.item() * len(images)
                 if logger: 

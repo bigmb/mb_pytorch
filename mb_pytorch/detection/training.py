@@ -52,8 +52,6 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
     if device.type == 'cuda':
         if logger:
             logger.info(torch.cuda.get_device_name(0))
-            logger.info('Memory Usage - Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
-            logger.info('Memory Usage - Cached: ', round(torch.cuda.memory_reserved(0)/1024**3,1), 'GB')
     
     model.to(device)
     best_val_loss = float('inf')

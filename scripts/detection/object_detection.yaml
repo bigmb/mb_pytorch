@@ -25,7 +25,7 @@ model:
   model_loss: 'cross_entropy' #cross_entropy, mse,none
   model_scheduler: 'StepLR' #StepLR, ExponentialLR,none
   model_pretrained: True
-  model_epochs: 5
+  model_epochs: 3
   model_num_classes: 41    ## if multiple classes, then labels should be in the form of list
   model_initialization: None
 

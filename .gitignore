@@ -22,6 +22,8 @@ data/wrangled_file.csv
 data/logs/
 data/celeba
 data/celeba/
+data/fruit_dataset
+data/fruit_dataset/
 .vscode
 logs/
 .vscode/

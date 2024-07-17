@@ -1,6 +1,6 @@
 data:
   file:
-    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final.csv', ## path to the csv file ##/home/malav/Desktop
+    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final_test.csv', ## path to the csv file ##/home/malav/Desktop
     verify_image_path: True,  ## if True, then image path is verified
     verify_image : False} ## if Ture, verifying images using mb.
 
@@ -45,14 +45,14 @@ model:
       {gamma: 0.9}
 
 train_params:
-  batch_size: 4
+  batch_size: 16
   num_workers: 4
   pin_memory: True
   shuffle: False
   seed: 42
 
 test_params:
-  batch_size: 4
+  batch_size: 16
   num_workers: 4
   pin_memory: True
   shuffle: False

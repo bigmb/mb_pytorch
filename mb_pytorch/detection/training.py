@@ -88,7 +88,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         model.train(False)
     
         if writer is not None:
-            writer.add_graph(model, images)
+            #writer.add_graph(model, images[0,:])
             writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
             for name, param in model.named_parameters():
                 writer.add_histogram(name, param, global_step=i)

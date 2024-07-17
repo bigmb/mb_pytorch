@@ -88,13 +88,13 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         model.train(False)
     
         if writer is not None:
-            writer.add_graph(model, x)
+            writer.add_graph(model, images)
             writer.add_scalar('Loss/train', avg_train_loss, global_step=i)
             for name, param in model.named_parameters():
                 writer.add_histogram(name, param, global_step=i)
             
-            x = x.to('cpu')
-            y = y.to('cpu')
+            x = images.to('cpu')
+            y = images.to('cpu')
             x_grad = x[0,:]
             x_grad = x_grad.unsqueeze(0)
             #y_grad = y[0].to('cpu')

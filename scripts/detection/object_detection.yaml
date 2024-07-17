@@ -15,6 +15,7 @@ model:
   model_path : '/home/malav/Desktop/mb_packages/mb_pytorch/models/...'
   model_layer : 'avgpool' # generally used for generating embeddings
 
+  device: 'cpu'  ## cpu, cuda
   load_model: False
   use_torchvision_models: True
   model_name: 'fasterrcnn_resnet50_fpn' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
@@ -45,14 +46,14 @@ model:
       {gamma: 0.9}
 
 train_params:
-  batch_size: 16
+  batch_size: 2
   num_workers: 4
   pin_memory: True
   shuffle: False
   seed: 42
 
 test_params:
-  batch_size: 16
+  batch_size: 2
   num_workers: 4
   pin_memory: True
   shuffle: False

@@ -32,6 +32,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
     data_model = k_yaml.data_dict['model']
     model_data_load = ModelLoader(k_yaml.data_dict['model'])
     model =  model_data_load.get_model()
+    device_type = data_model['device']
     
     if logger:
         logger.info('Model Loaded')
@@ -48,11 +49,14 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
         logger.info(f'Optimizer: {optimizer}')
         logger.info(f'Scheduler: {scheduler}')
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    if device.type == 'cuda':
-        if logger:
-            logger.info(torch.cuda.get_device_name(0))
-    
+    if device_type =='cuda':
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        if device == 'cuda':
+            torch.cuda.empty_cache()
+            if logger:
+                logger.info('Device: CUDA')
+                logger.info(torch.cuda.get_device_name(0))
+
     model.to(device)
     best_val_loss = float('inf')
 

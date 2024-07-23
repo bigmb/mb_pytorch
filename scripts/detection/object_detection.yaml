@@ -28,6 +28,7 @@ model:
   model_epochs: 3
   model_num_classes: 41    ## if multiple classes, then labels should be in the form of list
   model_initialization: None
+  model_meta_data:  {model_bbox_threshold: 0.8}
 
   model_train_parameters:
     Adam: 

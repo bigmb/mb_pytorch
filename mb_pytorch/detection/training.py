@@ -33,7 +33,8 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
     model_data_load = ModelLoader(k_yaml.data_dict['model'])
     model =  model_data_load.get_model()
     device_type = data_model['device']
-    
+    bbox_threshold = data_model['model_meta_data']['model_bbox_threshold']
+
     if logger:
         logger.info('Model Loaded')
     
@@ -99,7 +100,12 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
 
         ## Validation loop
         val_loss = 0
-        
+        val_bbox = []
+        val_labels = []
+        val_scores = []
+        val_targets_labels = []
+        val_targets_bbox = []
+
         with torch.no_grad():
             for batch_idx, data in enumerate(tqdm.tqdm(val_loader, desc="Validation", leave=False)):
                 images,bbox,labels = data.values()
@@ -110,12 +116,23 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
                 targets = [{'boxes': b,'labels': label} for b,label in zip(bbox, labels)]    
 
                 loss_dict = model(images, targets)
-                if isinstance(loss_dict, tuple):
-                    loss_dict = loss_dict[0] 
-                elif isinstance(loss_dict, list):
-                    loss_dict = loss_dict[0]
 
-                losses = sum(loss for loss in loss_dict.values() if loss.numel()>0)
+                if len(loss_dict) == 0:
+                    continue
+                else:
+                    for i in range(len(loss_dict)):
+                        if len(loss_dict[i]['boxes']) > 0 :
+                            if 'scores' in loss_dict[i]:
+                                for j in range(len(loss_dict[i]['scores'])):
+                                    if loss_dict[i]['scores'][j] > bbox_threshold:
+                                        val_bbox.append(loss_dict[i]['boxes'][j])
+                                        val_labels.append(loss_dict[i]['labels'][j])
+                                        val_scores.append(loss_dict[i]['scores'][j])
+                                        if j < 1:
+                                            val_targets_labels.append(labels[i])
+                                            val_targets_bbox.append(bbox[i])
+
+                #losses = sum(loss for loss in loss_dict.values() if loss.numel()>0)
                 
                 val_loss += losses.item() * len(images)
                 if logger: 

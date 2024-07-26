@@ -4,9 +4,10 @@ import tqdm
 import os
 from mb_utils.src.logging import logger
 import numpy as np
-from ..utils.viewer import gradcam_viewer,create_img_grid,plot_classes_pred
+from ..utils.viewer import gradcam_viewer,plot_classes_pred,plot_to_image
 from mb_pytorch.models.modelloader import ModelLoader
 from mb_pytorch.training.train_params import train_helper
+from mb.plt.utils import dynamic_plt
 
 __all__ = ['detection_train_loop']
 
@@ -155,7 +156,9 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             # Visualizations
             if len(images) > 0:
                 x = images[0].to('cpu')
-                create_img_grid(x, x, writer, global_step=epoch)
+                #create_img_grid(x, x, writer, global_step=epoch)
+                fig = dynamic_plt(x,return_fig=True)
+                writer.add_image('grid', plot_to_image(fig), global_step=epoch)
 
                 # Grad-CAM visualization
                 if gradcam is not None:

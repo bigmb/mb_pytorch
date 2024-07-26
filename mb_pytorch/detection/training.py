@@ -176,7 +176,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             best_val_loss = avg_val_loss
             best_model = model.state_dict()
 
-            path = os.path.join(k_data['work_dir'], 'best_model.pth')
+            path = os.path.join(os.path.dirname(data['root']), 'best_model.pth')
             torch.save(best_model, path)
             if logger:
                 logger.info(f'Epoch {epoch + 1} - Best Model Saved (Val Loss: {best_val_loss:.4f})')

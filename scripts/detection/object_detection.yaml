@@ -1,6 +1,7 @@
 data:
   file:
-    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final_test.csv', ## path to the csv file ##/home/malav/Desktop ## /home/winnow/mb_packages/mb_pytorch
+    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final_test.csv', 
+    ## path to the csv file ##/home/malav/Desktop ## /home/winnow/mb_packages/mb_pytorch ## just add csv file to the folder. result saved here too.
     verify_image_path: True,  ## if True, then image path is verified
     verify_image : False} ## if Ture, verifying images using mb.
 
@@ -25,7 +26,7 @@ model:
   model_loss: 'cross_entropy' #cross_entropy, mse,none
   model_scheduler: 'StepLR' #StepLR, ExponentialLR,none
   model_pretrained: True
-  model_epochs: 2
+  model_epochs: 5
   model_num_classes: 41    ## if multiple classes, then labels should be in the form of list
   model_initialization: None
   model_meta_data:  {model_bbox_threshold: 0.8}

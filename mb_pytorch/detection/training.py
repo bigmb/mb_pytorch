@@ -157,14 +157,14 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             if len(images) > 0:
                 x = images[0].to('cpu')
                 #create_img_grid(x, x, writer, global_step=epoch)
-                fig = dynamic_plt(x,return_fig=True)
+                fig = dynamic_plt(x,labels=labels[0],return_fig=True)
                 writer.add_image('grid', plot_to_image(fig), global_step=epoch)
 
-                # Grad-CAM visualization
+                # Grad-CAM visualization 
                 if gradcam is not None:
                     use_cuda = device != 'cpu'
                     for cam_layers in gradcam:
-                        grad_img = gradcam_viewer(cam_layers, model, x.unsqueeze(0), gradcam_rgb=gradcam_rgb, use_cuda=use_cuda)
+                        grad_img = gradcam_viewer(cam_layers, model, x.unsqueeze(0), gradcam_rgb=gradcam_rgb, use_cuda=use_cuda) 
                         if grad_img is not None:
                             grad_img = np.transpose(grad_img, (2, 0, 1))
                             writer.add_image(f'Gradcam/{cam_layers}', grad_img, global_step=epoch)

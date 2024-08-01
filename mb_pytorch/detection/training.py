@@ -80,7 +80,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             targets = [{'boxes': b,'labels': label} for b,label in zip(bbox, labels)]      
                     
             optimizer.zero_grad()
-            loss_dict = model(images, targets)
+            loss_dict = model(images, targets)  
             losses = sum(loss for loss in loss_dict.values())
             
             losses.backward()
@@ -116,7 +116,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
                 labels = list(label.to(device) for label in labels)  
                 targets = [{'boxes': b,'labels': label} for b,label in zip(bbox, labels)]    
 
-                loss_dict = model(images, targets)
+                loss_dict = model(images, targets)  ## output is boxes, labels, scores
 
                 if len(loss_dict) == 0:
                     continue
@@ -157,7 +157,7 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             if len(images) > 0:
                 x = images[0].to('cpu')
                 #create_img_grid(x, x, writer, global_step=epoch)
-                fig = dynamic_plt(x,labels=labels[0],return_fig=True)
+                fig = dynamic_plt(x,labels=labels,return_fig=True)
                 writer.add_image('grid', plot_to_image(fig), global_step=epoch)
 
                 # Grad-CAM visualization 

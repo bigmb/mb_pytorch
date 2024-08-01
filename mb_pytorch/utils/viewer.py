@@ -10,7 +10,8 @@ import torchvision.transforms.functional as TF
 import io
 import PIL
 
-__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer','new_show_cam_on_image','gradcam_viewer','plot_classes_pred']
+__all__ = ['show_images', 'show_segmentation_masks', 'show_bounding_boxes', 'show_label_on_img','model_viewer',
+           'new_show_cam_on_image','gradcam_viewer','plot_classes_pred','dynamic_plt_tensor']
 
 def show_images(imgs, figsize=(12.0, 12.0)):
     """Displays a single image or list of images. 
@@ -282,3 +283,66 @@ def plot_classes_pred(images, labels, predictions_prob, preds):
                     str(labels_np[idx])),
                     color=("green" if preds[idx]==labels[idx] else "red"))
     return fig
+
+def dynamic_plt_tensor(imgs: list,labels: list =None, bboxes: list =None ,num_cols: int = 2, figsize=(16, 12), return_fig: bool = False, show: bool = True):
+    """
+    Create dynamic plots based on the number of images and desired columns
+    Args:
+        imgs: List of images or paths to images or torch tensors
+        labels: List of labels corresponding to the images (default: None)
+        bboxes: List of bounding boxes corresponding to the images (default: None)
+        num_cols: Number of columns for the subplot grid (default: 2)
+        figsize: Size of the figure (default: (16, 12))
+        return_fig: Return the figure object (default: False)
+        show: Show the plot (default: True)
+    Return:
+        None
+    """
+    if isinstance(imgs[0], str):
+        imgs = [plt.imread(i) for i in imgs]
+    
+    if isinstance(imgs[0][0], torch.Tensor):
+        imgs = [img.permute(1, 2, 0).numpy() for img in imgs]
+
+    num_images = len(imgs)
+    num_rows = int(np.ceil(num_images / num_cols))
+    
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=figsize)
+    
+    # Ensure axes is always 2D
+    if num_rows == 1:
+        axes = axes.reshape(1, -1)
+    
+    for i, img in enumerate(imgs):
+        row = i // num_cols
+        col = i % num_cols
+        ax = axes[row, col]
+        if img.shape[0]==3:
+            img = np.moveaxis(img, 0, -1)
+        ax.imshow(img)
+        ax.axis('off')
+        if labels:
+            if isinstance(labels[i], torch.Tensor):
+                labels[i] = labels[i].item()
+            ax.set_title(str(labels[i]))
+
+        if bboxes:
+            img_bboxes = bboxes[i]
+            for bbox in img_bboxes:
+                if isinstance(bbox[0], torch.Tensor):
+                    bbox = [b.item() for b in bbox]
+                rect = plt.Rectangle((bbox[0], bbox[1]), bbox[2], bbox[3], 
+                                     fill=False, edgecolor='red', linewidth=2)
+                ax.add_patch(rect)
+
+    # Remove any unused subplots
+    for j in range(num_images, num_rows * num_cols):
+        row = j // num_cols
+        col = j % num_cols
+        fig.delaxes(axes[row, col])
+    
+    plt.tight_layout()
+    if show:    
+        plt.show()
+    if return_fig:
+        return fig

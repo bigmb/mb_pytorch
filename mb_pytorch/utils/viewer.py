@@ -243,7 +243,7 @@ def new_show_cam_on_image(img, mask, use_rgb=True,image_weight: float = 0.4):
 
 def gradcam_viewer(gradcam_layer, model, x_grad,gradcam_rgb=False,use_cuda=False):
     from pytorch_grad_cam import GradCAM
-    from pytorch_grad_cam.utils.image import show_cam_on_image
+    # from pytorch_grad_cam.utils.image import show_cam_on_image
     
     split_val = gradcam_layer.split('.')[1]
     new_layer_name = 'model.' + split_val

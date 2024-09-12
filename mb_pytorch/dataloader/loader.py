@@ -13,6 +13,7 @@ from mb.pandas import check_drop_duplicates,remove_unnamed
 from ..utils.extra_utils import labels_num_map
 from datetime import datetime
 import cv2
+from typing import List,Optional,Dict
 
 today = datetime.now()
 
@@ -202,7 +203,16 @@ class JointTransforms:
 
 
 class customdl(torch.utils.data.Dataset):
-    def __init__(self,data,model_type,transform=None,train_file=True,logger=None):
+    """
+    Dataset class for custom data
+    Args:
+        data: dict
+        model_type: str
+        transform: torch.transform
+        train_file: bool
+        logger: logger
+    """
+    def __init__(self,data: dict,model_type: str,transform: Optional[object] =None,train_file: bool =True,logger: Optional[object] =None):
         self.transform=transform
         self.logger=logger
         self.folder_name=os.path.dirname(data['root'])
@@ -323,6 +333,7 @@ class customdl(torch.utils.data.Dataset):
         img = self.csv_data['image_path'].iloc[idx]
         #img = Image.open(img)
         img = cv2.imread(img)
+        img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
 
         if self.data_type == 'classification':
             if self.transform:

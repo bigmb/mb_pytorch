@@ -161,16 +161,16 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
                 fig = dynamic_plt(img_l,labels=labels_l,return_fig=True)
                 writer.add_image('grid', plot_to_image(fig), global_step=epoch)
 
-                # Grad-CAM visualization 
-                if gradcam is not None:
-                    use_cuda = device != 'cpu'
-                    for cam_layers in gradcam:
-                        grad_img = gradcam_viewer(cam_layers, model, x.unsqueeze(0), gradcam_rgb=gradcam_rgb, use_cuda=use_cuda) 
-                        if grad_img is not None:
-                            grad_img = np.transpose(grad_img, (2, 0, 1))
-                            writer.add_image(f'Gradcam/{cam_layers}', grad_img, global_step=epoch)
-                        elif logger:
-                            logger.info(f'Gradcam not supported for {cam_layers}')   
+                # # Grad-CAM visualization 
+                # if gradcam is not None:
+                #     use_cuda = 'cpu'
+                #     for cam_layers in gradcam:
+                #         grad_img = gradcam_viewer(cam_layers, model, img_l.unsqueeze(0), gradcam_rgb=gradcam_rgb, use_cuda=use_cuda) 
+                #         if grad_img is not None:
+                #             grad_img = np.transpose(grad_img, (2, 0, 1))
+                #             writer.add_image(f'Gradcam/{cam_layers}', grad_img, global_step=epoch)
+                #         elif logger:
+                #             logger.info(f'Gradcam not supported for {cam_layers}')   
    
         # Save best model
         if avg_val_loss < best_val_loss:

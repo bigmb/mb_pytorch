@@ -155,9 +155,10 @@ def detection_train_loop( k_yaml: dict,scheduler: Optional[object] =None,writer:
             
             # Visualizations
             if len(images) > 0:
-                x = images[0].to('cpu')
+                img_l = [np.array(i.to('cpu')) for i in images]
+                labels_l = [str(list(np.array((l.to('cpu'))))[0]) for l in labels] ##check for multiple labels
                 #create_img_grid(x, x, writer, global_step=epoch)
-                fig = dynamic_plt(x,labels=labels,return_fig=True)
+                fig = dynamic_plt(img_l,labels=labels_l,return_fig=True)
                 writer.add_image('grid', plot_to_image(fig), global_step=epoch)
 
                 # Grad-CAM visualization 

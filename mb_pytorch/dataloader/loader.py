@@ -11,7 +11,7 @@ import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 # from mb_pytorch.utils.yaml_reader import YAMLReader
-from mb_pandas.src.dfload import load_any_df
+from mb_pandas import load_any_df
 from mb_utils.src.verify_image import verify_image
 from mb.pandas import check_drop_duplicates, remove_unnamed
 from ..utils.extra_utils import labels_num_map

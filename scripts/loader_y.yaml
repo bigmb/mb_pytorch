@@ -1,39 +1,78 @@
-##general loader yaml file to get the loader and the data.
 data:
-  from_datasets: 'CIFAR10'
-  from_file: True  ##if False, then from_datasets is used
-  work_dir: /home/malav/mb_pytorch/data/
-  file: /home/malav/mb_pytorch/data/csv/file_data.csv
-  use_img_dir: True
-  img_dir: /home/malav/mb_pytorch/data/images1/
-  thresholding_pd: 0
-  
+  file:
+    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final_test.csv', 
+    ## path to the csv file ##/home/malav/Desktop ## /home/winnow/mb_packages/mb_pytorch ## just add csv file to the folder. result saved here too.
+    verify_image_path: True,  ## if True, then image path is verified
+    verify_image : False} ## if Ture, verifying images using mb.
+
+##csv format ('image_id','image_path','image_type','label','bbox') 
+
+model:
+  model_type : 'detection'  ## detection, segmentation, classification
+  model: 'faster_rcnn'
+  use_pretrained: True  
+  use_own_model: False
+  #model_path: '/home/winnow/Desktop/mb_packages/mb_pytorch/models/...' ## if use_own_model is True   
+  model_path : '/home/malav/Desktop/mb_packages/mb_pytorch/models/...'
+  model_layer : 'avgpool' # generally used for generating embeddings
+
+  device: 'cpu'  ## cpu, cuda
+  load_model: False
+  use_torchvision_models: True
+  model_name: 'fasterrcnn_resnet50_fpn' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
+  model_version: '50'  ##if model_name is in torchvision.models, then this is the version of the model
+  model_backbone: 'resnet'  ##if model_name is in torchvision.models, then this is the backbone of the model
+  model_optimizer: 'Adam' #adam, sgd, rmsprop,none
+  model_loss: 'cross_entropy' #cross_entropy, mse,none
+  model_scheduler: 'StepLR' #StepLR, ExponentialLR,none
+  model_pretrained: True
+  model_epochs: 3
+  model_num_classes: 41    ## if multiple classes, then labels should be in the form of list
+  model_initialization: None
+  model_meta_data:  {model_bbox_threshold: 0.8}
+
+  model_train_parameters:
+    Adam: 
+      {lr: 0.001, betas: [0.9, 0.999], eps: !!float 1e-08, weight_decay: 0, amsgrad: False}
+    SGD:
+      {lr: 0.01, momentum: 0.9, dampening: 0, weight_decay: 0, nesterov: False}
+    RMSprop:
+      {lr: 0.01, alpha: 0.99, eps: !!float 1e-08, weight_decay: 0, momentum: 0, centered: False}
+    cross_entropy:
+      {weight: None, size_average: None, ignore_index: -100, reduce: None, reduction: 'mean'}
+    mse_loss:
+      {size_average: None, reduce: None, reduction: 'mean'}
+    StepLR:
+      {step_size: 3, gamma: 0.2}
+    ExponentialLR:
+      {gamma: 0.9}
+
 train_params:
-  batch_size: 4
+  batch_size: 8
   num_workers: 4
   pin_memory: True
-  shuffle: True
-  seed : 42
+  shuffle: False
+  seed: 42
 
 test_params:
-  batch_size: 4
+  batch_size: 8
   num_workers: 4
   pin_memory: True
-  shuffle: True
-  seed : 42
+  shuffle: False
+  seed: 42  
 
 transformation:
-  transform : True
+  transform : True ## if True, then the following transformations are used
   resize:
-    val : False
+    val : True
     args:
-      size: [256, 256]
+      size: [600, 800]
   random_crop:
     val : False
     args:
       size: [224, 224]
   random_horizontal_flip:
-    val : True
+    val : False
     args:
       p: 0.5
   random_vertical_flip:
@@ -41,7 +80,7 @@ transformation:
     args:
        p: 0.5
   random_rotation:
-    val : True
+    val : False
     args:
       degrees: 90
   random_grayscale:
@@ -49,7 +88,7 @@ transformation:
     args:
       p: 0.1
   random_color_jitter:
-    val : True
+    val : False
     args:
       brightness: 0.4
       contrast: 0.4
@@ -62,28 +101,6 @@ transformation:
       std: [0.229, 0.224, 0.225]
   to_tensor:
     val : True
-  
-model:
-  use_torchvision_models: True
-  model_name: 'resnet' #if name exists in models, then it will be used. Also,if its in torchvision.models, then it will be used.
-  model_version: '50'  ##if model_name is in torchvision.models, then this is the version of the model
-  model_path: /home/malav/mb_pytorch/models/ #path to save the model if model_name is not in models otherise it will use the saved one
-  model_optimizer: 'adam' #adam, sgd, rmsprop,none
-  model_loss: 'cross_entropy' #cross_entropy, mse,none
-  model_pretrained: False
-  model_num_classes: 10
-  model_initialization: None
 
-  model_parameters:
-    adam: 
-      {lr: 0.001, betas: [0.9, 0.999], eps: 1e-08, weight_decay: 0, amsgrad: False}
-    sgd:
-      {lr: 0.01, momentum: 0.9, dampening: 0, weight_decay: 0, nesterov: False}
-    rmsprop:
-      {lr: 0.01, alpha: 0.99, eps: 1e-08, weight_decay: 0, momentum: 0, centered: False}
-    cross_entropy:
-      {weight: None, size_average: None, ignore_index: -100, reduce: None, reduction: 'mean'}
-    mse:
-      {size_average: None, reduce: None, reduction: 'mean'}
 
  

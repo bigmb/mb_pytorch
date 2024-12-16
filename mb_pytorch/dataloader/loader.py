@@ -224,6 +224,8 @@ class BaseDataset(Dataset):
         # Remove duplicates and unnamed columns
         self.data = check_drop_duplicates(self.data, columns=['image_path'], drop=True, logger=self.logger)
         self.data = remove_unnamed(self.data, logger=self.logger)
+        self.data.reset_index(drop=True, inplace=True)
+        self.data.to_csv(os.path.join(os.path.dirname(self.config['root']),'clean_data.csv'), index=False)
     
     def _process_labels(self):
         """Process and map labels to numbers."""

@@ -291,5 +291,6 @@ class TorchScriptUtils:
         print('Setting TorchScript to use all available cores')
         print(f'Current number of threads for torch: {torch.get_num_threads()}')
         print(f'Number of available cores: {torch.get_num_interop_threads()}')
-        torch.set_num_threads(torch.get_num_interop_threads())
-        print(f'Number of threads set to: {torch.get_num_threads()}')
+        torch.set_num_threads(torch.get_num_interop_threads()-2)
+        cores = torch.get_num_interop_threads()-2
+        print(f'Number of threads set to: {cores}. Using 2 less than available cores for other tasks.')

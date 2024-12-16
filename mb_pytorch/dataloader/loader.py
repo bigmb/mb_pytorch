@@ -13,7 +13,7 @@ import torchvision.transforms as transforms
 # from mb_pytorch.utils.yaml_reader import YAMLReader
 from mb_pandas.dfload import load_any_df
 from mb_utils.src.verify_image import verify_image
-from mb_pandas import check_drop_duplicates, remove_unnamed
+from mb.pandas import check_drop_duplicates, remove_unnamed
 from ..utils.extra_utils import labels_num_map
 
 __all__ = ['BaseDataset', 'TorchDataLoader', 'TransformCompose']

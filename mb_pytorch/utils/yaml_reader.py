@@ -1,17 +1,15 @@
 """YAML configuration file reader with validation and caching."""
 
 from typing import Any, Dict, Optional
-import os
 from pathlib import Path
 import yaml
-from mb_utils.src.logging import logger
 
 __all__ = ['YAMLReader']
 
 class YAMLReader:
     """Read and validate YAML configuration files."""
     
-    def __init__(self, yaml_path: str,get_data: bool = True):
+    def __init__(self, yaml_path: str):
         """
         Initialize YAML reader.
         
@@ -32,8 +30,6 @@ class YAMLReader:
             
         self.data: Optional[Dict[str, Any]] = None
 
-        if get_data:    
-            self.data = self.read(logger)
 
     def read(self, logger: Optional[Any] = None) -> Dict[str, Any]:
         """
@@ -48,11 +44,10 @@ class YAMLReader:
         Raises:
             yaml.YAMLError: If YAML parsing fails
         """
-        self.data=  None
         if self.data is None:
             try:
                 with open(self.yaml_path, 'r', encoding='utf-8') as f:
-                    self._data = yaml.safe_load(f)
+                    self.data = yaml.safe_load(f)
                     
                 if logger:
                     logger.info(f"Successfully read YAML file: {self.yaml_path}")

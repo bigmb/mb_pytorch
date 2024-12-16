@@ -11,7 +11,7 @@ __all__ = ['YAMLReader']
 class YAMLReader:
     """Read and validate YAML configuration files."""
     
-    def __init__(self, yaml_path: str):
+    def __init__(self, yaml_path: str,get_data: bool = True):
         """
         Initialize YAML reader.
         
@@ -31,7 +31,10 @@ class YAMLReader:
             raise ValueError(f"Invalid file extension: {self.yaml_path.suffix}")
             
         self._data: Optional[Dict[str, Any]] = None
-        
+
+        if get_data:
+            return self.read(logger)
+
     def read(self, logger: Optional[Any] = None) -> Dict[str, Any]:
         """
         Read and parse YAML file.

@@ -30,10 +30,10 @@ class YAMLReader:
         if not self.yaml_path.suffix in ['.yaml', '.yml']:
             raise ValueError(f"Invalid file extension: {self.yaml_path.suffix}")
             
-        self._data: Optional[Dict[str, Any]] = None
+        self.data: Optional[Dict[str, Any]] = None
 
-        if get_data:
-            return self.read(logger)
+        if get_data:    
+            self.data = self.read(logger)
 
     def read(self, logger: Optional[Any] = None) -> Dict[str, Any]:
         """
@@ -48,7 +48,8 @@ class YAMLReader:
         Raises:
             yaml.YAMLError: If YAML parsing fails
         """
-        if self._data is None:
+        self.data=  None
+        if self.data is None:
             try:
                 with open(self.yaml_path, 'r', encoding='utf-8') as f:
                     self._data = yaml.safe_load(f)
@@ -61,7 +62,7 @@ class YAMLReader:
                     logger.error(f"Failed to parse YAML file: {e}")
                 raise
                 
-        return self._data
+        return self.data
     
     def get_value(
         self,
@@ -85,11 +86,11 @@ class YAMLReader:
         Raises:
             KeyError: If required key is missing
         """
-        if self._data is None:
+        if self.data is None:
             self.read(logger)
             
         try:
-            value = self._data
+            value = self.data
             for k in key.split('.'):
                 value = value[k]
             return value
@@ -122,7 +123,7 @@ class YAMLReader:
         Raises:
             KeyError: If any required key is missing
         """
-        if self._data is None:
+        if self.data is None:
             self.read(logger)
             
         missing_keys = []

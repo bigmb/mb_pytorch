@@ -160,7 +160,7 @@ class BaseDataset(Dataset):
         self,
         data_config: Dict[str, Any],
         task_type: str,
-        transform: Optional[TransformCompose] = None,
+        transform: Optional[str,None] = None,
         is_train: bool = True,
         logger: Optional[Any] = None
     ):
@@ -176,7 +176,7 @@ class BaseDataset(Dataset):
         """
         self.config = data_config
         self.task_type = task_type
-        self.transform = transform
+        self.transform = TransformCompose(transform) if transform else None
         self.is_train = is_train
         self.logger = logger
         
@@ -219,7 +219,18 @@ class BaseDataset(Dataset):
         
         # Filter by split
         split_type = 'training' if self.is_train else 'validation'
-        self.data = self.data[self.data['image_type'].isin([split_type, split_type[:4]])].reset_index(drop=True)
+        if 'image_type' in self.data.columns and split_type=='training':
+            if self.data['image_type'].nunique() > 1:
+                if 'train' in self.data['image_type'].unique():
+                    self.data = self.data[self.data['image_type']=='train'].reset_index(drop=True)
+                else:
+                    self.data = self.data[self.data['image_type']=='training'].reset_index(drop=True)  
+        elif 'image_type' in self.data.columns and split_type=='validation':
+            if self.data['image_type'].nunique() > 1:
+                if 'val' in self.data['image_type'].unique():
+                    self.data = self.data[self.data['image_type']=='val'].reset_index(drop=True)
+                else:
+                    self.data = self.data[self.data['image_type']=='validation'].reset_index(drop=True)
         
         # Remove duplicates and unnamed columns
         self.data = check_drop_duplicates(self.data, columns=['image_path'], drop=True, logger=self.logger)
@@ -230,12 +241,12 @@ class BaseDataset(Dataset):
     def _process_labels(self):
         """Process and map labels to numbers."""
         output_path = os.path.join(os.path.dirname(self.config['root']), 'label_num_map.csv')
-        self.data = labels_num_map(self.data, output_csv=output_path)
+        self.data_labels = labels_num_map(self.data, output_csv=output_path)
         
         # Save processed data
         if os.path.dirname(self.config['root']):
             suffix = 'train' if self.is_train else 'val'
-            self.data.to_csv(
+            self.data_labels.to_csv(
                 os.path.join(os.path.dirname(self.config['root']), f'{suffix}_wrangled_file.csv'),
                 index=False
             )

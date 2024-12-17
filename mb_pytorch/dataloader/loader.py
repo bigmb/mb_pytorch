@@ -183,7 +183,7 @@ class BaseDataset(Dataset):
         # Load and process data
         self.data = self._load_data()
         self._verify_data()
-        # self._process_labels()
+        self._process_labels()
     
     def _load_data(self) -> pd.DataFrame:
         """Load and validate data from CSV."""

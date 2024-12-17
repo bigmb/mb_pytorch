@@ -58,13 +58,13 @@ def labels_num_map(input_csv, output_csv=None):
     else:
         df = input_csv
 
-    print(df.head())
+    print(f'dataframe1: {df.head()}')
     labels_list = df['label'].to_list()
     labels_list2 = [[i] for i in labels_list if isinstance(i, str)]
     unique_labels = list(set([label for labels in labels_list2 for label in labels]))
     label_num_map = {label: i for i, label in enumerate(unique_labels)}
 
-    print(label_num_map)
+    print(f'label map :{label_num_map}')
     new_pd = pd.DataFrame(columns=['label', 'label_num'])
     new_pd['label'] = list(label_num_map.keys())
     new_pd['label_num'] = list(label_num_map.values())

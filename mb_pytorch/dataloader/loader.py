@@ -231,7 +231,7 @@ class BaseDataset(Dataset):
                     self.data = self.data[self.data['image_type']=='val'].reset_index(drop=True)
                 else:
                     self.data = self.data[self.data['image_type']=='validation'].reset_index(drop=True)
-        
+        print(f'Number of images in {split_type} set: {len(self.data)}')
         # Remove duplicates and unnamed columns
         self.data = check_drop_duplicates(self.data, columns=['image_path'], drop=True, logger=self.logger)
         self.data = remove_unnamed(self.data, logger=self.logger)

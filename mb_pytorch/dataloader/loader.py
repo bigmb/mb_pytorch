@@ -160,7 +160,7 @@ class BaseDataset(Dataset):
         self,
         data_config: Dict[str, Any],
         task_type: str,
-        transform: Optional[str,None] = None,
+        transform: Dict[str,Any] = None,
         is_train: bool = True,
         logger: Optional[Any] = None
     ):

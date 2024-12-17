@@ -125,31 +125,31 @@ class TransformCompose:
         self,
         original_size: torch.Size,
         new_size: torch.Size,
-        bbox: torch.Tensor
+        bbox: torch.Tensor,
+        dtype: torch.dtype = torch.int32
     ) -> torch.Tensor:
         """Resize bounding box coordinates."""
+        orig_x1, orig_y1, orig_x2, orig_y2 = bbox
         _, orig_h, orig_w = original_size
         _, new_h, new_w = new_size
         
         x_scale = new_w / orig_w
         y_scale = new_h / orig_h
+        new_x1 = int(orig_x1 * x_scale)
+        new_y1 = int(orig_y1 * y_scale)
+        new_x2 = int(orig_x2 * x_scale)
+        new_y2 = int(orig_y2 * y_scale)
         
-        bbox = bbox.clone()
-        bbox[0::2] *= x_scale  # x coordinates
-        bbox[1::2] *= y_scale  # y coordinates
+        return torch.tensor([new_x1, new_y1, new_x2, new_y2],dtype=dtype)
         
-        return bbox
-    
     def _hflip_bbox(self, bbox: torch.Tensor, width: int) -> torch.Tensor:
         """Flip bounding box horizontally."""
-        bbox = bbox.clone()
-        bbox[0::2] = width - bbox[0::2]
+        bbox[:, [0, 2]] = width - bbox[:, [2, 0]]
         return bbox
     
     def _vflip_bbox(self, bbox: torch.Tensor, height: int) -> torch.Tensor:
         """Flip bounding box vertically."""
-        bbox = bbox.clone()
-        bbox[1::2] = height - bbox[1::2]
+        bbox[:, [1, 3]] = height - bbox[:, [3, 1]]
         return bbox
 
 

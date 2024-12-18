@@ -218,20 +218,21 @@ class BaseDataset(Dataset):
             ].reset_index(drop=True)
         
         # Filter by split
-        split_type = 'training' if self.is_train else 'validation'
+        if self.is_train:
+            split_type = 'training'
+        else:
+            split_type = 'validation'
         if 'image_type' in self.data.columns and split_type=='training':
-            if self.data['image_type'].nunique() > 1:
-                if 'train' in self.data['image_type'].unique():
-                    self.data = self.data[self.data['image_type']=='train'].reset_index(drop=True)
-                else:
-                    self.data = self.data[self.data['image_type']=='training'].reset_index(drop=True)  
+            if 'train' in self.data['image_type'].unique():
+                self.data = self.data[self.data['image_type']=='train'].reset_index(drop=True)
+            else:
+                self.data = self.data[self.data['image_type']=='training'].reset_index(drop=True)  
         elif 'image_type' in self.data.columns and split_type=='validation':
-            if self.data['image_type'].nunique() > 1:
-                if 'val' in self.data['image_type'].unique():
-                    self.data = self.data[self.data['image_type']=='val'].reset_index(drop=True)
-                else:
-                    self.data = self.data[self.data['image_type']=='validation'].reset_index(drop=True)
-        print(f'Number of images in {split_type} set: {len(self.data)}')
+            if 'val' in self.data['image_type'].unique():
+                self.data = self.data[self.data['image_type']=='val'].reset_index(drop=True)
+            else:
+                self.data = self.data[self.data['image_type']=='validation'].reset_index(drop=True)
+        # print(f'Number of images in {split_type} set: {len(self.data)}')
         # Remove duplicates and unnamed columns
         self.data = check_drop_duplicates(self.data, columns=['image_path'], drop=True, logger=self.logger)
         self.data = remove_unnamed(self.data, logger=self.logger)
@@ -241,15 +242,21 @@ class BaseDataset(Dataset):
     def _process_labels(self):
         """Process and map labels to numbers."""
         output_path = os.path.join(os.path.dirname(self.config['root']), 'label_num_map.csv')
-        self.data_labels = labels_num_map(self.data, output_csv=output_path)
-        
+        if self.is_train:
+            self.data_labels = labels_num_map(self.data, output_csv=output_path,is_train=True)
+        else:
+            self.data_labels = labels_num_map(self.data,output_csv=output_path,is_train=False)
+
         # Save processed data
         if os.path.dirname(self.config['root']):
-            suffix = 'train' if self.is_train else 'val'
-            self.data_labels.to_csv(
-                os.path.join(os.path.dirname(self.config['root']), f'{suffix}_wrangled_file.csv'),
-                index=False
-            )
+            if self.is_train:
+                self.data_labels.to_csv(
+                    os.path.join(os.path.dirname(self.config['root']), 'train_wrangled_file.csv'),
+                    index=False)
+            else:
+                self.data_labels.to_csv(
+                    os.path.join(os.path.dirname(self.config['root']), 'val_wrangled_file.csv'),
+                    index=False)
     
     def __len__(self) -> int:
         return len(self.data)

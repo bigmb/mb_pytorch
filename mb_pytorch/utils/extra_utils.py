@@ -52,25 +52,31 @@ def overwrite_layer_weights(model, layer_index, new_weights,logger=None):
     else:
         raise ValueError("The specified layer is not a convolutional layer or linear layer.")
 
-def labels_num_map(input_csv, output_csv=None):
+def labels_num_map(input_csv, output_csv=None,is_train=True):
     if isinstance(input_csv, str):
         df = load_any_df(input_csv)
     else:
         df = input_csv
 
-    print(f'dataframe1: {df.head()}')
-    labels_list = df['label'].to_list()
-    labels_list2 = [[i] for i in labels_list if isinstance(i, str)]
-    unique_labels = list(set([label for labels in labels_list2 for label in labels]))
-    label_num_map = {label: i for i, label in enumerate(unique_labels)}
+    if is_train:
+        # print(f'dataframe1: {df.head()}')
+        labels_list = df['label'].to_list()
+        labels_list2 = [[i] for i in labels_list if isinstance(i, str)]
+        unique_labels = list(set([label for labels in labels_list2 for label in labels]))
+        label_num_map = {label: i for i, label in enumerate(unique_labels)}
 
-    print(f'label map :{label_num_map}')
-    new_pd = pd.DataFrame(columns=['label', 'label_num'])
-    new_pd['label'] = list(label_num_map.keys())
-    new_pd['label_num'] = list(label_num_map.values())
-    if output_csv:
-        new_pd.to_csv(output_csv, index=False)
-    
+        # print(f'label map :{label_num_map}')
+        new_pd = pd.DataFrame(columns=['label', 'label_num'])
+        new_pd['label'] = list(label_num_map.keys())
+        new_pd['label_num'] = list(label_num_map.values())
+        if output_csv:
+            new_pd.to_csv(output_csv, index=False)
+    else:
+        new_pd = load_any_df(output_csv)
+        labels_list = df['label'].to_list()
+        labels_list2 = [[i] for i in labels_list if isinstance(i, str)]
+        label_num_map = dict(zip(new_pd['label'], new_pd['label_num']))
+
     labels_num =[]
     for i in labels_list2:
         temp_list = []

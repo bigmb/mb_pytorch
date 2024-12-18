@@ -357,5 +357,9 @@ class TorchDataLoader(torch.utils.data.DataLoader):
                 'bbox': torch.stack([b['bbox'] for b in batch]),
                 'label': torch.tensor([b['label'] for b in batch])
             }
+        elif task_type == 'embeddings':
+            return lambda batch: {
+                'image': torch.stack([b['image'] for b in batch])
+            }
         else:
             raise ValueError(f"Unknown task type: {task_type}")

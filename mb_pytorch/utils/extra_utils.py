@@ -84,8 +84,8 @@ def labels_num_map(input_csv, output_csv=None,is_train=True):
             temp_list.append(label_num_map[i[j]])
         labels_num.append(temp_list)
         labels_final_num = [xs[x] for xs in labels_num for x in range(len(xs))]
-    print(f'dataframe2: {df.head()}')
-    print(f'labels_final_num: {labels_final_num}')
+    # print(f'dataframe2: {df.head()}')
+    # print(f'labels_final_num: {labels_final_num}')
     df['label_num'] = labels_final_num
     return df
 

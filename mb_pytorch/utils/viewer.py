@@ -22,21 +22,28 @@ def show_images(imgs, figsize=(12.0, 12.0)):
     Returns:
         None
     """
-
     if not isinstance(imgs, list):
         imgs = [imgs]
+        
     fig, axs = plt.subplots(ncols=len(imgs), figsize=figsize, squeeze=False)
+    
     for i, img in enumerate(imgs):
-        #img = img.detach()
-        #img = TF.to_pil_image(img)
+        # Convert PyTorch tensor to NumPy array
         img = np.asarray(img)
-        if img.shape[0]==3:
+        
+        # Handle PyTorch format: Convert C × H × W to H × W × C
+        if img.ndim == 3 and img.shape[0] == 3:
             img = np.transpose(img, (1, 2, 0))
-        axs[0, i].imshow(np.asarray(img))
+        
+        # Scale back to [0, 255] if needed
+        if img.max() <= 1:  # If image is in [0, 1], scale to [0, 255]
+            img = (img * 255).astype('uint8')
+        
+        # Plot the image
+        axs[0, i].imshow(img)
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+    
     plt.show()
-
-    return None
     
 def plot_to_image(figure):
     """Converts the matplotlib plot specified by 'figure' to a PNG image and

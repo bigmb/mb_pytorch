@@ -99,8 +99,8 @@ class ModelLoader(nn.Module):
         """
         # Check if the model is available in torchvision models
 
-        if self._model_unet:
-            raise NotImplementedError("Unet not implemented in the new update.")
+        # if self._model_unet:
+        #     raise NotImplementedError("Unet not implemented in the new update.")
 
         if self._load_model:
             self.model = torch.load(self._data['load_model'])

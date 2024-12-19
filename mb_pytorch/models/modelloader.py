@@ -67,7 +67,7 @@ class ModelLoader(nn.Module):
         self._load_model = self._data['load_model']
         self._model_num_classes = self._data['model_num_classes']
         self._model_type=self._data['model_type']
-        self._model_unet= self._data['use_unet']
+        # self._model_unet= self._data['use_unet']
 
     def model_type(self):
         """

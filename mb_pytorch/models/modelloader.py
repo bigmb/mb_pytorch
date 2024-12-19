@@ -135,6 +135,11 @@ class LayerExtractor:
         self.target_layers = target_layers
         self.device = device
         self._features = {}
+        
+        model_layers = dict(self.model.named_modules())
+        for layer in self.target_layers:
+            if layer not in model_layers:
+                raise ValueError(f"Layer '{layer}' not found in the model")
 
         for name, module in self.model.named_modules():
             if name in self.target_layers:
@@ -162,6 +167,7 @@ class LayerExtractor:
         return hook
 
     def forward(self, x):
+        x = x.to(self.device)
         _ = self.model(x)  # Run the forward pass
         return self._features  # Return the hooked layer's features
     
@@ -176,15 +182,11 @@ class LayerExtractor:
             self._features = {i_layer: None for i_layer in self.target_layers}
             
             # Forward pass
-            _ = self.model(i_dat['image'].to(self.device))
+            _ = self.model(i_dat['image'])
             
             # Append features for each layer
             for layer_name in self.target_layers:
-                final_features[layer_name].append(self._features[layer_name].cpu().numpy())
-
-        # Concatenate features for each layer
-        for layer_name in self.target_layers:
-            final_features[layer_name] = np.concatenate(final_features[layer_name], axis=0)
+                final_features[layer_name].append(self._features[layer_name])
 
         return final_features
         

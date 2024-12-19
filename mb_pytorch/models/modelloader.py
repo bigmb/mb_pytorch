@@ -4,20 +4,27 @@ import torch
 from torch.nn import functional as F
 import torchvision
 import torchvision.models as models
-import os
+import numpy as np
 import importlib
+from tqdm import tqdm
 
-__all__ = ['ModelLoader','ModelExtractor']
+__all__ = ['ModelLoader','LayerExtractor']
 
 
 def get_custom_model(data):
     """
-    Function to get custom model from the models folder
+    Function to load a custom model.
+
+    Parameters:
+    data (dict): dictionary with the model name, model custom name, and model custom parameters
+
+    Returns:
+    model_out (nn.Module): loaded custom model
     """
     model_name = data['model_name']
     model_custom = data['model_custom']
     model_module = importlib.import_module(model_custom)
-    if model_name=='Unet':
+    if model_name=='Unet': ## Dynamic Unet with attention - not implemented in the new update
         if data['unet_parameters']['attention']:
             model_name = 'Unet_attention'
         model_out = getattr(model_module, model_name)(**data['unet_parameters'])
@@ -28,6 +35,30 @@ def get_custom_model(data):
 
 class ModelLoader(nn.Module):
     def __init__(self, data : dict,logger=None):
+        """
+        Initialize the ModelLoader class.
+
+        Parameters
+        ----------
+        data : dict
+            A dictionary containing the following information:
+                - model_name: str
+                    The name of the model to use.
+                - model_path: str
+                    The path to the model weights file.
+                - model_pretrained: bool
+                    Whether to use a pre-trained model.
+                - load_model: bool
+                    Whether to load the model weights from the specified path.
+                - model_num_classes: int
+                    The number of classes to predict.
+                - model_type: str
+                    The type of model to use (e.g. classification, detection, segmentation).
+                - use_unet: bool
+                    Whether to use a U-Net model for segmentation tasks.
+        logger : Logger or None
+            The logger to use for printing messages.
+        """
         super().__init__()
         self._data= data 
         self._model_name=self._data['model_name']
@@ -88,31 +119,72 @@ class ModelLoader(nn.Module):
     def forward(self,x):
         return self.model(x)
     
-class LayerExtractor(nn.Module):
-    def __init__(self, model, layer_name):
-        super(LayerExtractor, self).__init__()
+class LayerExtractor:
+    def __init__(self, model, dataloader, target_layers : list ,device='cpu'):
+        """
+        Initialize the LayerExtractor class.
+
+        Args:
+            model (nn.Module): Model which we want to extract the features from.
+            dataloader (DataLoader): Dataloader which will be used to extract the features.
+            target_layers (list): List of target layers from which the features are to be extracted.
+            device (str, optional): Device on which the model is to be run. Defaults to 'cpu'.
+        """
         self.model = model
-        self.layer_name = layer_name
-        self._features = None
-        self._register_hook()
+        self.dataloader = dataloader
+        self.target_layers = target_layers
+        self.device = device
+        self._features = {}
 
-    def _register_hook(self):
-        # Register a forward hook to capture the layer's output
-        layer = dict(self.model.named_modules())[self.layer_name]
-        layer.register_forward_hook(self._hook_fn)
+        for name, module in self.model.named_modules():
+            if name in self.target_layers:
+                module.register_forward_hook(self._hook_fn(name))
 
-    def _hook_fn(self, module, input, output):
-        self._features = output
+    def _hook_fn(self, layer_name):
+        """
+        Creates a forward hook function for a specified layer.
+
+        This hook function captures the output of the layer during the forward pass
+        and stores it in a dictionary with the layer name as the key. The output
+        is reshaped and converted to a NumPy array before storing.
+
+        Args:
+            layer_name (str): The name of the layer to attach the forward hook to.
+
+        Returns:
+            function: A hook function that can be registered to a model layer.
+        """
+
+        def hook(module, input, output):
+            N, C, H, W = output.shape
+            output = output.reshape(N, C, -1)
+            self._features[layer_name]=output.data.cpu().numpy()
+        return hook
 
     def forward(self, x):
         _ = self.model(x)  # Run the forward pass
         return self._features  # Return the hooked layer's features
     
-class ModelExtractor(nn.Module):
-    def __init__(self, model):
-        super(ModelExtractor, self).__init__()
-        self.model = model
-        self.feature_extractor = torch.nn.Sequential(*list(self.model.children())[:-1])
-                
-    def __call__(self, x):
-        return self.feature_extractor(x)[:, :, 0, 0]
+    def generate_embeddings(self):
+        self.model.to(self.device)
+        self.model.eval()
+
+        final_features = {i_layer: [] for i_layer in self.target_layers}
+
+        for i, i_dat in tqdm(enumerate(self.dataloader)):
+            # Reset _features for each forward pass
+            self._features = {i_layer: None for i_layer in self.target_layers}
+            
+            # Forward pass
+            _ = self.model(i_dat['image'].to(self.device))
+            
+            # Append features for each layer
+            for layer_name in self.target_layers:
+                final_features[layer_name].append(self._features[layer_name].cpu().numpy())
+
+        # Concatenate features for each layer
+        for layer_name in self.target_layers:
+            final_features[layer_name] = np.concatenate(final_features[layer_name], axis=0)
+
+        return final_features
+        

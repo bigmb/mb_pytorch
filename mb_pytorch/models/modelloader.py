@@ -36,6 +36,7 @@ class ModelLoader(nn.Module):
         self._load_model = self._data['load_model']
         self._model_num_classes = self._data['model_num_classes']
         self._model_type=self._data['model_type']
+        self._model_unet= self._data['use_unet']
 
     def model_type(self):
         """
@@ -60,22 +61,15 @@ class ModelLoader(nn.Module):
                         model_out.classifier = nn.Linear(num_ftrs, self._model_num_classes)
                         break
             return model_out
-    
-
-    def model_params(self):
-        """
-        Function to pass the model params to custom model
-        """        
-        #check if model is available in the models list
-        model_out = get_custom_model(self._data)
-        return model_out
         
-
     def get_model(self):
         """
         FUnction to get the model
         """
         # Check if the model is available in torchvision models
+
+        if self._model_unet:
+            raise NotImplementedError("Unet not implemented in the new update.")
 
         if self._load_model:
             self.model = torch.load(self._data['load_model'])
@@ -88,16 +82,32 @@ class ModelLoader(nn.Module):
                 if logger:
                     logger.info(f"Model {self._model_name} loaded from torchvision.models.") 
                 return self.model
-            else:
-                self.model = self.model_params()
-                return self.model
         except FileNotFoundError:
             raise ValueError(f"Model {self._model_name} not found in torchvision.models.")
     
     def forward(self,x):
         return self.model(x)
     
+class LayerExtractor(nn.Module):
+    def __init__(self, model, layer_name):
+        super(LayerExtractor, self).__init__()
+        self.model = model
+        self.layer_name = layer_name
+        self._features = None
+        self._register_hook()
 
+    def _register_hook(self):
+        # Register a forward hook to capture the layer's output
+        layer = dict(self.model.named_modules())[self.layer_name]
+        layer.register_forward_hook(self._hook_fn)
+
+    def _hook_fn(self, module, input, output):
+        self._features = output
+
+    def forward(self, x):
+        _ = self.model(x)  # Run the forward pass
+        return self._features  # Return the hooked layer's features
+    
 class ModelExtractor(nn.Module):
     def __init__(self, model):
         super(ModelExtractor, self).__init__()

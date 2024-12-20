@@ -75,11 +75,9 @@ class DetectionTrainer(BaseTrainer):
             
         for batch_idx, batch in enumerate(tqdm(self.train_loader, desc="Training", leave=False)):
             images, targets = self._prepare_batch(batch)
-            print(len(images))
-            print(targets[0]['boxes'].shape)
-            print(targets[0]['labels'].shape)
+
             self.optimizer.zero_grad()
-            loss_dict = self.model(images)
+            loss_dict = self.model(images,targets)
             losses = sum(loss for loss in loss_dict.values())
             
             losses.backward()

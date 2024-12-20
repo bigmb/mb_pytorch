@@ -56,7 +56,7 @@ class DetectionTrainer(BaseTrainer):
         images = [image.to(self.device) for image in images]
         bbox = [b.to(self.device) for b in bbox]
         bbox = [b.view(-1, 4) if b.dim() == 1 else b for b in bbox]
-        labels = [label.to(self.device) for label in labels]
+        labels = [torch.tensor([label.to('cpu').tolist()]).to(self.device) for label in labels]
         
         targets = [
             {'boxes': b, 'labels': label} 
@@ -75,9 +75,11 @@ class DetectionTrainer(BaseTrainer):
             
         for batch_idx, batch in enumerate(tqdm(self.train_loader, desc="Training", leave=False)):
             images, targets = self._prepare_batch(batch)
-
+            print(len(images))
+            print(targets[0]['boxes'].shape)
+            print(targets[0]['labels'].shape)
             self.optimizer.zero_grad()
-            loss_dict = self.model(images, targets)
+            loss_dict = self.model(images)
             losses = sum(loss for loss in loss_dict.values())
             
             losses.backward()

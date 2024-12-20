@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from ..training.base_trainer import BaseTrainer
 from ..utils.viewer import plot_to_image
+from ..utils.compiler import TorchScriptUtils
 from mb.plt.utils import dynamic_plt
 
 __all__ = ['DetectionTrainer', 'DetectionLoop']
@@ -20,7 +21,8 @@ class DetectionTrainer(BaseTrainer):
         logger: Optional[Any] = None,
         gradcam: Optional[Any] = None,
         gradcam_rgb: bool = False,
-        device: str = 'cpu'
+        device: str = 'cpu',
+        use_all_cpu_cores: bool = False
     ):
         """
         Initialize the detection trainer.
@@ -33,10 +35,13 @@ class DetectionTrainer(BaseTrainer):
             gradcam: Optional gradcam layers to visualize
             gradcam_rgb: Whether to use RGB for gradcam
             device: Device to run training on
+            use_all_cpu_cores: Whether to use all CPU cores for data loading. (2 cpu cores less than max. default)
         """
         super().__init__(config, train_loader,val_loader, writer, logger, device)
         self.gradcam = gradcam
         self.gradcam_rgb = gradcam_rgb
+        if use_all_cpu_cores:
+            TorchScriptUtils.set_to_max_cores()
         self.bbox_threshold = self.config['model']['model_meta_data']['model_bbox_threshold']
         
     def _prepare_batch(
@@ -104,7 +109,7 @@ class DetectionTrainer(BaseTrainer):
         with torch.no_grad():
             for batch_idx, batch in enumerate(tqdm(self.val_loader, desc="Validation", leave=False)):
                 images, targets = self._prepare_batch(batch)
-                loss_dict = self.model(images, targets)
+                loss_dict = self.model(images)
                 
                 if len(loss_dict) > 0:
                     self._process_predictions(loss_dict, targets, val_predictions)

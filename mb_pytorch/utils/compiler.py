@@ -286,7 +286,8 @@ class TorchScriptUtils:
             
         return traced_model
     
-    def set_to_max_cores(self) -> None:
+    @staticmethod
+    def set_to_max_cores() -> None:
         """Set TorchScript to use all available cores."""
         print('Setting TorchScript to use all available cores')
         print(f'Current number of threads for torch: {torch.get_num_threads()}')

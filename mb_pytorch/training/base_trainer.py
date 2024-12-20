@@ -18,7 +18,8 @@ class BaseTrainer:
     def __init__(
         self,
         config: Dict[str, Any],
-        scheduler: Optional[_LRScheduler] = None,
+        train_loader: DataLoader = None,
+        val_loader: DataLoader = None,
         writer: Optional[Any] = None,
         logger: Optional[Any] = None,
         device: str = 'cpu'
@@ -28,7 +29,6 @@ class BaseTrainer:
         
         Args:
             config: Configuration dictionary containing model and data settings
-            scheduler: Optional learning rate scheduler
             writer: Optional tensorboard writer
             logger: Optional logger instance
             device: Device to run training on ('cpu' or 'cuda')
@@ -36,12 +36,13 @@ class BaseTrainer:
         self.config = config
         self.writer = writer
         self.logger = logger
-        self.scheduler = scheduler
         self.device = self._setup_device(device)
         self.model_params = self.config['model']
 
         # Initialize training components
         self.model = self._setup_model()
+        self.train_loader = train_loader
+        self.val_loader = val_loader
         # self.train_loader, self.val_loader = self._setup_data()
         self.loss_fn, self.optimizer = self._setup_training()
         
@@ -109,7 +110,7 @@ class BaseTrainer:
         loss_fn, optimizer_cls, optimizer_params, scheduler_cls, scheduler_params = self._setup_train_helper()
         optimizer = optimizer_cls(self.model.parameters(), **optimizer_params)
         
-        if self.scheduler is not None and scheduler_cls is not None:
+        if scheduler_cls is not None:
             self.scheduler = scheduler_cls(optimizer, **scheduler_params)
             
         if self.logger:

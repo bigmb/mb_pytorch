@@ -14,7 +14,8 @@ class DetectionTrainer(BaseTrainer):
     def __init__(
         self,
         config: Dict[str, Any],
-        scheduler: Optional[Any] = None,
+        train_loader: torch.utils.data.DataLoader = None,
+        val_loader: torch.utils.data.DataLoader = None,
         writer: Optional[Any] = None,
         logger: Optional[Any] = None,
         gradcam: Optional[Any] = None,
@@ -33,7 +34,7 @@ class DetectionTrainer(BaseTrainer):
             gradcam_rgb: Whether to use RGB for gradcam
             device: Device to run training on
         """
-        super().__init__(config, scheduler, writer, logger, device)
+        super().__init__(config, train_loader,val_loader, writer, logger, device)
         self.gradcam = gradcam
         self.gradcam_rgb = gradcam_rgb
         self.bbox_threshold = self.config['model']['model_meta_data']['model_bbox_threshold']

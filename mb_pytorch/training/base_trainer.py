@@ -7,7 +7,8 @@ import os
 from tqdm import tqdm
 from mb_utils.src.logging import logger
 from ..models.modelloader import ModelLoader
-from ..training.train_params import train_helper
+from ..utils import losses as loss_fn
+import inspect
 
 __all__ = ['BaseTrainer']
 
@@ -37,10 +38,11 @@ class BaseTrainer:
         self.logger = logger
         self.scheduler = scheduler
         self.device = self._setup_device(device)
-        
+        self.model_params = self.config['model']
+
         # Initialize training components
         self.model = self._setup_model()
-        self.train_loader, self.val_loader = self._setup_data()
+        # self.train_loader, self.val_loader = self._setup_data()
         self.loss_fn, self.optimizer = self._setup_training()
         
         self.best_val_loss = float('inf')
@@ -63,18 +65,48 @@ class BaseTrainer:
         model.to(self.device)
         return model
     
-    def _setup_data(self) -> Tuple[DataLoader, DataLoader]:
-        """Setup and return data loaders."""
-        if self.logger:
-            self.logger.info('Setting up data loaders...')
-        train_loader, val_loader, _, _ = self.config.data_load()
-        return train_loader, val_loader
+    # def _setup_data(self) -> Tuple[DataLoader, DataLoader]:
+    #     """Setup and return data loaders."""
+    #     if self.logger:
+    #         self.logger.info('Setting up data loaders...')
+    #     train_loader, val_loader, _, _ = self.config.data_load()
+    #     return train_loader, val_loader
     
+    def _setup_train_helper(self) -> Tuple[Any, Optimizer]:
+        
+        if self.model_params['model_optimizer'] is not None:
+            optimizer = getattr(torch.optim,self.model_params['model_optimizer'])
+            temp_str = self.model_params['model_optimizer']
+            optimizer_dict = self.model_params['model_train_parameters'][temp_str]
+        else:
+            optimizer_dict = self.model_params['model_train_parameters']['Adam']
+            optimizer = getattr(torch.optim,'Adam')
+        
+        if self.model_params['model_scheduler'] is not None:
+            scheduler_dict = self.model_params['model_train_parameters'][self.model_params['model_scheduler']]
+            #print(scheduler_dict)
+            #print(data['model_scheduler'])
+            scheduler = getattr(torch.optim.lr_scheduler,self.model_params['model_scheduler'])
+            #print(scheduler_attr)
+            #scheduler = scheduler_attr(optimizer,**scheduler_dict)
+        else:
+            scheduler = None
+            scheduler_dict = None
+        
+        loss = None
+        for _,k in enumerate(inspect.getmembers(loss_fn)):
+            if self.model_params['model_loss']==k:
+                loss_attr = getattr(loss_fn,self.model_params['model_loss'])
+        if loss==None:
+            loss_attr = getattr(torch.nn.functional,self.model_params['model_loss']) ## if loss is not in loss_fn, it is in torch.nn
+
+        return loss_attr, optimizer, optimizer_dict, scheduler, scheduler_dict
+
     def _setup_training(self) -> Tuple[Any, Optimizer]:
         """Setup loss function and optimizer."""
         if self.logger:
             self.logger.info('Setting up training components...')
-        loss_fn, optimizer_cls, optimizer_params, scheduler_cls, scheduler_params = train_helper(self.config['model'])
+        loss_fn, optimizer_cls, optimizer_params, scheduler_cls, scheduler_params = self._setup_train_helper()
         optimizer = optimizer_cls(self.model.parameters(), **optimizer_params)
         
         if self.scheduler is not None and scheduler_cls is not None:

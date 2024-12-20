@@ -1,6 +1,6 @@
 data:
   file:
-    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final_test.csv', 
+    {root : '/home/malav/Desktop/mb_packages/mb_pytorch/data/fruit_dataset/fruit_dataset_final.csv', 
     ## path to the csv file ##/home/malav/Desktop ## /home/winnow/mb_packages/mb_pytorch ## just add csv file to the folder. result saved here too.
     verify_image_path: True,  ## if True, then image path is verified
     verify_image : False} ## if Ture, verifying images using mb.
@@ -14,7 +14,6 @@ model:
   use_own_model: False
   #model_path: '/home/winnow/Desktop/mb_packages/mb_pytorch/models/...' ## if use_own_model is True   
   model_path : '/home/malav/Desktop/mb_packages/mb_pytorch/models/...'
-  model_layer : 'avgpool' # generally used for generating embeddings
 
   device: 'cpu'  ## cpu, cuda
   load_model: False
@@ -54,7 +53,7 @@ train_params:
   shuffle: False
   seed: 42
 
-test_params:
+val_params:
   batch_size: 8
   num_workers: 4
   pin_memory: True

@@ -9,6 +9,8 @@ from mb.plt.utils import dynamic_plt
 from collections import OrderedDict
 from torchvision.models.detection.roi_heads import fastrcnn_loss
 from torchvision.models.detection.rpn import concat_box_prediction_layers
+from torch.utils.tensorboard import SummaryWriter
+import os
 
 __all__ = ['DetectionTrainer', 'DetectionLoop']
 
@@ -25,7 +27,7 @@ class DetectionTrainer(BaseTrainer):
         gradcam: Optional[Any] = None,
         gradcam_rgb: bool = False,
         device: str = 'cpu',
-        use_all_cpu_cores: bool = False
+        use_all_cpu_cores: bool = False,
     ):
         """
         Initialize the detection trainer.
@@ -46,6 +48,9 @@ class DetectionTrainer(BaseTrainer):
         if use_all_cpu_cores:
             TorchScriptUtils.set_to_max_cores()
         self.bbox_threshold = self.config['model']['model_meta_data']['model_bbox_threshold']
+        if writer:
+            self.writer = SummaryWriter(log_dir=os.path.join(os.path.dirname(self.config['data']['file']['root']), 'logs'))
+
         
     def _prepare_batch(
         self, 
@@ -304,7 +309,7 @@ class DetectionTrainer(BaseTrainer):
                         torch.profiler.ProfilerActivity.CPU, 
                         torch.profiler.ProfilerActivity.CUDA],
             schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=2),
-            on_trace_ready=torch.profiler.tensorboard_trace_handler('./log_profiler')) as p:
+            on_trace_ready=torch.profiler.tensorboard_trace_handler(os.path.join(os.path.dirname(self.config['data']['file']['root']), 'log_profiler'))) as p:
             for batch_idx, batch in enumerate(self.train_loader):
                 images, targets = self._prepare_batch(batch)
                 loss_dict = self.model(images, targets)

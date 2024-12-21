@@ -243,8 +243,8 @@ class DetectionTrainer(BaseTrainer):
             for batch_idx, batch in enumerate(tqdm(self.val_loader, desc="Validation", leave=False)):
                 images, targets = self._prepare_batch(batch)
                 # loss_dict = self.model(images) ##old code - doesnt give loss
-                # loss_dict, detections = self._eval_forward(self.model, images, targets)
-                loss_dict, detections = self._eval_forward_new(self.model, images, targets) #testing new function
+                loss_dict, detections = self._eval_forward(self.model, images, targets)
+                # loss_dict, detections = self._eval_forward_new(self.model, images, targets) #testing new function
 
                 if len(loss_dict) > 0:
                     self._process_predictions(detections, targets, val_predictions)

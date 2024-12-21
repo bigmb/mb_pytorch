@@ -128,7 +128,8 @@ class BaseTrainer:
             'scheduler_state_dict': self.scheduler.state_dict() if self.scheduler else None,
             'best_val_loss': self.best_val_loss
         }
-        save_path = os.path.join(os.path.dirname(self.config['data']['file']['root']), 'checkpoint.pth')
+        checkpoint_name = f'checkpoint_{epoch + 1}.pth'
+        save_path = os.path.join(os.path.dirname(self.config['data']['file']['root']), checkpoint_name)
         torch.save(checkpoint, save_path)
         if is_best:
             best_model_path = os.path.join(os.path.dirname(self.config['data']['file']['root']), 'best_model.pth')
@@ -174,7 +175,8 @@ class BaseTrainer:
             for name, param in self.model.named_parameters():
                 self.writer.add_histogram(name, param, global_step=epoch)
         ##saving the loss plot
-        plt.plot([train_loss,val_loss])
+        plt.plot(range(epoch+1),train_loss,label='train_loss')
+        plt.plot(range(epoch+1),val_loss,label='val_loss')
         plt.savefig(os.path.join(os.path.dirname(self.config['data']['file']['root']), 'loss_plot.png'))
     
     def train_epoch(self, epoch: int) -> float:
@@ -225,7 +227,7 @@ class BaseTrainer:
                 self.logger.info(f'Epoch {epoch + 1} - Val Loss: {val_loss:.4f}')
             
             # Log metrics and save model
-            self.log_metrics(train_loss, val_loss, epoch)
+            self.log_metrics(train_loss_list, val_loss_list, epoch)
             if val_loss < self.best_val_loss:
                 self.best_val_loss = val_loss
                 self.save_checkpoint(epoch, is_best=True)

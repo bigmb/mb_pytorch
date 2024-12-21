@@ -163,8 +163,8 @@ class BaseTrainer:
     def log_metrics(self, train_loss: float, val_loss: float, epoch: int) -> None:
         """Log training metrics to tensorboard if writer is available."""
         if self.writer is not None:
-            self.writer.add_scalar('Loss/train', train_loss, global_step=epoch)
-            self.writer.add_scalar('Loss/val', val_loss, global_step=epoch)
+            self.writer.add_scalar('Loss/train', train_loss[-1], global_step=epoch)
+            self.writer.add_scalar('Loss/val', val_loss[-1], global_step=epoch)
             self.writer.add_scalar(
                 'Learning_rate', 
                 self.optimizer.param_groups[0]['lr'], 

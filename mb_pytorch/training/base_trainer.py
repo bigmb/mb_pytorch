@@ -207,18 +207,20 @@ class BaseTrainer:
             self.logger.info('Starting training...')
             
         num_epochs = self.config['model']['model_epochs']
-        train_loss=[]
-        val_loss=[]
+        train_loss_list=[]
+        val_loss_list=[]
 
         for epoch in tqdm(range(num_epochs), desc="Epochs"):
 
             # Training phase
-            train_loss.append(self.train_epoch(epoch))
+            train_loss = self.train_epoch(epoch)
+            train_loss_list.append(train_loss)
             if self.logger:
                 self.logger.info(f'Epoch {epoch + 1} - Train Loss: {train_loss:.4f}')
             
             # Validation phase
-            val_loss.append(self.validate_epoch(epoch))
+            val_loss = self.validate_epoch(epoch)
+            val_loss_list.append(val_loss)
             if self.logger:
                 self.logger.info(f'Epoch {epoch + 1} - Val Loss: {val_loss:.4f}')
             

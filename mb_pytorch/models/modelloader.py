@@ -34,7 +34,7 @@ def get_custom_model(data):
     
 
 class ModelLoader(nn.Module):
-    def __init__(self, data : dict,logger=None):
+    def __init__(self, data : dict,get_model_data=False,logger=None):
         """
         Initialize the ModelLoader class.
 
@@ -56,6 +56,7 @@ class ModelLoader(nn.Module):
                     The type of model to use (e.g. classification, detection, segmentation).
                 - use_unet: bool
                     Whether to use a U-Net model for segmentation tasks.
+        get_model_data : bool, optional
         logger : Logger or None
             The logger to use for printing messages.
         """
@@ -67,6 +68,7 @@ class ModelLoader(nn.Module):
         self._load_model = self._data['load_model']
         self._model_num_classes = self._data['model_num_classes']
         self._model_type=self._data['model_type']
+        self.model_params_show = get_model_data
         # self._model_unet= self._data['use_unet']
 
     def model_type(self):
@@ -110,6 +112,10 @@ class ModelLoader(nn.Module):
             # Try to load the model from the specified path
             if hasattr(models, self._model_name) or hasattr(torchvision.models.detection, self._model_name):
                 self.model = self.model_type() 
+                if self.model_params_show:
+                    from mb_pytorch.utils.extra_utils import get_model_summary
+                    print('Model Summary : input_size=(3,128,128)')
+                    get_model_summary(self.model,input_size=(3,128,128))
                 if logger:
                     logger.info(f"Model {self._model_name} loaded from torchvision.models.") 
                 return self.model

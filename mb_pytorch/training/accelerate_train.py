@@ -1,15 +1,18 @@
 #function to train the model with accelerate
 
-from accelerate import Accelerator
+# from accelerate import Accelerator
 import torch
 
-
-accelerator = Accelerator() #initialize the accelerator
+def call_accelerate():
+    from accelerate import Accelerator
+    accelerator = Accelerator() #initialize the accelerator
+    return accelerator
 
 def acc_train(model,config,train_loader, val_loader):
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    accelerator = call_accelerate()
     model.to(accelerator.device)
     model,optimizer,lr_scheduler ,train_loader,val_loader = accelerator.prepare(model,config.optimizer,config.lr_scheduler,train_loader,val_loader) #prepare the model, options, train_loader and val_loader for the accelerator
     

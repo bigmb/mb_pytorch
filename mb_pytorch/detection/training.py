@@ -96,10 +96,33 @@ class DetectionTrainer(BaseTrainer):
             
             total_loss += losses.item()
             
-            if self.logger:
-                self.logger.info(f'Epoch {epoch+1} - Batch {batch_idx+1} - Train Loss: {losses.item()}')
-        
+            if batch_idx % 10 == 0 and self.logger:
+                self.logger.info(f"Epoch {epoch + 1}, Batch {batch_idx}: Loss={losses.item():.4f}")
+            else:
+                print(f"Epoch {epoch + 1}, Batch {batch_idx}: Loss={losses.item():.4f}")
+
         return total_loss / len(self.train_loader)
+    
+    def _eval_forward_new(self, model, images, targets):
+        """Simplified evaluation logic."""
+        original_image_sizes = [img.shape[-2:] for img in images]
+        images, targets = model.transform(images, targets)
+
+        # Simplified feature extraction
+        features = model.backbone(images.tensors)
+        if isinstance(features, torch.Tensor):
+            features = OrderedDict([("0", features)])
+
+        # RPN proposals
+        proposals, proposal_losses = model.rpn(images, features, targets)
+
+        # ROI heads
+        detections, detector_losses = model.roi_heads(features, proposals, images.image_sizes, targets)
+        detections = model.transform.postprocess(detections, images.image_sizes, original_image_sizes)
+
+        # Combine losses
+        losses = {**detector_losses, **proposal_losses}
+        return losses, detections
     
     def _eval_forward(self,model, images, targets):
         # type: (List[Tensor], Optional[List[Dict[str, Tensor]]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
@@ -214,9 +237,10 @@ class DetectionTrainer(BaseTrainer):
         with torch.no_grad():
             for batch_idx, batch in enumerate(tqdm(self.val_loader, desc="Validation", leave=False)):
                 images, targets = self._prepare_batch(batch)
-                # loss_dict = self.model(images)
-                loss_dict, detections = self._eval_forward(self.model, images, targets)
-                
+                # loss_dict = self.model(images) ##old code - doesnt give loss
+                # loss_dict, detections = self._eval_forward(self.model, images, targets)
+                loss_dict, detections = self._eval_forward_new(self.model, images, targets) #testing new function
+
                 if len(loss_dict) > 0:
                     self._process_predictions(detections, targets, val_predictions)
                     
@@ -271,6 +295,26 @@ class DetectionTrainer(BaseTrainer):
             return_fig=True
         )
         self.writer.add_image('grid', plot_to_image(fig), global_step=epoch)
+
+    def test_profile(self):
+        """Profile the model inference."""
+        import torch.profiler
+        with torch.profiler.profile(
+            activities=[
+                        torch.profiler.ProfilerActivity.CPU, 
+                        torch.profiler.ProfilerActivity.CUDA],
+            schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=2),
+            on_trace_ready=torch.profiler.tensorboard_trace_handler('./log_profiler')) as p:
+            for batch_idx, batch in enumerate(self.train_loader):
+                images, targets = self._prepare_batch(batch)
+                loss_dict = self.model(images, targets)
+                losses = sum(loss for loss in loss_dict.values())
+                losses.backward()  
+                self.optimizer.step()
+                p.step()
+                if batch_idx > 10:
+                    break
+
 
 def DetectionLoop(
     k_yaml: dict,

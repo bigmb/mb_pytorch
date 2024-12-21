@@ -2,13 +2,13 @@ from typing import Optional, Dict, Any, Tuple
 import torch
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
-from torch.optim.lr_scheduler import _LRScheduler
+# from torch.optim.lr_scheduler import LRScheduler
 import os
 from tqdm import tqdm
-from mb_utils.src.logging import logger
 from ..models.modelloader import ModelLoader
 from ..utils import losses as loss_fn
 import inspect
+from matplotlib import pyplot as plt
 
 __all__ = ['BaseTrainer']
 
@@ -120,6 +120,33 @@ class BaseTrainer:
             
         return loss_fn, optimizer
     
+    def save_checkpoint(self, epoch, is_best=False):
+        checkpoint = {
+            'epoch': epoch,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'scheduler_state_dict': self.scheduler.state_dict() if self.scheduler else None,
+            'best_val_loss': self.best_val_loss
+        }
+        save_path = os.path.join(os.path.dirname(self.config['data']['file']['root']), 'checkpoint.pth')
+        torch.save(checkpoint, save_path)
+        if is_best:
+            best_model_path = os.path.join(os.path.dirname(self.config['data']['file']['root']), 'best_model.pth')
+            torch.save(self.model.state_dict(), best_model_path)
+        if self.logger:
+            self.logger.info(f'Checkpoint saved at epoch {epoch + 1}')
+
+    def load_checkpoint(self, checkpoint_path):
+        checkpoint = torch.load(checkpoint_path)
+        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        if self.scheduler and checkpoint['scheduler_state_dict']:
+            self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        self.start_epoch = checkpoint['epoch'] + 1
+        self.best_val_loss = checkpoint['best_val_loss']
+        if self.logger:
+            self.logger.info(f'Checkpoint loaded from epoch {self.start_epoch}')
+
     def save_model(self, val_loss: float, epoch: int) -> None:
         """Save model if validation loss improves."""
         if val_loss < self.best_val_loss:
@@ -146,6 +173,9 @@ class BaseTrainer:
             # Log model parameter histograms
             for name, param in self.model.named_parameters():
                 self.writer.add_histogram(name, param, global_step=epoch)
+        ##saving the loss plot
+        plt.plot([train_loss,val_loss])
+        plt.savefig(os.path.join(os.path.dirname(self.config['data']['file']['root']), 'loss_plot.png'))
     
     def train_epoch(self, epoch: int) -> float:
         """
@@ -177,18 +207,50 @@ class BaseTrainer:
             self.logger.info('Starting training...')
             
         num_epochs = self.config['model']['model_epochs']
-        
+        train_loss=[]
+        val_loss=[]
+
         for epoch in tqdm(range(num_epochs), desc="Epochs"):
+
             # Training phase
-            train_loss = self.train_epoch(epoch)
+            train_loss.append(self.train_epoch(epoch))
             if self.logger:
                 self.logger.info(f'Epoch {epoch + 1} - Train Loss: {train_loss:.4f}')
             
             # Validation phase
-            val_loss = self.validate_epoch(epoch)
+            val_loss.append(self.validate_epoch(epoch))
             if self.logger:
                 self.logger.info(f'Epoch {epoch + 1} - Val Loss: {val_loss:.4f}')
             
             # Log metrics and save model
             self.log_metrics(train_loss, val_loss, epoch)
-            self.save_model(val_loss, epoch)
+            if val_loss < self.best_val_loss:
+                self.best_val_loss = val_loss
+                self.save_checkpoint(epoch, is_best=True)
+            else:
+                self.save_checkpoint(epoch)
+
+            print(f'Epoch {epoch + 1} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f}')
+
+    def train_from_checkpoint(self, checkpoint_path: str) -> None:
+        """Train from a saved checkpoint."""
+        self.load_checkpoint(checkpoint_path)
+        self.model.train()
+        num_epochs = self.config['model']['model_epochs']
+        train_loss = []
+        val_loss = []
+
+        for epoch in tqdm(range(self.start_epoch, num_epochs), desc="Epochs"):
+            train_loss.append(self.train_epoch(epoch))
+            val_loss.append(self.validate_epoch(epoch))
+            self.log_metrics(train_loss, val_loss, epoch)
+            if val_loss < self.best_val_loss:
+                self.best_val_loss = val_loss
+                self.save_checkpoint(epoch, is_best=True)
+            else:
+                self.save_checkpoint(epoch)
+            print(f'Epoch {epoch + 1} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f}')
+
+    def test_profile(self) -> None:
+        """Profile the model inference time."""
+        raise NotImplementedError("Subclasses must implement test_profile")
